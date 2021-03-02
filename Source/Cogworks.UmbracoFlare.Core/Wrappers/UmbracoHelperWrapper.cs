@@ -10,6 +10,8 @@ namespace Cogworks.UmbracoFlare.Core.Wrappers
         IEnumerable<IPublishedContent> TypedContentAtRoot();
 
         IPublishedContent TypedMedia(int id);
+
+        IPublishedContent TypedContent(int id);
     }
 
     public class UmbracoHelperWrapper : IUmbracoHelperWrapper
@@ -30,6 +32,11 @@ namespace Cogworks.UmbracoFlare.Core.Wrappers
         public IPublishedContent TypedMedia(int id)
         {
             return _umbracoHelper.TypedMedia(id);
+        }
+
+        public IPublishedContent TypedContent(int id)
+        {
+            return _umbracoHelper.TypedContent(id);
         }
     }
 }

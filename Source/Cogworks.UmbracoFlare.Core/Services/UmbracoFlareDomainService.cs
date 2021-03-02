@@ -4,6 +4,8 @@ using Cogworks.UmbracoFlare.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cogworks.UmbracoFlare.Core.Wrappers;
+using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Web;
@@ -16,7 +18,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         List<string> GetUrlsForNode(int contentId, bool includeDescendants = false);
 
-        List<string> GetUrlsForNode(IContent content, bool includeDescendants = false);
+        List<string> GetUrlsForNode(IPublishedContent content, bool includeDescendants = false);
 
         IEnumerable<Zone> GetAllowedCloudflareZones();
 
@@ -27,13 +29,13 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly ICloudflareService _cloudflareService;
         private readonly IDomainService _domainService;
-        private readonly IContentService _umbracoContentService;
+        private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-        public UmbracoFlareDomainService(ICloudflareService cloudflareService, IDomainService domainService, IContentService umbracoContentService)
+        public UmbracoFlareDomainService(ICloudflareService cloudflareService, IUmbracoHelperWrapper umbracoHelperWrapper)
         {
             _cloudflareService = cloudflareService;
-            _domainService = domainService;
-            _umbracoContentService = umbracoContentService;
+            _umbracoHelperWrapper = umbracoHelperWrapper;
+            _domainService = ApplicationContext.Current.Services.DomainService;
         }
 
         public IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains)
@@ -59,11 +61,11 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         public List<string> GetUrlsForNode(int contentId, bool includeDescendants = false)
         {
-            var content = _umbracoContentService.GetById(contentId);
+            var content = _umbracoHelperWrapper.TypedContent(contentId);
             return content == null ? new List<string>() : GetUrlsForNode(content, includeDescendants);
         }
 
-        public List<string> GetUrlsForNode(IContent content, bool includeDescendants = false)
+        public List<string> GetUrlsForNode(IPublishedContent content, bool includeDescendants = false)
         {
             var urls = new List<string>();
 
@@ -87,7 +89,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return urls;
         }
 
-        private IEnumerable<string> RecursivelyGetParentsDomains(List<string> domains, IContent content)
+        private IEnumerable<string> RecursivelyGetParentsDomains(List<string> domains, IPublishedContent content)
         {
             if (!domains.HasAny())
             {
@@ -97,7 +99,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             if (!content.HasValue()) { return domains; }
 
             domains.AddRange(_domainService.GetAssignedDomains(content.Id, false).Select(x => x.DomainName));
-            domains = RecursivelyGetParentsDomains(domains, content.Parent()) as List<string>;
+            domains = RecursivelyGetParentsDomains(domains, content.Parent) as List<string>;
 
             return domains;
         }
