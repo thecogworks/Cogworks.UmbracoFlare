@@ -4,11 +4,12 @@ using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.ImageCropperHelpers;
 using Cogworks.UmbracoFlare.Core.Services;
+using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Cogworks.UmbracoFlare.Core.Wrappers;
+using System.Web;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -39,6 +40,7 @@ namespace Cogworks.UmbracoFlare.Core
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            UmbracoApplicationBase.ApplicationInit += UmbracoApplicationBase_ApplicationInit;
 
             ContentService.Published += PurgeCloudflareCache;
             ContentService.Published += UpdateContentIdToUrlCache;
@@ -48,6 +50,26 @@ namespace Cogworks.UmbracoFlare.Core
             MediaService.Saved += PurgeCloudflareCacheForMedia;
             DataTypeService.Saved += RefreshImageCropsCache;
             TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
+        }
+
+        private static void UmbracoApplicationBase_ApplicationInit(object sender, EventArgs e)
+        {
+            var app = (HttpApplication)sender;
+            app.PostRequestHandlerExecute += UmbracoApplication_PostRequestHandlerExecute;
+            app.PreRequestHandlerExecute += UmbracoApplication_PreRequestHandlerExecute;
+            app.BeginRequest += UmbracoApplication_PreRequestHandlerExecute;
+        }
+
+        private static void UmbracoApplication_PreRequestHandlerExecute(object sender, EventArgs e)
+        {
+            //Do something...
+            IoCBootstrapper.IoCSetup();
+        }
+
+        private static void UmbracoApplication_PostRequestHandlerExecute(object sender, EventArgs e)
+        {
+            //Do something...
+            IoCBootstrapper.IoCSetup();
         }
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
@@ -60,7 +82,7 @@ namespace Cogworks.UmbracoFlare.Core
             {
                 if (content.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
-                urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content));
+                urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id));
             }
 
             var results = _cloudflareService.PurgePages(urls);
@@ -82,7 +104,7 @@ namespace Cogworks.UmbracoFlare.Core
             {
                 if (content.HasPublishedVersion)
                 {
-                    var urls = _umbracoFlareDomainService.GetUrlsForNode(content);
+                    var urls = _umbracoFlareDomainService.GetUrlsForNode(content.Id);
 
                     if (urls.Contains("#"))
                     {
