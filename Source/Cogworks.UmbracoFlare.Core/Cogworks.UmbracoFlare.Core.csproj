@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -226,13 +226,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App_Start\TestEvents.cs" />
-    <Compile Include="App_Start\UmbracoFlareStartup.cs" />
+    <Compile Include="EventHandlers\UmbracoFlareStartup.cs" />
+    <Compile Include="EventHandlers\UmbracoFlareEvents.cs" />
     <Compile Include="Client\CloudflareApiClient.cs" />
     <Compile Include="Configuration\CloudflareConfiguration.cs" />
     <Compile Include="Constants\ApplicationConstants.cs" />
     <Compile Include="Controllers\CloudflareUmbracoApiController.cs" />
-    <Compile Include="EventHandlers\UmbracoEvents.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

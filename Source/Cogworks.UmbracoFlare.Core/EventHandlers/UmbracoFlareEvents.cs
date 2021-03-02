@@ -1,13 +1,13 @@
-﻿using Cogworks.UmbracoFlare.Core.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Cogworks.UmbracoFlare.Core.Configuration;
 using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.ImageCropperHelpers;
 using Cogworks.UmbracoFlare.Core.Services;
 using Cogworks.UmbracoFlare.Core.Wrappers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -17,15 +17,15 @@ using Umbraco.Web;
 using Umbraco.Web.Models.Trees;
 using Umbraco.Web.Trees;
 
-namespace Cogworks.UmbracoFlare.Core
+namespace Cogworks.UmbracoFlare.Core.EventHandlers
 {
-    public class UmbracoFlareStartup : ApplicationEventHandler
+    public class UmbracoFlareEvents : ApplicationEventHandler
     {
         private readonly ICloudflareService _cloudflareService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-        public UmbracoFlareStartup(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper)
+        public UmbracoFlareEvents(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper)
         {
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;

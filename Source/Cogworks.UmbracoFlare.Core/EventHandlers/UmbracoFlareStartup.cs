@@ -12,9 +12,9 @@ using LightInject.Mvc;
 using LightInject.WebApi;
 using Umbraco.Core;
 
-namespace Cogworks.UmbracoFlare.Core
+namespace Cogworks.UmbracoFlare.Core.EventHandlers
 {
-    public class TestEvents : ApplicationEventHandler
+    public class UmbracoFlareStartup : ApplicationEventHandler
     {
         protected override void ApplicationInitialized(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
