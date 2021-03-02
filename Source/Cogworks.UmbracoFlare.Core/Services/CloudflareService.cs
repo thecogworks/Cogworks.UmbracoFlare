@@ -18,8 +18,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         string PrintResultsSummary(IEnumerable<StatusWithMessage> results);
 
-        IEnumerable<Zone> GetCloudflareZones(string name = null);
-
         UserDetails GetCloudflareUserDetails();
     }
 
@@ -27,13 +25,11 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly IUmbracoLoggingService _umbracoLoggingService;
         private readonly ICloudflareApiClient _cloudflareApiClient;
-        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
 
-        public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient, IUmbracoFlareDomainService umbracoFlareDomainService)
+        public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient)
         {
             _umbracoLoggingService = umbracoLoggingService;
             _cloudflareApiClient = cloudflareApiClient;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
         }
 
         public List<StatusWithMessage> PurgePages(IEnumerable<string> urls)
@@ -48,7 +44,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
                 return results;
             }
 
-            urls = _umbracoFlareDomainService.FilterToAllowedDomains(urls);
+            urls = new List<string>();// _umbracoFlareDomainService.FilterToAllowedDomains(urls);
 
             var groupings = urls.GroupBy(url => UrlHelper.GetDomainFromUrl(url, true));
 
@@ -130,11 +126,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return statusMessages.ToString();
         }
 
-        public IEnumerable<Zone> GetCloudflareZones(string name = null)
-        {
-            return _cloudflareApiClient.ListZones(name);
-        }
-
         public UserDetails GetCloudflareUserDetails()
         {
             return _cloudflareApiClient.GetUserDetails();
@@ -142,10 +133,10 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         private Zone GetZone(string url)
         {
-            var zones = _umbracoFlareDomainService.GetAllowedCloudflareZones().Where(x => url.Contains(x.Name));
+            var zones = new List<string>(); //_umbracoFlareDomainService.GetAllowedCloudflareZones().Where(x => url.Contains(x.Name));
 
             //TODO:THIS DOESNT MAKE SENSE CHECK LATER
-            if (!zones.HasAny()) return zones.First();
+            //if (!zones.HasAny()) return zones.First();
 
             var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {url}");
             _umbracoLoggingService.LogError<ICloudflareService>(noZoneException.Message, noZoneException);

@@ -4,6 +4,7 @@ using Cogworks.UmbracoFlare.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using Umbraco.Core;
 using Umbraco.Core.Models;
@@ -27,13 +28,13 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
     public class UmbracoFlareDomainService : IUmbracoFlareDomainService
     {
-        private readonly ICloudflareService _cloudflareService;
+        private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IDomainService _domainService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-        public UmbracoFlareDomainService(ICloudflareService cloudflareService, IUmbracoHelperWrapper umbracoHelperWrapper)
+        public UmbracoFlareDomainService(ICloudflareApiClient cloudflareApiClient, IUmbracoHelperWrapper umbracoHelperWrapper)
         {
-            _cloudflareService = cloudflareService;
+            _cloudflareApiClient = cloudflareApiClient;
             _umbracoHelperWrapper = umbracoHelperWrapper;
             _domainService = ApplicationContext.Current.Services.DomainService;
         }
@@ -121,7 +122,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var allowedZones = new List<Zone>();
             var allowedDomains = new List<string>();
 
-            var allZones = _cloudflareService.GetCloudflareZones();
+            var allZones = _cloudflareApiClient.GetZones();
 
             var umbracoDomains = _domainService.GetAll(false).Select(x => new UriBuilder(x.DomainName).Uri.DnsSafeHost);
 

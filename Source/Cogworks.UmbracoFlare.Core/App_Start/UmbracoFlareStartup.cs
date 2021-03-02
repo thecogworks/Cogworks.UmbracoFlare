@@ -37,8 +37,21 @@ namespace Cogworks.UmbracoFlare.Core
             _umbracoHelperWrapper = umbracoHelperWrapper;
         }
 
+        protected override void ApplicationInitialized(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
+        {
+            IoCBootstrapper.IoCSetup();
+            base.ApplicationInitialized(umbracoApplication, applicationContext);
+        }
+
+        protected override void ApplicationStarting(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
+        {
+            IoCBootstrapper.IoCSetup();
+            base.ApplicationStarting(umbracoApplication, applicationContext);
+        }
+
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
+            IoCBootstrapper.IoCSetup();
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             UmbracoApplicationBase.ApplicationInit += UmbracoApplicationBase_ApplicationInit;
 

@@ -18,7 +18,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
         SslEnabledResponse GetSslStatus(string zoneId);
 
-        IEnumerable<Zone> ListZones(string name = null);
+        IEnumerable<Zone> GetZones(string name = null);
 
         bool PurgeCache(string zoneIdentifier, IEnumerable<string> urls, bool purgeEverything = false);
     }
@@ -110,7 +110,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
             }
         }
 
-        public IEnumerable<Zone> ListZones(string name = null)
+        public IEnumerable<Zone> GetZones(string name = null)
         {
             try
             {

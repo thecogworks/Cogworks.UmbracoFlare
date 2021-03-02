@@ -1,7 +1,6 @@
 ﻿using Cogworks.UmbracoFlare.Core.Configuration;
 using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models.Api;
 using Cogworks.UmbracoFlare.Core.Services;
 using System;
@@ -9,12 +8,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
+using System.Web.Mvc;
 using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
 using Cogworks.UmbracoFlare.Core.Models;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
+using UrlHelper = Cogworks.UmbracoFlare.Core.Helpers.UrlHelper;
 
 namespace Cogworks.UmbracoFlare.Core.Controllers
 {
@@ -26,16 +27,16 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private readonly IUmbracoUrlWildCardService _umbracoUrlWildCardService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
-        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService,
-            IUmbracoUrlWildCardService umbracoUrlWildCardService, IUmbracoLoggingService umbracoLoggingService)
+        public CloudflareUmbracoApiController()
         {
-            _cloudflareService = cloudflareService;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
-            _umbracoUrlWildCardService = umbracoUrlWildCardService;
-            _umbracoLoggingService = umbracoLoggingService;
+            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
+            var t = string.Empty;
+            //_umbracoFlareDomainService = umbracoFlareDomainService;
+            //_umbracoUrlWildCardService = umbracoUrlWildCardService;
+            //_umbracoLoggingService = umbracoLoggingService;
         }
 
-        [HttpPost]
+        [System.Web.Http.HttpPost]
         public StatusWithMessage PurgeCacheForUrls([FromBody] PurgeCacheForUrlsRequestModel model)
         {
             /*Important to note that the urls can come in here in two different ways.
@@ -75,7 +76,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return new StatusWithMessage(true, $"{results.Count(x => x.Success)} urls purged successfully.");
         }
 
-        [HttpPost]
+        [System.Web.Http.HttpPost]
         public StatusWithMessage PurgeStaticFiles([FromBody] PurgeStaticFilesRequestModel model)
         {
             var allowedFileExtensions = new List<string> { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
@@ -163,7 +164,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return filePaths;
         }
 
-        [HttpPost]
+        [System.Web.Http.HttpPost]
         public StatusWithMessage PurgeAll()
         {
             var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
@@ -172,7 +173,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
         }
 
-        [HttpGet]
+        [System.Web.Http.HttpGet]
         public CloudflareConfigModel GetConfig()
         {
             var userDetails = _cloudflareService.GetCloudflareUserDetails();
@@ -186,7 +187,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             };
         }
 
-        [HttpPost]
+        [System.Web.Http.HttpPost]
         public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeCacheForIdParams args)
         {
             if (args.NodeId <= 0)
@@ -206,7 +207,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return resultFromPurge.Success ? new StatusWithMessage(true, resultFromPurge.Message) : resultFromPurge;
         }
 
-        [HttpPost]
+        [System.Web.Http.HttpPost]
         public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
         {
             try
@@ -224,7 +225,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             }
         }
 
-        [HttpGet]
+        [System.Web.Http.HttpGet]
         public IEnumerable<string> GetAllowedDomains()
         {
             return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
