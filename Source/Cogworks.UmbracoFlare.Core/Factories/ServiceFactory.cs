@@ -31,9 +31,9 @@ namespace Cogworks.UmbracoFlare.Core.Factories
             return new CloudflareService(GetUmbracoLoggingService(), GetCloudflareApiClient());
         }
 
-        public static IUmbracoFlareDomainService GetUmbracoFlareDomainService()
-        {
-            return new UmbracoFlareDomainService(GetCloudflareApiClient(), GetUmbracoHelperWrapper());
-        }
+        //public static IUmbracoFlareDomainService GetUmbracoFlareDomainService()
+        //{
+        //    return new UmbracoFlareDomainService(GetCloudflareApiClient(), GetUmbracoHelperWrapper());
+        //}
     }
 }

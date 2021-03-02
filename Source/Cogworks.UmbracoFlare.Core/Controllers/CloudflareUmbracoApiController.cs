@@ -11,6 +11,7 @@ using System.Web.Http;
 using System.Web.Mvc;
 using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
 using Cogworks.UmbracoFlare.Core.Models;
+using Cogworks.UmbracoFlare.Core.Wrappers;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
 using Umbraco.Web.Mvc;
@@ -23,17 +24,25 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
     public class CloudflareUmbracoApiController : UmbracoAuthorizedApiController
     {
         private readonly ICloudflareService _cloudflareService;
-        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
-        private readonly IUmbracoUrlWildCardService _umbracoUrlWildCardService;
+        public readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
+        private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-        public CloudflareUmbracoApiController()
+
+        //NOT WORKING - WHY ?
+        
+        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoLoggingService umbracoLoggingService, IUmbracoHelperWrapper umbracoHelperWrapper)
         {
-            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
-            var t = string.Empty;
-            //_umbracoFlareDomainService = umbracoFlareDomainService;
+            _cloudflareService = cloudflareService;
+            _umbracoFlareDomainService = umbracoFlareDomainService;
+            _umbracoLoggingService = umbracoLoggingService;
+            _umbracoHelperWrapper = umbracoHelperWrapper;
+
             //_umbracoUrlWildCardService = umbracoUrlWildCardService;
-            //_umbracoLoggingService = umbracoLoggingService;
+            
+
+
+            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
         }
 
         [System.Web.Http.HttpPost]
@@ -244,7 +253,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private IEnumerable<string> AccountForWildCards(IEnumerable<string> urls)
         {
             var urlsWithWildCards = urls.Where(x => x.Contains('*'));
-            return !urlsWithWildCards.HasAny() ? urls : _umbracoUrlWildCardService.GetAllUrlsForWildCardUrls(urlsWithWildCards);
+            return !urlsWithWildCards.HasAny() ? urls : _umbracoFlareDomainService.GetAllUrlsForWildCardUrls(urlsWithWildCards);
         }
     }
 }

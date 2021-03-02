@@ -8,8 +8,6 @@ using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Web;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -25,36 +23,17 @@ namespace Cogworks.UmbracoFlare.Core
     {
         private readonly ICloudflareService _cloudflareService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
-        private readonly IUmbracoUrlWildCardService _umbracoUrlWildCardService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-        public UmbracoFlareStartup(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoUrlWildCardService umbracoUrlWildCardService, IUmbracoHelperWrapper umbracoHelperWrapper)
+        public UmbracoFlareStartup(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper)
         {
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;
-            _umbracoUrlWildCardService = umbracoUrlWildCardService;
             _umbracoHelperWrapper = umbracoHelperWrapper;
-            _umbracoHelperWrapper = umbracoHelperWrapper;
-        }
-
-        protected override void ApplicationInitialized(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
-        {
-            IoCBootstrapper.IoCSetup();
-            base.ApplicationInitialized(umbracoApplication, applicationContext);
-        }
-
-        protected override void ApplicationStarting(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
-        {
-            IoCBootstrapper.IoCSetup();
-            base.ApplicationStarting(umbracoApplication, applicationContext);
         }
 
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
-            IoCBootstrapper.IoCSetup();
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            UmbracoApplicationBase.ApplicationInit += UmbracoApplicationBase_ApplicationInit;
-
             ContentService.Published += PurgeCloudflareCache;
             ContentService.Published += UpdateContentIdToUrlCache;
             FileService.SavedScript += PurgeCloudflareCacheForScripts;
@@ -63,26 +42,6 @@ namespace Cogworks.UmbracoFlare.Core
             MediaService.Saved += PurgeCloudflareCacheForMedia;
             DataTypeService.Saved += RefreshImageCropsCache;
             TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
-        }
-
-        private static void UmbracoApplicationBase_ApplicationInit(object sender, EventArgs e)
-        {
-            var app = (HttpApplication)sender;
-            app.PostRequestHandlerExecute += UmbracoApplication_PostRequestHandlerExecute;
-            app.PreRequestHandlerExecute += UmbracoApplication_PreRequestHandlerExecute;
-            app.BeginRequest += UmbracoApplication_PreRequestHandlerExecute;
-        }
-
-        private static void UmbracoApplication_PreRequestHandlerExecute(object sender, EventArgs e)
-        {
-            //Do something...
-            IoCBootstrapper.IoCSetup();
-        }
-
-        private static void UmbracoApplication_PostRequestHandlerExecute(object sender, EventArgs e)
-        {
-            //Do something...
-            IoCBootstrapper.IoCSetup();
         }
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
@@ -123,11 +82,11 @@ namespace Cogworks.UmbracoFlare.Core
                     {
                         //When a piece of content is first saved, we cannot get the url, if that is the case then we need to just
                         //invalidate the who ContentIdToUrlCache, that way when we request all of the urls agian, it will pick it up.
-                        _umbracoUrlWildCardService.DeletedContentIdToUrlCache();
+                        _umbracoFlareDomainService.DeletedContentIdToUrlCache();
                     }
                     else
                     {
-                        _umbracoUrlWildCardService.UpdateContentIdToUrlCache(content.Id, urls);
+                        _umbracoFlareDomainService.UpdateContentIdToUrlCache(content.Id, urls);
                     }
                 }
 
@@ -139,7 +98,7 @@ namespace Cogworks.UmbracoFlare.Core
                 {
                     var descUrls = _umbracoFlareDomainService.GetUrlsForNode(descendant.Id);
 
-                    _umbracoUrlWildCardService.UpdateContentIdToUrlCache(content.Id, descUrls);
+                    _umbracoFlareDomainService.UpdateContentIdToUrlCache(content.Id, descUrls);
                 }
             }
         }
