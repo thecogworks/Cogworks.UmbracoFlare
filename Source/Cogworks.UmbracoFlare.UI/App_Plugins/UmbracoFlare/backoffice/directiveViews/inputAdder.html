@@ -1,0 +1,20 @@
+﻿<div>
+    <div class="purge-url-actions-container-1">
+        <div class="purge-url-buttons-container">
+            <div class="icon-check umb-button__success status-indicator-purge-url" ng-class="{'-hidden': state !== 'purge-urls-success'}"></div>
+            <div class="umb-button__progress status-indicator-purge-url" ng-class="{'-hidden': state !== 'purge-urls-busy'}"></div>
+            <button class="btn btn-success purge-url-button" ng-disabled="collection == null || collection.length == 0 || state === 'purge-urls-busy'" ng-click="submit({collection:collection})">Purge Urls</button>
+        </div>
+
+        <div class="add-url-container">
+            <input type="text" ng-model="activeInput" class="input-adder-input" />
+            <button class="btn btn-success" ng-click="add(activeInput)">Add</button>
+        </div>
+    </div>
+    
+    <div class="purge-url-actions-container-2">
+        <div ng-repeat="item in collection">
+            <input type="text" disabled value="{{item}}" /><button class="btn btn-danger" ng-click="remove(item)">Remove</button>
+        </div>
+    </div>
+</div>

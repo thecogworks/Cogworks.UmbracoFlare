@@ -348,3 +348,14 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+#####################################
+# Custom
+#####################################
+
+*.orig
+ood.flag
+Source/Cogworks.UmbracoFlare.UI/App_Data
+Source/Cogworks.UmbracoFlare.UI/Umbraco
+Source/Cogworks.UmbracoFlare.UI/Umbraco_Client
+*.editorconfig

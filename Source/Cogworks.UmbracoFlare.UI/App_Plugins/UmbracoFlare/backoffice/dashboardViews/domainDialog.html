@@ -1,0 +1,33 @@
+﻿<div class="umb-panel" ng-controller="Cloudflare.DomainDialog.Controller as domainDialogController">
+    <div class="umb-panel-body">
+        <h3>Purge for domain(s)</h3>
+        <ul class="unstyled umbracoflare">
+            <li>
+                <label>
+                    <input type="checkbox" value="Select All" ng-model="domainDialogController.domainDialog.checkboxWrapper.allSelected">Select All
+                </label>
+            </li>
+            <li ng-repeat="domain in domainDialogController.domainDialog.allowedDomains">
+                <label for="{{domain}}">
+                    <input type="checkbox" value="{{domain}}" ng-click="domainDialogController.domainDialog.toggleSelected(domain)" ng-checked="domainDialogController.domainDialog.isChecked(domain)" />
+                    {{domain}}
+                </label>
+            </li>
+        </ul>
+        <span ng-show="domainDialogController.domainDialog.allowedDomains.length == 0">You do not have any hostnames registered with Umbraco.</span>
+    </div>
+    <div class="umb-panel-footer">
+        <div class="umb-el-wrap umb-panel-buttons">
+            <div class="btn-toolbar umb-btn-toolbar pull-right">
+                <a href="#" ng-click="domainDialogController.domainDialog.close()" class="btn btn-link" prevent-default>
+                    <localize key="general_cancel">Cancel</localize>
+                </a>
+            </div>
+            <div class="btn-toolbar umb-btn-toolbar">
+                <a href="#" ng-click="domainDialogController.domainDialog.addDomains()" ng-disabled="domainDialogController.domainDialog.selectedDomains.length == 0" class="btn btn-success" prevent-default>
+                    Purge
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
