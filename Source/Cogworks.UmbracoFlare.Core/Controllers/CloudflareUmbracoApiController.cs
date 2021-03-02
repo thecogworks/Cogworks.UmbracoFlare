@@ -1,22 +1,21 @@
-﻿using Cogworks.UmbracoFlare.Core.Configuration;
-using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Models.Api;
-using Cogworks.UmbracoFlare.Core.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
-using System.Web.Mvc;
+using Cogworks.UmbracoFlare.Core.Configuration;
+using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
-using Cogworks.UmbracoFlare.Core.Wrappers;
+using Cogworks.UmbracoFlare.Core.Models.Api;
+using Cogworks.UmbracoFlare.Core.Services;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
-using UrlHelper = Cogworks.UmbracoFlare.Core.Helpers.UrlHelper;
+using File = System.IO.File;
 
 namespace Cogworks.UmbracoFlare.Core.Controllers
 {
@@ -26,26 +25,16 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private readonly ICloudflareService _cloudflareService;
         public readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
-        private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
 
-
-        //NOT WORKING - WHY ?
-        
-        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoLoggingService umbracoLoggingService, IUmbracoHelperWrapper umbracoHelperWrapper)
+        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService,
+            IUmbracoLoggingService umbracoLoggingService)
         {
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;
             _umbracoLoggingService = umbracoLoggingService;
-            _umbracoHelperWrapper = umbracoHelperWrapper;
-
-            //_umbracoUrlWildCardService = umbracoUrlWildCardService;
-            
-
-
-            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
         }
 
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public StatusWithMessage PurgeCacheForUrls([FromBody] PurgeCacheForUrlsRequestModel model)
         {
             /*Important to note that the urls can come in here in two different ways.
@@ -85,7 +74,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return new StatusWithMessage(true, $"{results.Count(x => x.Success)} urls purged successfully.");
         }
 
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public StatusWithMessage PurgeStaticFiles([FromBody] PurgeStaticFilesRequestModel model)
         {
             var allowedFileExtensions = new List<string> { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
@@ -140,7 +129,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 try
                 {
                     var fileOrFolderPath = IOHelper.MapPath(fileOrFolder);
-                    var fileAttributes = System.IO.File.GetAttributes(fileOrFolderPath);
+                    var fileAttributes = File.GetAttributes(fileOrFolderPath);
 
                     if (fileAttributes.Equals(FileAttributes.Directory))
                     {
@@ -156,7 +145,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                     }
                     else
                     {
-                        if (!System.IO.File.Exists(fileOrFolderPath))
+                        if (!File.Exists(fileOrFolderPath))
                         {
                             _umbracoLoggingService.LogWarn<CloudflareUmbracoApiController>($"Could not find file with the path {fileOrFolderPath}");
                             continue;
@@ -173,7 +162,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return filePaths;
         }
 
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public StatusWithMessage PurgeAll()
         {
             var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
@@ -182,7 +171,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
         }
 
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public CloudflareConfigModel GetConfig()
         {
             var userDetails = _cloudflareService.GetCloudflareUserDetails();
@@ -196,7 +185,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             };
         }
 
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeCacheForIdParams args)
         {
             if (args.NodeId <= 0)
@@ -216,7 +205,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return resultFromPurge.Success ? new StatusWithMessage(true, resultFromPurge.Message) : resultFromPurge;
         }
 
-        [System.Web.Http.HttpPost]
+        [HttpPost]
         public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
         {
             try
@@ -234,7 +223,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             }
         }
 
-        [System.Web.Http.HttpGet]
+        [HttpGet]
         public IEnumerable<string> GetAllowedDomains()
         {
             return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
