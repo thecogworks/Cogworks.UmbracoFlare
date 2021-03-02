@@ -10,20 +10,5 @@
         /App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-Dashboard-Tab.html
       </control>
     </tab>
-    <tab caption="Configuration">
-      <control addPanel="true">
-        /App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-Configuration-Tab.html
-      </control>
-    </tab>
-    <tab caption="License">
-      <control addPanel="true">
-        /App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-License-Tab.html
-      </control>
-    </tab>
-    <tab caption="Support">
-      <control addPanel="true">
-        /App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-Support-Tab.html
-      </control>
-    </tab>
   </section>
 </dashBoard>

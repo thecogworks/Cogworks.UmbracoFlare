@@ -273,11 +273,8 @@
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\sa.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\Scylla-Mark-64px.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\share.png" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-About-Tab.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-Configuration-Tab.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-Dashboard-Tab.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-License-Tab.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-Support-Tab.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\domainDialog.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\filesystem-picker-dialog.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\inputAdder.html" />

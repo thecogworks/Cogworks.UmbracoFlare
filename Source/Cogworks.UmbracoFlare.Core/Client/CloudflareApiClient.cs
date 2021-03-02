@@ -1,4 +1,5 @@
-﻿using Cogworks.UmbracoFlare.Core.Extensions;
+﻿using Cogworks.UmbracoFlare.Core.Configuration;
+using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Models;
 using Cogworks.UmbracoFlare.Core.Services;
 using Newtonsoft.Json;
@@ -8,7 +9,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Web;
-using Cogworks.UmbracoFlare.Core.Configuration;
 
 namespace Cogworks.UmbracoFlare.Core.Client
 {
@@ -42,10 +42,15 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
         public UserDetails GetUserDetails()
         {
+            var userDetails = new UserDetails();
+
+            if (!_accountEmail.HasValue() || !_apiKey.HasValue())
+            {
+                return userDetails;
+            }
+
             using (var client = new HttpClient())
             {
-                var userDetails = new UserDetails();
-
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                 const string url = CloudflareApiBaseUrl + "user";
@@ -72,6 +77,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
                 }
 
                 _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"The request for <<GetUserDetails>> was not successful for user email {_accountEmail}");
+
                 return userDetails;
             }
         }

@@ -1,28 +1,71 @@
 <!--Included in /config/Dashboard.config-->
-<div style="max-width: 1200px" ng-controller="Cloudflare.Dashboard.Controller as cloudflareDashboardController" class="umbracoflare umb-scrollable">
+<div ng-controller="Cloudflare.Dashboard.Controller as cloudflareDashboardController" class="umbracoflare umb-scrollable">
     <div class="cloudflare-config">
-        <h2>Status</h2>
+        <h2>Status Cloudflare Account: <span ng-show="cloudflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cloudflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
         <hr />
-        <h3>
+        <!--<h3>
             Cloudflare Account: <span ng-show="cloudflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cloudflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span>
         </h3>
         <p ng-hide="cloudflareDashboardController.dashboard.credentialsAreValid">Your CloudFlare Account information needs to be associated with UmbracoFlare.</p>
         <p ng-show="cloudflareDashboardController.dashboard.credentialsAreValid">Good Job. Your CloudFlare Account information is associated properly.</p>
-        <button class="btn btn-success" ng-click="cloudflareDashboardController.dashboard.switchTabOnClick(2)" tab-index="2">Input CloudFlare Account Info</button>
+        <button class="btn btn-success" ng-click="cloudflareDashboardController.dashboard.switchTabOnClick(2)" tab-index="2">Input CloudFlare Account Info</button>-->
+        <div class="row-fluid">
+            <div class="span3">
+                <div>
+                    <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purgin on publish, from the context menu and from the dashboard.</p>
+                    <div class="config-group">
+                        <label>Api Key </label>
+                        <input type="text" class="apikey-input" ng-model="configurationController.configuration.currentApiKey" />
+                    </div>
+                    <div class="config-group">
+                        <label>Account Email </label>
+                        <input type="text" ng-model="configurationController.configuration.currentAccountEmail" />
+                    </div>
+                    <div class="config-group position-relative">
+                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !configurationController.configuration.updatedCredentials}"></div>
+                        <div class="umb-button__progress" ng-class="{'-hidden': !configurationController.configuration.updatingCredentials}"></div>
+                        <button class="btn btn-success" ng-disabled="configurationController.configuration.updatingCredentials" ng-click="configurationController.configuration.UpdateCredentials(false)">Update Credentials</button>
+                    </div>
+                </div>
+
+                <div>
+                    <p>By turning Auto-Purge ON, CloudFlare will automatically purge the servers’ cache everytime you save/publish a page or media type.</p>
+                    <div class="toggle-container">
+                        <span>CloudFlare Auto-Purge</span>
+                        <div class="toggle-switch" ng-class="{'disable-toggle-switch' : configurationController.configuration.updatingAutoPurge}">
+                            <div ng-click="configurationController.configuration.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : configurationController.configuration.currentPurgeCacheOn, 'pointer-events': configurationController.configuration.updatingAutoPurge}" class="-float-left toggle-button">
+                                <div class="toggle-label">ON</div>
+                            </div>
+                            <div ng-click="configurationController.configuration.togglePurgeCacheOn()" ng-class="{'-background-red' : !configurationController.configuration.currentPurgeCacheOn, 'pointer-events': configurationController.configuration.updatingAutoPurge}" class="-float-right toggle-button">
+                                <div class="toggle-label">OFF</div>
+                            </div>
+                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !configurationController.configuration.updatedAutoPurge}"></div>
+                            <div class="umb-button__progress" ng-class="{'-hidden': !configurationController.configuration.updatingAutoPurge}"></div>
+                        </div>
+                    </div>
+                    <p>
+                        Notes: <br />
+                        -You can still manually choose NOT to purge cache upon Save/Publish at the page content level. <a class="umbraco-help" ng-click="configurationController.configuration.openModal('choosingNotToPurge')"><i class=" -black fa fa-question-circle fa-lg"></i></a> <br />
+                        -You can also manually purge pages through the UmbracoFlare dashboard or by right clicking a node and choosing option from the menu. <a class="umbraco-help" ng-click="configurationController.configuration.openModal('manualPurgingANode')"><i class=" -black fa fa-question-circle fa-lg"></i></a>
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div ng-class="{'-grey-out' : !cloudflareDashboardController.dashboard.credentialsAreValid}">
-        <div class="purge-everything">
-            <h2>Site Purge</h2>
-            <hr />
-            <p>Purge everything on your site. This will take a while depending on your site and servers.</p>
-            <button ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cloudflareDashboardController.dashboard.purgeSite()">Purge Site</button>
-        </div>
+
         <div class="manual-purge-container">
-            <h2>Manual Purge Options</h2>
+            <h2>Purge Options</h2>
             <hr />
             <div class="row-fluid">
-                <div class="span5">
+                <div class="span3">
+                    <h3>Site Purge</h3>
+                    <p>Purge everything on your site. This will take a while depending on your site and servers.</p>
+                    <button ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cloudflareDashboardController.dashboard.purgeSite()">Purge Site</button>
+                </div>
+
+                <div class="span3 offset1">
                     <h3>Pick Files</h3>
                     <p>
                         Add individual files by selecting them from the picker below.
@@ -60,7 +103,8 @@
                         </button>
                     </div>
                 </div>
-                <div class="span5 pull-right">
+
+                <div class="span3 offset1">
                     <form ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
                         <h3>Purge By Url</h3>
                         <p>

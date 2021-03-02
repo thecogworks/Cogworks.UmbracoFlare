@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web.Http;
-using Cogworks.UmbracoFlare.Core.Configuration;
+﻿using Cogworks.UmbracoFlare.Core.Configuration;
 using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
@@ -11,6 +6,11 @@ using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using Cogworks.UmbracoFlare.Core.Models.Api;
 using Cogworks.UmbracoFlare.Core.Services;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Web.Http;
 using Umbraco.Core.IO;
 using Umbraco.Core.Models;
 using Umbraco.Web.Mvc;
@@ -23,7 +23,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
     public class CloudflareUmbracoApiController : UmbracoAuthorizedApiController
     {
         private readonly ICloudflareService _cloudflareService;
-        public readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
+        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
         public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService,
@@ -32,6 +32,44 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;
             _umbracoLoggingService = umbracoLoggingService;
+        }
+
+        [HttpGet]
+        public CloudflareConfigModel GetConfig()
+        {
+            //Carga y guardar el archivo completo
+            //cargar archivo y si tiene datos hacer la llamada a GetCloudflareUserDetails para verificar los datos
+
+            var userDetails = _cloudflareService.GetCloudflareUserDetails();
+
+            return new CloudflareConfigModel
+            {
+                PurgeCacheOn = CloudflareConfiguration.Instance.PurgeCacheOn,
+                ApiKey = CloudflareConfiguration.Instance.ApiKey,
+                AccountEmail = CloudflareConfiguration.Instance.AccountEmail,
+                CredentialsAreValid = userDetails != null && userDetails.Success
+            };
+        }
+
+        [HttpPost]
+        public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
+        {
+
+
+
+            try
+            {
+                CloudflareConfiguration.Instance.PurgeCacheOn = config.PurgeCacheOn;
+                CloudflareConfiguration.Instance.ApiKey = config.ApiKey;
+                CloudflareConfiguration.Instance.AccountEmail = config.AccountEmail;
+
+                return GetConfig();
+            }
+            catch (Exception e)
+            {
+                _umbracoLoggingService.LogError<CloudflareUmbracoApiController>("Could not update cloudflare purge cache on state.", e);
+                return null;
+            }
         }
 
         [HttpPost]
@@ -171,20 +209,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
         }
 
-        [HttpGet]
-        public CloudflareConfigModel GetConfig()
-        {
-            var userDetails = _cloudflareService.GetCloudflareUserDetails();
-
-            return new CloudflareConfigModel
-            {
-                PurgeCacheOn = CloudflareConfiguration.Instance.PurgeCacheOn,
-                ApiKey = CloudflareConfiguration.Instance.ApiKey,
-                AccountEmail = CloudflareConfiguration.Instance.AccountEmail,
-                CredentialsAreValid = userDetails != null && userDetails.Success
-            };
-        }
-
         [HttpPost]
         public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeCacheForIdParams args)
         {
@@ -203,24 +227,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             var resultFromPurge = PurgeCacheForUrls(new PurgeCacheForUrlsRequestModel { Urls = urls, Domains = null });
 
             return resultFromPurge.Success ? new StatusWithMessage(true, resultFromPurge.Message) : resultFromPurge;
-        }
-
-        [HttpPost]
-        public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
-        {
-            try
-            {
-                CloudflareConfiguration.Instance.PurgeCacheOn = config.PurgeCacheOn;
-                CloudflareConfiguration.Instance.ApiKey = config.ApiKey;
-                CloudflareConfiguration.Instance.AccountEmail = config.AccountEmail;
-
-                return GetConfig();
-            }
-            catch (Exception e)
-            {
-                _umbracoLoggingService.LogError<CloudflareUmbracoApiController>("Could not update cloudflare purge cache on state.", e);
-                return null;
-            }
         }
 
         [HttpGet]
