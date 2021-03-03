@@ -52,6 +52,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             container.Register<ICloudflareService, CloudflareService>();
             container.Register<IUmbracoLoggingService, UmbracoLoggingService>();
             container.Register<ICloudflareApiClient, CloudflareApiClient>();
+            container.Register<IConfigurationService, ConfigurationService>();
 
             //if (ConfigurationSettings.IsCacheEnabled)
             //{

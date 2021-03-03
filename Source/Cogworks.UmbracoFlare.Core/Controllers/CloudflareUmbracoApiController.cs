@@ -1,6 +1,4 @@
-﻿using Cogworks.UmbracoFlare.Core.Configuration;
-using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Extensions;
+﻿using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
@@ -25,51 +23,41 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private readonly ICloudflareService _cloudflareService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
+        private readonly IConfigurationService _configurationService;
 
         public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService,
-            IUmbracoLoggingService umbracoLoggingService)
+            IUmbracoLoggingService umbracoLoggingService, IConfigurationService configurationService)
         {
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;
             _umbracoLoggingService = umbracoLoggingService;
+            _configurationService = configurationService;
         }
 
         [HttpGet]
         public CloudflareConfigModel GetConfig()
         {
-            //Carga y guardar el archivo completo
-            //cargar archivo y si tiene datos hacer la llamada a GetCloudflareUserDetails para verificar los datos
-
-            var userDetails = _cloudflareService.GetCloudflareUserDetails();
-
-            return new CloudflareConfigModel
+            var configurationFile = _configurationService.LoadConfigurationFile();
+            if (!_configurationService.ConfigurationFileHasData(configurationFile))
             {
-                PurgeCacheOn = CloudflareConfiguration.Instance.PurgeCacheOn,
-                ApiKey = CloudflareConfiguration.Instance.ApiKey,
-                AccountEmail = CloudflareConfiguration.Instance.AccountEmail,
-                CredentialsAreValid = userDetails != null && userDetails.Success
-            };
+                return configurationFile;
+            }
+
+            var userDetails = _cloudflareService.GetCloudflareUserDetails(configurationFile);
+            configurationFile.CredentialsAreValid = userDetails != null && userDetails.Success;
+
+            return configurationFile;
         }
 
         [HttpPost]
         public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
         {
+            var userDetails = _cloudflareService.GetCloudflareUserDetails(config);
+            config.CredentialsAreValid = userDetails != null && userDetails.Success;
+            
+            var configurationFile = _configurationService.SaveConfigurationFile(config);
 
-
-
-            try
-            {
-                CloudflareConfiguration.Instance.PurgeCacheOn = config.PurgeCacheOn;
-                CloudflareConfiguration.Instance.ApiKey = config.ApiKey;
-                CloudflareConfiguration.Instance.AccountEmail = config.AccountEmail;
-
-                return GetConfig();
-            }
-            catch (Exception e)
-            {
-                _umbracoLoggingService.LogError<CloudflareUmbracoApiController>("Could not update cloudflare purge cache on state.", e);
-                return null;
-            }
+            return configurationFile;
         }
 
         [HttpPost]
@@ -215,11 +203,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             if (args.NodeId <= 0)
             {
                 return new StatusWithMessage(false, "You must provide a node id.");
-            }
-
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn)
-            {
-                return new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareDisabled);
             }
 
             var content = Umbraco.TypedContent(args.NodeId);

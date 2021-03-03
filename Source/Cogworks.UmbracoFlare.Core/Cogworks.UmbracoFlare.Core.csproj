@@ -229,13 +229,11 @@
     <Compile Include="EventHandlers\UmbracoFlareStartup.cs" />
     <Compile Include="EventHandlers\UmbracoFlareEvents.cs" />
     <Compile Include="Client\CloudflareApiClient.cs" />
-    <Compile Include="Configuration\CloudflareConfiguration.cs" />
     <Compile Include="Constants\ApplicationConstants.cs" />
     <Compile Include="Controllers\CloudflareUmbracoApiController.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Factories\ServiceFactory.cs" />
     <Compile Include="FileSystemPickerControllers\FileSystemPickerApiController.cs" />
     <Compile Include="FileSystemPickerControllers\FileSystemThumbnailApiController.cs" />
     <Compile Include="FileSystemPickerControllers\FolderSystemTreeController.cs" />
@@ -259,6 +257,7 @@
     <Compile Include="Models\Zone.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CloudflareService.cs" />
+    <Compile Include="Services\ConfigurationService.cs" />
     <Compile Include="Services\UmbracoFlareDomainService.cs" />
     <Compile Include="Services\UmbracoLoggingService.cs" />
     <Compile Include="Wrappers\UmbracoContextWrapper.cs" />

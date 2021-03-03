@@ -1,5 +1,4 @@
-﻿using Cogworks.UmbracoFlare.Core.Configuration;
-using Cogworks.UmbracoFlare.Core.Extensions;
+﻿using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Models;
 using Cogworks.UmbracoFlare.Core.Services;
 using Newtonsoft.Json;
@@ -14,7 +13,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
 {
     public interface ICloudflareApiClient
     {
-        UserDetails GetUserDetails();
+        UserDetails GetUserDetails(CloudflareConfigModel configurationFile);
 
         SslEnabledResponse GetSslStatus(string zoneId);
 
@@ -28,26 +27,25 @@ namespace Cogworks.UmbracoFlare.Core.Client
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
         public const string CloudflareApiBaseUrl = "https://api.cloudflare.com/client/v4/";
-
         private static string _apiKey;
         private static string _accountEmail;
 
         public CloudflareApiClient(IUmbracoLoggingService umbracoLoggingService)
         {
             _umbracoLoggingService = umbracoLoggingService;
-
-            _apiKey = CloudflareConfiguration.Instance.ApiKey;
-            _accountEmail = CloudflareConfiguration.Instance.AccountEmail;
         }
 
-        public UserDetails GetUserDetails()
+        public UserDetails GetUserDetails(CloudflareConfigModel configurationFile)
         {
             var userDetails = new UserDetails();
 
-            if (!_accountEmail.HasValue() || !_apiKey.HasValue())
+            if (!configurationFile.ApiKey.HasValue() || !configurationFile.AccountEmail.HasValue())
             {
                 return userDetails;
             }
+
+            _apiKey = configurationFile.ApiKey;
+            _accountEmail = configurationFile.AccountEmail;
 
             using (var client = new HttpClient())
             {

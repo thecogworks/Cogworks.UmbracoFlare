@@ -21,6 +21,18 @@
         vm.dashboard.urls = [];
         vm.dashboard.selectedFiles = [];
         
+        vm.dashboard.newConfig = {};
+        vm.dashboard.currentApiKey = '';
+        vm.dashboard.currentAccountEmail = '';
+        vm.dashboard.currentPurgeCacheOn = false;
+
+        vm.dashboard.credentialsAreValid = false;
+
+        vm.dashboard.updatingCredentials = false;
+        vm.dashboard.updatedCredentials = false;
+        vm.dashboard.updatedAutoPurge = false;
+        vm.dashboard.updatingAutoPurge = false;
+
         vm.dashboard.purgeStaticBusy = 'purge-static-busy';
         vm.dashboard.purgeStaticSuccess = 'purge-static-success';
         vm.dashboard.purgeUrlsBusy = 'purge-urls-busy';
@@ -31,13 +43,19 @@
         function getCloudflareStatus() {
             cloudflareResource.getConfigurationStatus()
                 .success(function (configFromServer) {
-                    vm.dashboard.credentialsAreValid = configFromServer.CredentialsAreValid;
+                    vm.dashboard.newConfig = configFromServer;
+                    vm.dashboard.currentApiKey = vm.dashboard.newConfig.ApiKey;
+                    vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
+                    vm.dashboard.currentPurgeCacheOn = vm.dashboard.newConfig.PurgeCacheOn;
+                    vm.dashboard.credentialsAreValid = vm.dashboard.newConfig.CredentialsAreValid;
                 });
         }
 
         var refreshStateAfterTime = function () {
             $timeout(function () {
                 vm.dashboard.state = '';
+                vm.dashboard.updatedAutoPurge = false;
+                vm.dashboard.updatedCredentials = false;
             }, 5000);
         }
 
@@ -48,6 +66,39 @@
                     callback: callback
                 });
         }
+
+        vm.dashboard.UpdateCredentials = function (autoPurge) {
+            if (!autoPurge) {
+                vm.dashboard.updatingCredentials = true;
+            }
+
+            vm.dashboard.newConfig.ApiKey = vm.dashboard.currentApiKey;
+            vm.dashboard.newConfig.AccountEmail = vm.dashboard.currentAccountEmail;
+            vm.dashboard.newConfig.PurgeCacheOn = vm.dashboard.currentPurgeCacheOn;
+
+            cloudflareResource.updateConfigurationStatus(vm.dashboard.newConfig)
+                .success(function (configFromServer) {
+                    if (configFromServer === null || configFromServer === undefined) {
+                        notificationsService.error("We could not update the configuration.");
+                    } else if (!configFromServer.CredentialsAreValid) {
+                        notificationsService.error("We could not validate your credentials.");
+                        vm.dashboard.credentialsAreValid = false;
+                    } else {
+                        notificationsService.success("Successfully updated your configuration!");
+                        vm.dashboard.newConfig = configFromServer;
+                    }
+
+                    if (autoPurge) {
+                        vm.dashboard.updatingAutoPurge = false;
+                        vm.dashboard.updatedAutoPurge = true;
+                    } else {
+                        vm.dashboard.updatingCredentials = false;
+                        vm.dashboard.updatedCredentials = true;
+                    }
+
+                    refreshStateAfterTime();
+                });
+        };
 
         vm.dashboard.purgeSite = function () {
             modals.open('confirmModal').then(function () {

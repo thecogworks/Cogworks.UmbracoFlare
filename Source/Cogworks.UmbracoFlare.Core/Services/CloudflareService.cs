@@ -1,7 +1,5 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
-using Cogworks.UmbracoFlare.Core.Configuration;
 using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using System;
@@ -12,31 +10,31 @@ namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface ICloudflareService
     {
-        List<StatusWithMessage> PurgePages(IEnumerable<string> urls);
+        List<StatusWithMessage> PurgePages(IEnumerable<string> urls, bool purgeCacheOn = false);
 
         StatusWithMessage PurgeEverything(string domain);
 
         string PrintResultsSummary(IEnumerable<StatusWithMessage> results);
 
-        UserDetails GetCloudflareUserDetails();
+        UserDetails GetCloudflareUserDetails(CloudflareConfigModel configurationFile);
     }
 
     public class CloudflareService : ICloudflareService
     {
         private readonly IUmbracoLoggingService _umbracoLoggingService;
         private readonly ICloudflareApiClient _cloudflareApiClient;
-
+        
         public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient)
         {
             _umbracoLoggingService = umbracoLoggingService;
             _cloudflareApiClient = cloudflareApiClient;
         }
 
-        public List<StatusWithMessage> PurgePages(IEnumerable<string> urls)
+        public List<StatusWithMessage> PurgePages(IEnumerable<string> urls, bool purgeCacheOn = false)
         {
             var results = new List<StatusWithMessage>();
 
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn)
+            if (!purgeCacheOn)
             {
                 var cloudflareDisabled = new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareDisabled);
                 results.Add(cloudflareDisabled);
@@ -80,11 +78,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         public StatusWithMessage PurgeEverything(string domain)
         {
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn)
-            {
-                return new StatusWithMessage(false, "Cloudflare for umbraco is turned off as indicated in the config file.");
-            }
-
             //We only want the host and not the scheme or port number so just to ensure that is what we are getting we will proccess it as a uri.
             try
             {
@@ -126,9 +119,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return statusMessages.ToString();
         }
 
-        public UserDetails GetCloudflareUserDetails()
+        public UserDetails GetCloudflareUserDetails(CloudflareConfigModel configurationFile)
         {
-            return _cloudflareApiClient.GetUserDetails();
+            return _cloudflareApiClient.GetUserDetails(configurationFile);
         }
 
         private Zone GetZone(string url)

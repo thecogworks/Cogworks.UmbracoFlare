@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Cogworks.UmbracoFlare.Core.Configuration;
-using Cogworks.UmbracoFlare.Core.Constants;
+﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.ImageCropperHelpers;
 using Cogworks.UmbracoFlare.Core.Services;
 using Cogworks.UmbracoFlare.Core.Wrappers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -24,9 +23,13 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
         private readonly ICloudflareService _cloudflareService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
+        private static bool _purgeCacheOn;
 
-        public UmbracoFlareEvents(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper)
+        public UmbracoFlareEvents(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper, IConfigurationService configurationService)
         {
+            var configurationFile = configurationService.LoadConfigurationFile();
+            _purgeCacheOn = configurationFile.PurgeCacheOn;
+
             _cloudflareService = cloudflareService;
             _umbracoFlareDomainService = umbracoFlareDomainService;
             _umbracoHelperWrapper = umbracoHelperWrapper;
@@ -46,7 +49,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
         {
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn) { return; }
+            if (!_purgeCacheOn) { return; }
 
             var urls = new List<string>();
 
@@ -117,7 +120,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         private void PurgeCloudflareCacheForFiles<T>(IEnumerable<File> files, SaveEventArgs<T> e)
         {
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn) { return; }
+            if (!_purgeCacheOn) { return; }
 
             var urls = new List<string>();
 
@@ -149,7 +152,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected void PurgeCloudflareCacheForMedia(IMediaService sender, SaveEventArgs<IMedia> e)
         {
-            if (!CloudflareConfiguration.Instance.PurgeCacheOn) { return; }
+            if (!_purgeCacheOn) { return; }
 
             var imageCropSizes = ImageCropperManager.Instance.GetAllCrops();
             var urls = new List<string>();

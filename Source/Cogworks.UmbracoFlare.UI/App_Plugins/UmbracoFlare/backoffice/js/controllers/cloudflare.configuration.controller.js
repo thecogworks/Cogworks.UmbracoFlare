@@ -16,10 +16,12 @@
 
         /////////////////////////////Configuration/////////////////////////////////
         vm.configuration = {};
+
         vm.configuration.newConfig = {};
         vm.configuration.currentApiKey = '';
         vm.configuration.currentAccountEmail = '';
         vm.configuration.currentPurgeCacheOn = false;
+
         vm.configuration.credentialsAreValid = false;
 
         vm.configuration.updatingCredentials = false;

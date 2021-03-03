@@ -25,6 +25,12 @@ namespace Cogworks.UmbracoFlare.Core.Constants
             public const string UmbracoUrlWildCardServiceCacheKey = "UmbracoUrlWildCardService.ContentIdToUrlCache";
         }
 
+        public static class ConfigurationFile
+        {
+            public const string ConfigurationFilePath = "~/Config/cloudflare.config";
+        }
+        
+
         public static Guid ContentIdToUrlCacheRefresherGuid = Guid.NewGuid();
     }
 }
