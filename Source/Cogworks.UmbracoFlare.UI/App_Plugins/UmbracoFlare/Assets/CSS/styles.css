@@ -228,7 +228,8 @@
 }
 
 .umbracoflare .toggle-container {
-    margin: 50px 0;
+    margin-top: 50px;
+    margin-bottom: 10px;
 }
 
     .umbracoflare .toggle-container > span {
@@ -415,8 +416,12 @@
     cursor: pointer;
 }
 
-.umbracoflare .apikey-input {
-    width: 30%;
+/*.umbracoflare .apikey-input {
+    width: 100%;
+}*/
+
+.cloudflare-account input {
+    width: 100%;
 }
 
 .purge-everything {
@@ -455,6 +460,10 @@
 
     .cloudflare-config.cloudflare-account .position-relative {
         position: relative;
+    }
+
+    .cloudflare-config.cloudflare-auto-purge{
+        margin-top: 40px;
     }
 
     .cloudflare-config.cloudflare-auto-purge .umb-button__success {

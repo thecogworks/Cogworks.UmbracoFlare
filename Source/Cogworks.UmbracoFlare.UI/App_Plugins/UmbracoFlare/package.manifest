@@ -2,7 +2,6 @@
   "javascript": [
     "~/App_Plugins/UmbracoFlare/backoffice/js/resources/cloudflare.resource.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/resources/modal.service.js",
-    "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/cloudflare.configuration.controller.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/cloudflare.dashboard.controller.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/cloudflare.menu.controller.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/cloudflare.domainDialog.controller.js",

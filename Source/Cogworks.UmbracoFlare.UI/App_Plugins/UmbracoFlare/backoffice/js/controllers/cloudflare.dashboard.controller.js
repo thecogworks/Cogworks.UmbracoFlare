@@ -100,6 +100,16 @@
                 });
         };
 
+        vm.dashboard.togglePurgeCacheOn = function () {
+            vm.dashboard.updatingAutoPurge = true;
+            vm.dashboard.currentPurgeCacheOn = !vm.dashboard.currentPurgeCacheOn;
+            vm.dashboard.UpdateCredentials(true);
+        };
+
+        vm.dashboard.openModal = function (type) {
+            modals.open(type);
+        }
+
         vm.dashboard.purgeSite = function () {
             modals.open('confirmModal').then(function () {
                 cloudflareResource.purgeAll().success(function (statusWithMessage) {
