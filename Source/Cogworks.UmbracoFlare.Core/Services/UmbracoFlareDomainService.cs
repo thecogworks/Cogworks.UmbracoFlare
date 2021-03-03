@@ -1,14 +1,13 @@
-﻿using Cogworks.UmbracoFlare.Core.Extensions;
+﻿using Cogworks.UmbracoFlare.Core.Client;
+using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
+using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Cogworks.UmbracoFlare.Core.Client;
-using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Wrappers;
-using Umbraco.Core;
 using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Web;
@@ -46,9 +45,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             _umbracoHelperWrapper = umbracoHelperWrapper;
             _cloudflareApiClient = cloudflareApiClient;
             _domainService = domainService;
-            //_cloudflareApiClient = cloudflareApiClient;
-            //_umbracoHelperWrapper = umbracoHelperWrapper;
-            //_domainService = ApplicationContext.Current.Services.DomainService;
         }
 
         public IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains)
@@ -129,6 +125,22 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return domains;
         }
 
+        public IEnumerable<Zone> GetAllowedCloudflareZones()
+        {
+            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
+            var allowedZones = allowedZonesAndDomains.Key;
+
+            return allowedZones;
+        }
+
+        public IEnumerable<string> GetAllowedCloudflareDomains()
+        {
+            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
+            var allowedDomains = allowedZonesAndDomains.Value;
+
+            return allowedDomains;
+        }
+
         private KeyValuePair<IEnumerable<Zone>, IEnumerable<string>> GetAllowedZonesAndDomains()
         {
             var allowedZones = new List<Zone>();
@@ -159,23 +171,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return new KeyValuePair<IEnumerable<Zone>, IEnumerable<string>>(allowedZones, allowedDomains);
         }
 
-        public IEnumerable<Zone> GetAllowedCloudflareZones()
-        {
-            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
-            var allowedZones = allowedZonesAndDomains.Key;
-
-            return allowedZones;
-        }
-
-        public IEnumerable<string> GetAllowedCloudflareDomains()
-        {
-            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
-            var allowedDomains = allowedZonesAndDomains.Value;
-
-            return allowedDomains;
-        }
-
-                public IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls)
+        public IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls)
         {
             var resolvedUrls = new List<string>();
             if (!wildCardUrls.HasAny()) { return resolvedUrls; }

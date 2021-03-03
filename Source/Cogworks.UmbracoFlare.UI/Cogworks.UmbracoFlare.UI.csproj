@@ -262,17 +262,9 @@
     <Content Include="App_Plugins\UmbracoFlare\Assets\Icons\umbracoflare-black-18x20px.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Icons\umbracoflare-light_25x25.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Icons\umbracoflare-logo-light.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\by.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\cc-logo-large.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\Disable-purge.jpg" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\GitHub-Mark-64px.png" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\manual-purge-1.jpg" />
     <Content Include="App_Plugins\UmbracoFlare\Assets\Media\manual-purge-2.jpg" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\nc.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\remix.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\sa.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\Scylla-Mark-64px.png" />
-    <Content Include="App_Plugins\UmbracoFlare\Assets\Media\share.png" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-Dashboard-Tab.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\domainDialog.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\filesystem-picker-dialog.html" />
@@ -289,6 +281,7 @@
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\cloudflare.resource.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\modal.service.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\treeViews\PurgeCacheDialog.html" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.dasboard.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\lang\en-US.xml" />
     <Content Include="App_Plugins\UmbracoFlare\lang\en.xml" />
     <Content Include="config\grid.editors.config.js" />
@@ -370,6 +363,12 @@
       <Project>{b887cbfd-9da2-437c-aefe-4dc006ea2ef4}</Project>
       <Name>Cogworks.UmbracoFlare.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Plugins\UmbracoFlare\dashboard\directives\" />
+    <Folder Include="App_Plugins\UmbracoFlare\dashboard\media\" />
+    <Folder Include="App_Plugins\UmbracoFlare\dashboard\resources\" />
+    <Folder Include="App_Plugins\UmbracoFlare\dashboard\views\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

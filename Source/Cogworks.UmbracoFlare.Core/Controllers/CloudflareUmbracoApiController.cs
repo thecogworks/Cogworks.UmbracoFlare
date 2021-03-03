@@ -54,10 +54,25 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         {
             var userDetails = _cloudflareService.GetCloudflareUserDetails(config);
             config.CredentialsAreValid = userDetails != null && userDetails.Success;
-            
+
             var configurationFile = _configurationService.SaveConfigurationFile(config);
 
             return configurationFile;
+        }
+
+        [HttpPost]
+        public StatusWithMessage PurgeAll()
+        {
+            var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
+            var results = domains.Select(domain => _cloudflareService.PurgeEverything(domain)).ToList();
+
+            return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
+        }
+
+        [HttpGet]
+        public IEnumerable<string> GetAllowedDomains()
+        {
+            return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
         }
 
         [HttpPost]
@@ -189,15 +204,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpPost]
-        public StatusWithMessage PurgeAll()
-        {
-            var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
-            var results = domains.Select(domain => _cloudflareService.PurgeEverything(domain)).ToList();
-
-            return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
-        }
-
-        [HttpPost]
         public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeCacheForIdParams args)
         {
             if (args.NodeId <= 0)
@@ -210,12 +216,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             var resultFromPurge = PurgeCacheForUrls(new PurgeCacheForUrlsRequestModel { Urls = urls, Domains = null });
 
             return resultFromPurge.Success ? new StatusWithMessage(true, resultFromPurge.Message) : resultFromPurge;
-        }
-
-        [HttpGet]
-        public IEnumerable<string> GetAllowedDomains()
-        {
-            return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
         }
 
         private IEnumerable<string> BuildUrlsToPurge(IPublishedContent contentToPurge, bool includeChildren)

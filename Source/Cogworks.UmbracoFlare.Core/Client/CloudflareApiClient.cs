@@ -124,7 +124,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
                     var url = CloudflareApiBaseUrl + "zones";
 
-                    if (!name.HasValue())
+                    if (name.HasValue())
                     {
                         url += "?name=" + HttpUtility.UrlEncode(name);
                     }
