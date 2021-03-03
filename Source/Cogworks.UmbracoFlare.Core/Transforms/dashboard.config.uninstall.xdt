@@ -1,4 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <dashBoard xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
-  <section alias="UmbracoFlareDashboardSection" xdt:Locator="Match(alias)" xdt:Transform="Remove"/>
+  <section alias="StartupDeveloperDashboardSection" xdt:Locator="Match(alias)">
+    <tab caption="UmbracoFlare" xdt:Locator="Match(caption)" xdt:Transform="Remove">
+      <control>/App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-Dashboard-Tab.html</control>
+    </tab>
+  </section>
 </dashBoard>

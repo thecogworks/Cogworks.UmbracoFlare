@@ -268,8 +268,6 @@
     <None Include="app.config" />
     <None Include="Config\cloudflare.config" />
     <None Include="packages.config" />
-    <None Include="Transforms\applications.config.install.xdt" />
-    <None Include="Transforms\applications.config.uninstall.xdt" />
     <None Include="Transforms\dashboard.config.install.xdt" />
     <None Include="Transforms\dashboard.config.uninstall.xdt" />
   </ItemGroup>
