@@ -10,6 +10,8 @@ using Cogworks.UmbracoFlare.Core.Wrappers;
 using LightInject;
 using LightInject.Mvc;
 using LightInject.WebApi;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Umbraco.Core;
 
 namespace Cogworks.UmbracoFlare.Core.EventHandlers
@@ -34,6 +36,14 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
             GlobalConfiguration.Configuration.DependencyResolver = resolver;
             DependencyResolver.SetResolver(new LightInjectMvcDependencyResolver(container));
+
+            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+            {
+                //Formatting = Formatting.Indented,
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            };
         }
 
         private static void RegisterCoreUmbracoServices(IServiceRegistry container, ApplicationContext applicationContext)

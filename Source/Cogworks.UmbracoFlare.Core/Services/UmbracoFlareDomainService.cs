@@ -50,21 +50,19 @@ namespace Cogworks.UmbracoFlare.Core.Services
         public IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains)
         {
             var filteredDomains = new List<string>();
-
             var allowedDomains = GetAllowedCloudflareDomains();
 
             foreach (var allowedDomain in allowedDomains)
             {
-                foreach (var posDomain in domains)
+                foreach (var posDomain in domains.Where(posDomain => posDomain.Contains(allowedDomain)))
                 {
-                    if (!posDomain.Contains(allowedDomain)) { continue; }
-
                     if (!filteredDomains.Contains(posDomain))
                     {
                         filteredDomains.Add(posDomain);
                     }
                 }
             }
+
             return filteredDomains;
         }
 
@@ -113,18 +111,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return domains;
         }
 
-        private IEnumerable<string> GetDescendantsDomains(List<string> domains, IEnumerable<IContent> descendants)
-        {
-            if (!descendants.HasAny()) { return domains; }
-
-            foreach (var descendant in descendants)
-            {
-                domains.AddRange(_domainService.GetAssignedDomains(descendant.Id, false).Select(x => x.DomainName));
-            }
-
-            return domains;
-        }
-
         public IEnumerable<Zone> GetAllowedCloudflareZones()
         {
             var allowedZonesAndDomains = GetAllowedZonesAndDomains();
@@ -145,17 +131,13 @@ namespace Cogworks.UmbracoFlare.Core.Services
         {
             var allowedZones = new List<Zone>();
             var allowedDomains = new List<string>();
-
             var allZones = _cloudflareApiClient.GetZones();
-
-            var umbracoDomains = _domainService.GetAll(false).Select(x => new UriBuilder(x.DomainName).Uri.DnsSafeHost);
+            var umbracoDomains = _domainService.GetAll(false).Select(x => new UriBuilder(x.DomainName).Uri.DnsSafeHost).ToList();
 
             foreach (var zone in allZones)
             {
-                foreach (var domain in umbracoDomains)
+                foreach (var domain in umbracoDomains.Where(domain => domain.Contains(zone.Name)))
                 {
-                    if (!domain.Contains(zone.Name)) { continue; }
-
                     if (!allowedZones.Contains(zone))
                     {
                         allowedZones.Add(zone);
@@ -197,10 +179,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         public void UpdateContentIdToUrlCache(int id, IEnumerable<string> urls)
         {
-            if (!_contentIdToUrlCache.HasAny())
-            {
-                return;
-            }
+            if (!_contentIdToUrlCache.HasAny()) { return; }
 
             if (_contentIdToUrlCache.ContainsKey(id))
             {

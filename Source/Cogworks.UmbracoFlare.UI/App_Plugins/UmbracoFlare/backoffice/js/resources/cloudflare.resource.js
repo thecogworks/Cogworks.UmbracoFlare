@@ -26,7 +26,7 @@
         purgeStaticFiles: function(staticFiles, domains){
             return $http.post(
                 "backoffice/UmbracoFlare/CloudflareUmbracoApi/PurgeStaticFiles",
-                { StaticFiles: staticFiles, Hosts: domains }
+                { StaticFiles: staticFiles, SelectedDomains: domains }
             );
         },
 

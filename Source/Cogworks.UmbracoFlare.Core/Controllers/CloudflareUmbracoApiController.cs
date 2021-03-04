@@ -118,23 +118,15 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         [HttpPost]
         public StatusWithMessage PurgeStaticFiles([FromBody] PurgeStaticFilesRequestModel model)
         {
-            var allowedFileExtensions = new List<string> { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
-            const string generalSuccessMessage = "Successfully purged the cache for the selected static files.";
-            const string generalErrorMessage = "Sorry, we could not purge the cache for the static files.";
-
-            if (model.StaticFiles == null)
+            if (!model.StaticFiles.HasAny())
             {
-                return new StatusWithMessage(false, generalErrorMessage);
+                return new StatusWithMessage(false, "There were not static files selected to purge");
             }
 
-            if (!model.StaticFiles.Any())
-            {
-                return new StatusWithMessage(true, generalSuccessMessage);
-            }
-
-            var allFilePaths = GetAllFilePaths(model.StaticFiles, out var errors);
             var results = new List<StatusWithMessage>();
             var fullUrlsToPurge = new List<string>();
+            var allowedFileExtensions = new List<string> { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
+            var allFilePaths = GetAllFilePaths(model.StaticFiles);
 
             foreach (var filePath in allFilePaths)
             {
@@ -142,24 +134,25 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
                 if (allowedFileExtensions.Contains(extension))
                 {
-                    fullUrlsToPurge.AddRange(UrlHelper.MakeFullUrlWithDomain(filePath, model.Hosts, true));
+                    var urls = UrlHelper.MakeFullUrlWithDomain(filePath, model.SelectedDomains, true);
+                    fullUrlsToPurge.AddRange(urls);
                 }
             }
 
-            results.AddRange(_cloudflareService.PurgePages(fullUrlsToPurge));
+            var pageStatusMessages = _cloudflareService.PurgePages(fullUrlsToPurge);
+            results.AddRange(pageStatusMessages);
 
             if (results.Any(x => !x.Success))
             {
-                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
+                var resultsSummary = _cloudflareService.PrintResultsSummary(results);
+                return new StatusWithMessage(false, resultsSummary);
             }
 
             return new StatusWithMessage(true, $"{results.Count(x => x.Success)} static files purged successfully.");
         }
 
-        private IEnumerable<string> GetAllFilePaths(IEnumerable<string> filesOrFolders, out List<StatusWithMessage> errors)
+        private IEnumerable<string> GetAllFilePaths(IEnumerable<string> filesOrFolders)
         {
-            errors = new List<StatusWithMessage>();
-
             var rootOfApplication = IOHelper.MapPath("~/");
             var filePaths = new List<string>();
             var fileSystemApi = new FileSystemPickerApiController();

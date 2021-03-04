@@ -1,5 +1,6 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using System;
@@ -10,7 +11,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface ICloudflareService
     {
-        List<StatusWithMessage> PurgePages(IEnumerable<string> urls, bool purgeCacheOn = false);
+        List<StatusWithMessage> PurgePages(IEnumerable<string> urls);
 
         StatusWithMessage PurgeEverything(string domain);
 
@@ -23,45 +24,34 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly IUmbracoLoggingService _umbracoLoggingService;
         private readonly ICloudflareApiClient _cloudflareApiClient;
-        
-        public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient)
+        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
+
+        public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient, IUmbracoFlareDomainService umbracoFlareDomainService)
         {
             _umbracoLoggingService = umbracoLoggingService;
             _cloudflareApiClient = cloudflareApiClient;
+            _umbracoFlareDomainService = umbracoFlareDomainService;
         }
 
-        public List<StatusWithMessage> PurgePages(IEnumerable<string> urls, bool purgeCacheOn = false)
+        public List<StatusWithMessage> PurgePages(IEnumerable<string> urls)
         {
             var results = new List<StatusWithMessage>();
 
-            if (!purgeCacheOn)
-            {
-                var cloudflareDisabled = new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareDisabled);
-                results.Add(cloudflareDisabled);
-
-                return results;
-            }
-
-            urls = new List<string>();// _umbracoFlareDomainService.FilterToAllowedDomains(urls);
-
+            urls = _umbracoFlareDomainService.FilterToAllowedDomains(urls);
             var groupings = urls.GroupBy(url => UrlHelper.GetDomainFromUrl(url, true));
 
             foreach (var domainUrlGroup in groupings)
             {
-                //get the domain without the scheme or port.
-                var domain = new UriBuilder(domainUrlGroup.Key).Uri;
-
-                //Get the zone for the current website as configured by the "zoneUrl" config setting in the web.config.
-                var websiteZone = GetZone(domain.DnsSafeHost);
+                var domainUrl = new UriBuilder(domainUrlGroup.Key).Uri;
+                var websiteZone = GetZoneFilteredByDomain(domainUrl.DnsSafeHost);
 
                 if (websiteZone == null)
                 {
-                    results.Add(new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain(url) of {domain}"));
-
+                    results.Add(new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain(url) of {domainUrl}"));
                     continue;
                 }
 
-                var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, domainUrlGroup);
+                var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, domainUrlGroup, false);
 
                 if (!apiResult)
                 {
@@ -69,7 +59,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
                 }
                 else
                 {
-                    results.AddRange(domainUrlGroup.Select(url => new StatusWithMessage(true, $"Purged for url {url}")));
+                    results.AddRange(domainUrlGroup.Select(url => new StatusWithMessage(true, $"The url => {url} was purged successfully")));
                 }
             }
 
@@ -78,20 +68,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         public StatusWithMessage PurgeEverything(string domain)
         {
-            //We only want the host and not the scheme or port number so just to ensure that is what we are getting we will proccess it as a uri.
-            try
-            {
-                var domainAsUri = new Uri(domain);
-                domain = domainAsUri.Authority;
-            }
-            catch (Exception)
-            {
-                //TODO: THIS LOGIC IS WRONG, CHECK CALLERS
-                //So if we are here it didn't parse as an uri so we will assume that it was given in the correct format (without http://)
-            }
-
-            //Get the zone for the given domain
-            var websiteZone = GetZone(domain);
+            var websiteZone = GetZoneFilteredByDomain(domain);
 
             if (websiteZone == null)
             {
@@ -100,7 +77,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
                     $"We could not purge the cache because the domain {domain} is not valid with the provided credentials. Please ensure this domain is registered under these credentials on your cloudflare dashboard.");
             }
 
-            var purgeCacheStatus = _cloudflareApiClient.PurgeCache(websiteZone.Id, null, true);
+            var purgeCacheStatus = _cloudflareApiClient.PurgeCache(websiteZone.Id, Enumerable.Empty<string>(), true);
 
             return purgeCacheStatus
                 ? new StatusWithMessage(true, string.Empty)
@@ -115,8 +92,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
             };
 
             statusMessages.AddRange(results.Where(x => !x.Success).Select(failedStatus => "Failed for reason: " + failedStatus.Message + ".  "));
+            var resultsSummary = string.Join(" ", statusMessages);
 
-            return statusMessages.ToString();
+            return resultsSummary;
         }
 
         public UserDetails GetCloudflareUserDetails(CloudflareConfigModel configurationFile)
@@ -124,14 +102,17 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return _cloudflareApiClient.GetUserDetails(configurationFile);
         }
 
-        private Zone GetZone(string url)
+        private Zone GetZoneFilteredByDomain(string domainUrl)
         {
-            var zones = new List<string>(); //_umbracoFlareDomainService.GetAllowedCloudflareZones().Where(x => url.Contains(x.Name));
+            var allowedZones = _umbracoFlareDomainService.GetAllowedCloudflareZones();
+            var filteredZonesByDomainUrl = allowedZones.Where(x => domainUrl.Contains(x.Name)).ToList();
 
-            //TODO:THIS DOESNT MAKE SENSE CHECK LATER
-            //if (!zones.HasAny()) return zones.First();
+            if (filteredZonesByDomainUrl.HasAny())
+            {
+                return filteredZonesByDomainUrl.First(x => x.Name == domainUrl);
+            }
 
-            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {url}");
+            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {filteredZonesByDomainUrl}");
             _umbracoLoggingService.LogError<ICloudflareService>(noZoneException.Message, noZoneException);
 
             return null;

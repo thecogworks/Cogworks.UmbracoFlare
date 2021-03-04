@@ -5,27 +5,28 @@
         <hr />
         <div class="row-fluid">
             <div class="span3">
+                <h3>Cloudflare Account</h3>
                 <div class="cloudflare-config cloudflare-account">
                     <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
                     <div class="config-group">
                         <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cloudflareDashboardController.dashboard.currentApiKey" />
+                        <input type="text" class="apikey-input" ng-model="cloudflareDashboardController.dashboard.currentApiKey"/>
                     </div>
                     <div class="config-group">
                         <label>Account Email </label>
-                        <input type="text" ng-model="cloudflareDashboardController.dashboard.currentAccountEmail" />
+                        <input type="text" ng-model="cloudflareDashboardController.dashboard.currentAccountEmail"/>
                     </div>
                     <div class="config-group position-relative">
                         <div class="icon-check umb-button__success" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatedCredentials}"></div>
                         <div class="umb-button__progress" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatingCredentials}"></div>
-                        <button class="btn btn-success" ng-disabled="cloudflareDashboardController.dashboard.updatingCredentials" ng-click="cloudflareDashboardController.dashboard.UpdateCredentials(false)">Update Credentials</button>
+                        <button class="btn btn-success" ng-disabled="cloudflareDashboardController.dashboard.updatingCredentials" ng-click="cloudflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
                     </div>
                 </div>
 
                 <div class="cloudflare-config cloudflare-auto-purge">
-                    <p>By turning Auto-Purge ON, CloudFlare will automatically purge the servers' cache every time you save/publish a page or media type.</p>
+                    <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
                     <div class="toggle-container">
-                        <span>CloudFlare Auto-Purge</span>
+                        <span>CloudFlare Auto-Purge on "Save and publish"</span>
                         <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cloudflareDashboardController.dashboard.updatingAutoPurge}">
                             <div ng-click="cloudflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cloudflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cloudflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
                                 <div class="toggle-label">ON</div>
@@ -38,15 +39,27 @@
                         </div>
                     </div>
                     <p>
-                        Notes: 
+                        Notes:
                         <br />
                         <br />
-                        -You can still manually choose NOT to purge cache upon Save/Publish at the page content level. <a class="umbraco-help" ng-click="cloudflareDashboardController.dashboard.openModal('choosingNotToPurge')"><i class=" -black fa fa-question-circle fa-lg"></i></a>
+                        -You can still manually choose NOT to purge cache upon Save/Publish at the page content level by adding the property (bool) "cloudflareDisabledOnPublish" to the node.
                         <br />
                         <br />
-                        -You can also manually purge pages through the UmbracoFlare dashboard or by right clicking a node and choosing option from the menu. <a class="umbraco-help" ng-click="cloudflareDashboardController.dashboard.openModal('manualPurgingANode')"><i class=" -black fa fa-question-circle fa-lg"></i></a>
+                        -You can also manually purge pages through the UmbracoFlare dashboard or by right clicking a node and choosing option "Purge Cloudflare Cache" from the menu.
                     </p>
                 </div>
+            </div>
+            <div class="span4 offset1">
+                <h3>Domain(s) to purge</h3>
+                <ul class="unstyled umbracoflare">
+                    <li ng-repeat="domain in cloudflareDashboardController.dashboard.allowedDomains">
+                        <label for="{{domain}}">
+                            <input type="checkbox" value="{{domain}}" ng-click="cloudflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cloudflareDashboardController.dashboard.isChecked(domain)"/>
+                            {{domain}}
+                        </label>
+                    </li>
+                </ul>
+                <span ng-show="cloudflareDashboardController.dashboard.allowedDomains.length == 0">You do not have any hostnames registered with Umbraco.</span>
             </div>
         </div>
     </div>
@@ -119,44 +132,6 @@
 </div>
 
 <div bn-modals ng-show="subview" class="m-modals umbracoflare" ng-switch="subview">
-    <!-- BEGIN: CHOOSING NOT TO PURGE Modal. -->
-    <div ng-switch-when="choosingNotToPurge"
-         ng-controller="InfoModalController"
-         class="umbracoflare-modal">
-
-        <span class="close" ng-click="close()"><i class="fa fa-times fa-lg"></i></span>
-        <h2>Choosing NOT to purge</h2>
-
-        <span>Click this button at the bottom of the page to disable purging the cache when saving/publishing</span> <br />
-
-        <br />
-        <img alt="How to disable on publish." src="/App_Plugins/UmbracoFlare/Assets/Media/Disable-purge.jpg" />
-        <br />
-        <br />
-        <span>Please refer to the <a href="https://github.com/scyllagroup/UmbracoFlare" target="_blank" title="GitHub repo">GitHub readme</a> for documentation on how to disable the cache when saving/publishing.</span>
-    </div>
-    <!-- END: CHOOSING NOT TO PURGE Modal. -->
-    <!-- BEGIN: MANUAL PURGING Modal. -->
-    <div ng-switch-when="manualPurgingANode"
-         ng-controller="InfoModalController"
-         class="umbracoflare-modal">
-
-        <span class="close" ng-click="close()"><i class="fa fa-times fa-lg"></i></span>
-        <h2>Manual Purging A Node</h2>
-
-        <span>1) Right-click the folder or node you wish to purge the cache for.</span> <br />
-        <span>2) Choose "Purge CloudFlare Cache".</span>
-        <br />
-        <img alt="Purge context menu" src="/App_Plugins/UmbracoFlare/Assets/Media/manual-purge-1.jpg" />
-        <!-- This is to demonstrate that we can jump from one modal to another. -->
-        <br />
-        <br />
-        <span>3)Confirm that "Purge Children" option is selected to purge all child pages associated with folder/page.</span><br />
-        <span>4)Press "Purge Cache".</span> <br />
-        <br />
-        <img alt="Purge cache button." src="/App_Plugins/UmbracoFlare/Assets/Media/manual-purge-2.jpg" />
-    </div>
-    <!-- END: MANUAL PURGING Modal. -->
     <!-- BEGIN: confirmModal -->
     <div ng-switch-when="confirmModal" ng-controller="ConfirmModalController" class="umbracoflare-modal">
 

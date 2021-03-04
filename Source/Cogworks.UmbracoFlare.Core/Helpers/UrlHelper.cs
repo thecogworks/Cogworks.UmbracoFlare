@@ -41,20 +41,6 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             return uri.DnsSafeHost + (withTrailingSlash ? "/" : "");
         }
 
-        public static string GetCurrentDomainWithScheme(bool withTrailingSlash = false)
-        {
-            var currentDomain = MakeFullUrlWithDomain("", null, true, true);
-
-            if (!withTrailingSlash) { return currentDomain; }
-
-            if (currentDomain[currentDomain.Length - 1] != '/')
-            {
-                currentDomain += "/";
-            }
-
-            return currentDomain;
-        }
-
         public static IEnumerable<string> MakeFullUrlWithDomain(IEnumerable<string> urls, string host, bool withScheme = false)
         {
             return urls?.Select(url => MakeFullUrlWithDomain(url, host, !host.HasValue(), withScheme)).ToList();

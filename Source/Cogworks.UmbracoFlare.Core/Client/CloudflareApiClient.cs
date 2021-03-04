@@ -4,10 +4,11 @@ using Cogworks.UmbracoFlare.Core.Services;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Web;
+using Cogworks.UmbracoFlare.Core.Constants;
 
 namespace Cogworks.UmbracoFlare.Core.Client
 {
@@ -15,11 +16,9 @@ namespace Cogworks.UmbracoFlare.Core.Client
     {
         UserDetails GetUserDetails(CloudflareConfigModel configurationFile);
 
-        SslEnabledResponse GetSslStatus(string zoneId);
+        IEnumerable<Zone> GetZones();
 
-        IEnumerable<Zone> GetZones(string name = null);
-
-        bool PurgeCache(string zoneIdentifier, IEnumerable<string> urls, bool purgeEverything = false);
+        bool PurgeCache(string zoneId, IEnumerable<string> urls, bool purgeEverything);
     }
 
     public class CloudflareApiClient : ICloudflareApiClient
@@ -27,6 +26,8 @@ namespace Cogworks.UmbracoFlare.Core.Client
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
         public const string CloudflareApiBaseUrl = "https://api.cloudflare.com/client/v4/";
+        public const string CloudflareApiUserEndpoint = "user";
+        public const string CloudflareApiZonesEndpoint = "zones";
         private static string _apiKey;
         private static string _accountEmail;
 
@@ -49,9 +50,8 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                const string url = CloudflareApiBaseUrl + "user";
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
+                const string url = CloudflareApiBaseUrl + CloudflareApiUserEndpoint;
 
                 var request = new HttpRequestMessage
                 {
@@ -80,65 +80,24 @@ namespace Cogworks.UmbracoFlare.Core.Client
             }
         }
 
-        public SslEnabledResponse GetSslStatus(string zoneId)
+        public IEnumerable<Zone> GetZones()
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                const string url = CloudflareApiBaseUrl + CloudflareApiZonesEndpoint;
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
 
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri(CloudflareApiBaseUrl + "zones/" + zoneId + "/settings/ssl"),
+                    RequestUri = new Uri(url),
                     Method = HttpMethod.Get,
                 };
 
                 AddRequestHeaders(request);
 
-                var responseContent = client.SendAsync(request).Result.Content;
-                var stringVersion = responseContent.ReadAsStringAsync().Result;
-
                 try
                 {
-                    var response = responseContent.ReadAsAsync<SslEnabledResponse>().Result;
-                    if (response.Success) { return response; }
-
-                    _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"Something went wrong because of {response.Messages}");
-
-                    return null;
-                }
-                catch (Exception e)
-                {
-                    _umbracoLoggingService.LogError<ICloudflareApiClient>($"Something went wrong getting the SSL response back. The url that was used is {request.RequestUri}. ZoneId {zoneId}. The raw string value is {stringVersion}", e);
-                    return null;
-                }
-            }
-        }
-
-        public IEnumerable<Zone> GetZones(string name = null)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                    var url = CloudflareApiBaseUrl + "zones";
-
-                    if (name.HasValue())
-                    {
-                        url += "?name=" + HttpUtility.UrlEncode(name);
-                    }
-
-                    var request = new HttpRequestMessage
-                    {
-                        RequestUri = new Uri(url),
-                        Method = HttpMethod.Get,
-                    };
-
-                    AddRequestHeaders(request);
-
                     var responseContent = client.SendAsync(request).Result.Content;
-
                     var response = responseContent.ReadAsAsync<ListZonesResponse>().Result;
 
                     if (response.Success)
@@ -146,44 +105,36 @@ namespace Cogworks.UmbracoFlare.Core.Client
                         return response.Zones;
                     }
 
-                    _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"Could not get the list of zones for name {name} because of {response.Messages}");
-                    return new List<Zone>();
+                    _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"Could not get the list of zones because of {response.Messages}");
+                    return Enumerable.Empty<Zone>();
                 }
-            }
-            catch (Exception e)
-            {
-                _umbracoLoggingService.LogError<ICloudflareApiClient>($"Could not get the List of zones for name {name}", e);
-
-                return new List<Zone>();
+                catch (Exception e)
+                {
+                    _umbracoLoggingService.LogError<ICloudflareApiClient>("Something went wrong with the request for getting the zones. Could not get the List of zones", e);
+                    return Enumerable.Empty<Zone>();
+                }
             }
         }
 
-        public bool PurgeCache(string zoneIdentifier, IEnumerable<string> urls, bool purgeEverything = false)
+        public bool PurgeCache(string zoneId, IEnumerable<string> urls, bool purgeEverything)
         {
-            if (!zoneIdentifier.HasValue())
+            if (!zoneId.HasValue())
             {
-                var zoneIdentifierException = new ArgumentNullException(nameof(zoneIdentifier));
-                _umbracoLoggingService.LogError<ICloudflareApiClient>($"The parameter zoneIdentifier is empty", zoneIdentifierException);
+                var zoneIdentifierException = new ArgumentNullException(nameof(zoneId));
+                _umbracoLoggingService.LogError<ICloudflareApiClient>("The zone Identifier is empty", zoneIdentifierException);
                 return false;
-            }
-
-            if (!urls.HasAny() && !purgeEverything)
-            {
-                _umbracoLoggingService.LogInfo<ICloudflareApiClient>("PurgeIndividualPages was called but there were no urls given to purge nor are we purging everything");
-                return true;
             }
 
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
                 var json = purgeEverything ? "{\"purge_everything\":true}" : $"{{\"files\":{JsonConvert.SerializeObject(urls)}}}";
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
 
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri(CloudflareApiBaseUrl + "zones/" + zoneIdentifier + "/purge_cache"),
+                    RequestUri = new Uri(CloudflareApiBaseUrl + "zones/" + zoneId + "/purge_cache"),
                     Method = HttpMethod.Delete,
-                    Content = new StringContent(json, Encoding.UTF8, "application/json")
+                    Content = new StringContent(json, Encoding.UTF8, ApplicationConstants.ContentTypeApplicationJson)
                 };
 
                 AddRequestHeaders(request);

@@ -1,9 +1,9 @@
-﻿using System;
-
-namespace Cogworks.UmbracoFlare.Core.Constants
+﻿namespace Cogworks.UmbracoFlare.Core.Constants
 {
     public static class ApplicationConstants
     {
+        public const string ContentTypeApplicationJson = "application/json";
+
         public static class UmbracoFlareBackendProperties
         {
             public const string CloudflareDisabledOnPublishPropertyAlias = "cloudflareDisabledOnPublish";
@@ -16,7 +16,6 @@ namespace Cogworks.UmbracoFlare.Core.Constants
 
         public static class CloudflareMessages
         {
-            public const string CloudflareDisabled = "We could not purge the cache because your settings indicate that cloudflare purging is off.";
             public const string CloudflareApiError = "There was an error from the Cloudflare API. Please check the logfile to see the issue.";
         }
 
@@ -29,8 +28,5 @@ namespace Cogworks.UmbracoFlare.Core.Constants
         {
             public const string ConfigurationFilePath = "~/Config/cloudflare.config";
         }
-        
-
-        public static Guid ContentIdToUrlCacheRefresherGuid = Guid.NewGuid();
     }
 }
