@@ -9,7 +9,7 @@
     "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/confirmmodal.controller.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/umbracoflare.filesystempickerdialog.controller.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/directives/bnModals.directive.js",
-    "~/App_Plugins/UmbracoFlare/backoffice/js/directives/cloudflare.directives.js",
+    "~/App_Plugins/UmbracoFlare/backoffice/js/directives/input.adder.directives.js",
     "~/App_Plugins/UmbracoFlare/backoffice/js/directives/filesystem-picker.directives.js"
 
   ],

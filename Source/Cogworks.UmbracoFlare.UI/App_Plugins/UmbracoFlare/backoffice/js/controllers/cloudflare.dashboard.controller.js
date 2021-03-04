@@ -69,15 +69,7 @@
                 vm.dashboard.updatedCredentials = false;
             }, 5000);
         }
-
-        var openDomainDialog = function (callback) {
-            domainDialog = dialogService.open(
-                {
-                    template: '/App_Plugins/UmbracoFlare/backoffice/dashboardViews/domainDialog.html',
-                    callback: callback
-                });
-        }
-
+        
         vm.dashboard.updateCredentials = function (autoPurge) {
             if (!autoPurge) {
                 vm.dashboard.updatingCredentials = true;
@@ -152,9 +144,9 @@
         }
 
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
-            if (vm.dashboard.newConfig.SelectedDomains.length > 0) {
+            if (vm.dashboard.selectedDomains.length > 0) {
                 vm.dashboard.state = vm.dashboard.purgeStaticBusy;
-                cloudflareResource.purgeStaticFiles(selectedFiles, vm.dashboard.newConfig.SelectedDomains)
+                cloudflareResource.purgeStaticFiles(selectedFiles, vm.dashboard.selectedDomains)
                     .success(function (statusWithMessage) {
                         if (statusWithMessage.Success) {
                             vm.dashboard.state = vm.dashboard.purgeStaticSuccess;
@@ -205,9 +197,12 @@
                 return;
             }
 
-            openDomainDialog(function (domains) {
+            if (vm.dashboard.selectedDomains.length > 0) {
+
                 vm.dashboard.state = vm.dashboard.purgeUrlsBusy;
-                cloudflareResource.purgeCacheForUrls(urls, domains).success(function (statusWithMessage) {
+
+                cloudflareResource.purgeCacheForUrls(urls, vm.dashboard.selectedDomains)
+                    .success(function (statusWithMessage) {
                     if (statusWithMessage.Success) {
                         vm.dashboard.state = vm.dashboard.purgeUrlsSuccess;
                         notificationsService.success(statusWithMessage.Message);
@@ -220,7 +215,10 @@
                     notificationsService.error('Sorry, we could not purge the cache for the given urls.');
                     refreshStateAfterTime();
                 });
-            });
+            }else {
+                notificationsService.error('Please select domain(s) to purge');
+            }
+
         };
     }
 }

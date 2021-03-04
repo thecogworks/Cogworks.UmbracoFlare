@@ -40,7 +40,7 @@
                 submit: '&onSubmit',
                 state: '=state'
             },
-            templateUrl: '/App_Plugins/UmbracoFlare/backoffice/directiveViews/inputAdder.html',
+            templateUrl: '/App_Plugins/UmbracoFlare/backoffice/directiveViews/input.adder.html',
             link: link
         }
     }

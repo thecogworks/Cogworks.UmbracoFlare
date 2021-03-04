@@ -10,11 +10,11 @@
                     <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
                     <div class="config-group">
                         <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cloudflareDashboardController.dashboard.currentApiKey"/>
+                        <input type="text" class="apikey-input" ng-model="cloudflareDashboardController.dashboard.currentApiKey" />
                     </div>
                     <div class="config-group">
                         <label>Account Email </label>
-                        <input type="text" ng-model="cloudflareDashboardController.dashboard.currentAccountEmail"/>
+                        <input type="text" ng-model="cloudflareDashboardController.dashboard.currentAccountEmail" />
                     </div>
                     <div class="config-group position-relative">
                         <div class="icon-check umb-button__success" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatedCredentials}"></div>
@@ -54,7 +54,7 @@
                 <ul class="unstyled umbracoflare">
                     <li ng-repeat="domain in cloudflareDashboardController.dashboard.allowedDomains">
                         <label for="{{domain}}">
-                            <input type="checkbox" value="{{domain}}" ng-click="cloudflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cloudflareDashboardController.dashboard.isChecked(domain)"/>
+                            <input type="checkbox" value="{{domain}}" ng-click="cloudflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cloudflareDashboardController.dashboard.isChecked(domain)" />
                             {{domain}}
                         </label>
                     </li>

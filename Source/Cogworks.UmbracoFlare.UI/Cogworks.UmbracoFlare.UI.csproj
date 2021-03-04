@@ -293,7 +293,7 @@
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\Cloudflare-Dashboard-Tab.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\domainDialog.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\filesystem-picker-dialog.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\inputAdder.html" />
+    <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\input.adder.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\cloudflare.dashboard.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\cloudflare.domainDialog.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\cloudflare.menu.controller.js" />
@@ -301,7 +301,7 @@
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\infomodal.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\umbracoflare.filesystempickerdialog.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\bnModals.directive.js" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\cloudflare.directives.js" />
+    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\input.adder.directives.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\filesystem-picker.directives.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\cloudflare.resource.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\modal.service.js" />
