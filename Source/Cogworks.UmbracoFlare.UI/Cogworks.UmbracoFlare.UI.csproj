@@ -285,11 +285,11 @@
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\styles.css" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-black-18x20px.png" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.filespicker.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\input.adder.html" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.inputadder.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\confirmmodal.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.filespicker.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\bnModals.directive.js" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\input.adder.directives.js" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\cogworks.umbracoflare.inputadder.directives.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\filespicker.directives.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\resources\cogworks.umbracoflare.resources.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\modal.service.js" />
