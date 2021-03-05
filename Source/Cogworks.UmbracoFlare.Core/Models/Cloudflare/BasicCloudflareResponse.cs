@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Cogworks.UmbracoFlare.Core.Models
+namespace Cogworks.UmbracoFlare.Core.Models.Cloudflare
 {
     public class BasicCloudflareResponse
     {

@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 namespace Cogworks.UmbracoFlare.Core.Models
 {
     [XmlRoot(Namespace = "cloudflare", ElementName = "cloudflare")]
-    public class CloudflareConfigModel
+    public class UmbracoFlareConfigModel
     {
         [XmlElement(ElementName = "purgeCacheOn")]
         public bool PurgeCacheOn { get; set; }

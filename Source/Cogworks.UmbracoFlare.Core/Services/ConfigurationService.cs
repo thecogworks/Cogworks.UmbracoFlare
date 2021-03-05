@@ -10,11 +10,11 @@ namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IConfigurationService
     {
-        bool ConfigurationFileHasData(CloudflareConfigModel configurationFile);
+        bool ConfigurationFileHasData(UmbracoFlareConfigModel configurationFile);
 
-        CloudflareConfigModel LoadConfigurationFile();
+        UmbracoFlareConfigModel LoadConfigurationFile();
 
-        CloudflareConfigModel SaveConfigurationFile(CloudflareConfigModel configurationObject);
+        UmbracoFlareConfigModel SaveConfigurationFile(UmbracoFlareConfigModel configurationObject);
     }
 
     public class ConfigurationService : IConfigurationService
@@ -26,21 +26,21 @@ namespace Cogworks.UmbracoFlare.Core.Services
             _umbracoLoggingService = umbracoLoggingService;
         }
 
-        public bool ConfigurationFileHasData(CloudflareConfigModel configurationFile)
+        public bool ConfigurationFileHasData(UmbracoFlareConfigModel configurationFile)
         {
             return configurationFile.AccountEmail.HasValue() && configurationFile.ApiKey.HasValue();
         }
 
-        public CloudflareConfigModel LoadConfigurationFile()
+        public UmbracoFlareConfigModel LoadConfigurationFile()
         {
             try
             {
                 var configurationFilePath = HttpContext.Current.Server.MapPath(ApplicationConstants.ConfigurationFile.ConfigurationFilePath);
-                var serializer = new XmlSerializer(typeof(CloudflareConfigModel));
+                var serializer = new XmlSerializer(typeof(UmbracoFlareConfigModel));
 
                 using (var reader = new StreamReader(configurationFilePath))
                 {
-                    return (CloudflareConfigModel)serializer.Deserialize(reader);
+                    return (UmbracoFlareConfigModel)serializer.Deserialize(reader);
                 }
             }
             catch (Exception e)
@@ -48,15 +48,15 @@ namespace Cogworks.UmbracoFlare.Core.Services
                 _umbracoLoggingService.LogError<IConfigurationService>($"Could not load the file in this path {ApplicationConstants.ConfigurationFile.ConfigurationFilePath}", e);
             }
 
-            return new CloudflareConfigModel();
+            return new UmbracoFlareConfigModel();
         }
 
-        public CloudflareConfigModel SaveConfigurationFile(CloudflareConfigModel configurationFile)
+        public UmbracoFlareConfigModel SaveConfigurationFile(UmbracoFlareConfigModel configurationFile)
         {
             try
             {
                 var configurationFilePath = HttpContext.Current.Server.MapPath(ApplicationConstants.ConfigurationFile.ConfigurationFilePath);
-                var serializer = new XmlSerializer(typeof(CloudflareConfigModel));
+                var serializer = new XmlSerializer(typeof(UmbracoFlareConfigModel));
 
                 using (var writer = new StreamWriter(configurationFilePath))
                 {

@@ -9,12 +9,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 
 namespace Cogworks.UmbracoFlare.Core.Client
 {
     public interface ICloudflareApiClient
     {
-        UserDetails GetUserDetails(CloudflareConfigModel configurationFile);
+        UserDetails GetUserDetails(UmbracoFlareConfigModel configurationFile);
 
         IEnumerable<Zone> GetZones();
 
@@ -36,7 +37,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
             _umbracoLoggingService = umbracoLoggingService;
         }
 
-        public UserDetails GetUserDetails(CloudflareConfigModel configurationFile)
+        public UserDetails GetUserDetails(UmbracoFlareConfigModel configurationFile)
         {
             var userDetails = new UserDetails();
 
@@ -98,7 +99,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
                 try
                 {
                     var responseContent = client.SendAsync(request).Result.Content;
-                    var response = responseContent.ReadAsAsync<ListZonesResponse>().Result;
+                    var response = responseContent.ReadAsAsync<ZonesResponse>().Result;
 
                     if (response.Success)
                     {

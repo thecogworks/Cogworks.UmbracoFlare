@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -70,14 +71,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var content = _umbracoHelperWrapper.TypedContent(contentId);
             var urls = new List<string>();
             if (!content.HasValue()) { return urls; }
-
-            //Why is getting the full url only for the initial url???? 
-            var fullUrl = UrlHelper.GetFullUrlForPurgeContentNode(content.UrlAbsolute());
-            var otherUrls = UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id);
-
-            urls.AddRangeUnique(fullUrl);
-            urls.AddRangeUnique(otherUrls);
-
+            
             if (includeDescendants)
             {
                 foreach (var descendantContent in content.DescendantsOrSelf())

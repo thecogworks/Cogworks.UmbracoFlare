@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace Cogworks.UmbracoFlare.Core.Models
+namespace Cogworks.UmbracoFlare.Core.Models.Api
 {
-    public class PurgeCacheForUrlsRequestModel
+    public class PurgeUrlsRequestModel
     {
         public IEnumerable<string> Urls { get; set; }
         public IEnumerable<string> Domains { get; set; }

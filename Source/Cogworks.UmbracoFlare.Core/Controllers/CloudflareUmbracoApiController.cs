@@ -29,7 +29,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpGet]
-        public CloudflareConfigModel GetConfig()
+        public UmbracoFlareConfigModel GetConfig()
         {
             var configurationFile = _configurationService.LoadConfigurationFile();
             if (!_configurationService.ConfigurationFileHasData(configurationFile))
@@ -44,7 +44,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpPost]
-        public CloudflareConfigModel UpdateConfigStatus([FromBody] CloudflareConfigModel config)
+        public UmbracoFlareConfigModel UpdateConfigStatus([FromBody] UmbracoFlareConfigModel config)
         {
             var userDetails = _cloudflareService.GetCloudflareUserDetails(config);
             config.CredentialsAreValid = userDetails != null && userDetails.Success;
@@ -105,7 +105,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpPost]
-        public StatusWithMessage PurgeCacheForUrls([FromBody] PurgeCacheForUrlsRequestModel model)
+        public StatusWithMessage PurgeCacheForUrls([FromBody] PurgeUrlsRequestModel model)
         {
             if (!model.Urls.HasAny())
             {
@@ -137,30 +137,24 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpPost]
-        public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeCacheForIdParams args)
+        public StatusWithMessage PurgeCacheForContentNode([FromBody] PurgeFromContentTree model)
         {
-            if (args.NodeId <= 0)
+            if (model.NodeId <= 0)
             {
                 return new StatusWithMessage(false, "You must provide a node id.");
             }
-            var content = Umbraco.TypedContent(args.NodeId);
+            
             var urls = new List<string>();
+            urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(model.NodeId, model.PurgeChildren));
+            
+            var results = _cloudflareService.PurgePages(urls);
 
-            if (content.HasValue())
+            if (results.Any(x => !x.Success))
             {
-                urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id, args.PurgeChildren));
+                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
             }
 
-            var resultFromPurge = PurgeCacheForUrls(
-                new PurgeCacheForUrlsRequestModel
-                {
-                    Urls = urls,
-                    Domains = Enumerable.Empty<string>()
-                });
-
-            return resultFromPurge.Success
-                ? new StatusWithMessage(true, resultFromPurge.Message)
-                : resultFromPurge;
+            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} urls purged successfully.");
         }
     }
 }

@@ -37,17 +37,6 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             return urlsWithDomain;
         }
 
-        public static IEnumerable<string> GetFullUrlForPurgeContentNode(string url)
-        {
-            var urlsWithDomain = new List<string>();
-            var currentDomain = GetCurrentDomain(url);
-            var currentHost = MakeFullUrlWithDomain(url, currentDomain, false);
-
-            urlsWithDomain.Add(currentHost);
-
-            return urlsWithDomain;
-        }
-
         public static IEnumerable<string> GetFullUrlForPurgeEvents(IEnumerable<string> urls, IEnumerable<string> domains, bool withScheme)
         {
             var urlsWithDomains = MakeFullUrlsWithDomain(urls, domains, withScheme);

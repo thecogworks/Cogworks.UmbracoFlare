@@ -1,14 +1,14 @@
-using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Helpers;
 using System.Linq;
 using System.Net.Http.Formatting;
+using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Web.Models.Trees;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.Trees;
 
-namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
+namespace Cogworks.UmbracoFlare.Core.Controllers
 {
     [Tree("dummy", "fileSystemTree", "File System")]
     [PluginController("FileSystemPicker")]

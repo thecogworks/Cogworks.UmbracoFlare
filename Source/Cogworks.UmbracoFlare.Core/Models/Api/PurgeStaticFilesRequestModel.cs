@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Cogworks.UmbracoFlare.Core.Models
+namespace Cogworks.UmbracoFlare.Core.Models.Api
 {
     public class PurgeStaticFilesRequestModel
     {
