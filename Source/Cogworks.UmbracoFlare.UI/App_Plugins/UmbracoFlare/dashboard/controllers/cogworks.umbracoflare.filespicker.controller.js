@@ -1,21 +1,21 @@
 (function () {
     angular
         .module('umbraco')
-        .controller('Umbraco.FileSystemPickerDialogController', UmbracoFileSystemPickerDialogController);
+        .controller('Cogworks.Umbracoflare.Filespicker.Controller', CogworksUmbracoflareFilespickerController);
 
-    UmbracoFileSystemPickerDialogController.$inject = [
+    CogworksUmbracoflareFilespickerController.$inject = [
         '$scope'
     ];
 
-    function UmbracoFileSystemPickerDialogController($scope) {
+    function CogworksUmbracoflareFilespickerController($scope) {
         var vm = this;
 
         /////////////////////////////File System Picker Dialog/////////////////////////////////
         $scope.dialogEventHandler = $({});
         $scope.dialogEventHandler.bind('treeNodeSelect', nodeSelectHandler);
 
-        vm.fileSystemPickerDialog = {};
-        vm.fileSystemPickerDialog.selectedValues = [];
+        vm.filesPicker = {};
+        vm.filesPicker.selectedValues = [];
 
         function nodeSelectHandler(ev, args) {
             args.event.preventDefault();
@@ -24,19 +24,19 @@
             var targetDiv = args.element.children('div').first();
             var path = buildFullPath(args.node, '');
 
-            var indexOfPath = vm.fileSystemPickerDialog.selectedValues.indexOf(path);
+            var indexOfPath = vm.filesPicker.selectedValues.indexOf(path);
 
             if (targetDiv.hasClass('umb-tree-node-checked')) {
                 //it was already checked, uncheck it and remove it from the array
                 targetDiv.removeClass('umb-tree-node-checked');
 
                 //make sure we are in bounds
-                if (vm.fileSystemPickerDialog.selectedValues.length - 1 >= indexOfPath) {
-                    vm.fileSystemPickerDialog.selectedValues.splice(indexOfPath, 1);
+                if (vm.filesPicker.selectedValues.length - 1 >= indexOfPath) {
+                    vm.filesPicker.selectedValues.splice(indexOfPath, 1);
                 }
             } else {
                 targetDiv.addClass('umb-tree-node-checked');
-                vm.fileSystemPickerDialog.selectedValues.push(path);
+                vm.filesPicker.selectedValues.push(path);
             }
         };
 
@@ -51,9 +51,9 @@
             return buildFullPath(node.parent(), path);
         }
 
-        vm.fileSystemPickerDialog.selectFiles = function () {
+        vm.filesPicker.selectFiles = function () {
             //Crazy how the dialog service works. If you submit, the value is passed back to the callback function that was defined when you opened the modal.
-            $scope.submit(vm.fileSystemPickerDialog.selectedValues);
+            $scope.submit(vm.filesPicker.selectedValues);
         }
     }
 }

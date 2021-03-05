@@ -1,17 +1,17 @@
 ﻿(function () {
     angular
         .module('umbraco')
-        .controller('Cloudflare.Dashboard.Controller', CloudflareDashboardController);
+        .controller('Cogworks.Umbracoflare.Dashboard.Controller', CogworksUmbracoflareDashboardController);
 
-    CloudflareDashboardController.$inject = [
+    CogworksUmbracoflareDashboardController.$inject = [
         '$timeout',
-        'cogworksUmbracoflareResource',
+        'Cogworks.Umbracoflare.Resources',
         'notificationsService',
         'dialogService',
         'modals'
     ];
 
-    function CloudflareDashboardController($timeout, cogworksUmbracoflareResource, notificationsService, dialogService, modals) {
+    function CogworksUmbracoflareDashboardController($timeout, cogworksUmbracoflareResources, notificationsService, dialogService, modals) {
         var vm = this;
 
         /////////////////////////////Dashboard/////////////////////////////////
@@ -40,7 +40,7 @@
         getCloudflareStatus();
 
         function getCloudflareStatus() {
-            cogworksUmbracoflareResource.getConfigurationStatus()
+            cogworksUmbracoflareResources.getConfigurationStatus()
                 .success(function (configFromServer) {
                     vm.dashboard.newConfig = configFromServer;
                     vm.dashboard.currentApiKey = vm.dashboard.newConfig.ApiKey;
@@ -56,7 +56,7 @@
         }
 
         function getAllowedDomains() {
-            cogworksUmbracoflareResource.getAllowedDomains()
+            cogworksUmbracoflareResources.getAllowedDomains()
                 .success(function (domains) {
                     vm.dashboard.allowedDomains = domains;
                 });
@@ -80,7 +80,7 @@
             vm.dashboard.newConfig.PurgeCacheOn = vm.dashboard.currentPurgeCacheOn;
             vm.dashboard.newConfig.SelectedDomains = vm.dashboard.selectedDomains;
 
-            cogworksUmbracoflareResource.updateConfigurationStatus(vm.dashboard.newConfig)
+            cogworksUmbracoflareResources.updateConfigurationStatus(vm.dashboard.newConfig)
                 .success(function (configFromServer) {
                     if (configFromServer === null || configFromServer === undefined) {
                         notificationsService.error("We could not update the configuration.");
@@ -131,7 +131,7 @@
 
         vm.dashboard.purgeSite = function () {
             modals.open('confirmModal').then(function () {
-                cogworksUmbracoflareResource.purgeAll().success(function (statusWithMessage) {
+                cogworksUmbracoflareResources.purgeAll().success(function (statusWithMessage) {
                     if (statusWithMessage.Success) {
                         notificationsService.success('Purged Cache Successfully!');
                     } else {
@@ -146,7 +146,7 @@
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
             if (vm.dashboard.selectedDomains.length > 0) {
                 vm.dashboard.state = vm.dashboard.purgeStaticBusy;
-                cogworksUmbracoflareResource.purgeStaticFiles(selectedFiles, vm.dashboard.selectedDomains)
+                cogworksUmbracoflareResources.purgeStaticFiles(selectedFiles, vm.dashboard.selectedDomains)
                     .success(function (statusWithMessage) {
                         if (statusWithMessage.Success) {
                             vm.dashboard.state = vm.dashboard.purgeStaticSuccess;
@@ -167,7 +167,7 @@
 
         vm.dashboard.openFilePicker = function () {
             fileSystemPickerTreeDialog = dialogService.open({
-                template: '/App_Plugins/UmbracoFlare/backoffice/directiveViews/filesystem-picker-dialog.html',
+                template: '/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.filespicker.html',
                 callback: function (data) {
                     vm.dashboard.selectedFiles = data;
                 }
@@ -201,7 +201,7 @@
 
                 vm.dashboard.state = vm.dashboard.purgeUrlsBusy;
 
-                cogworksUmbracoflareResource.purgeCacheForUrls(urls, vm.dashboard.selectedDomains)
+                cogworksUmbracoflareResources.purgeCacheForUrls(urls, vm.dashboard.selectedDomains)
                     .success(function (statusWithMessage) {
                     if (statusWithMessage.Success) {
                         vm.dashboard.state = vm.dashboard.purgeUrlsSuccess;

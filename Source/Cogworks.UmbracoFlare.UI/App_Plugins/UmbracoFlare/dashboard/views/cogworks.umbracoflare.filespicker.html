@@ -1,4 +1,4 @@
-<div class="umb-panel" ng-controller="Umbraco.FileSystemPickerDialogController as fileSystemPickerDialogController">
+<div class="umb-panel" ng-controller="Cogworks.Umbracoflare.Filespicker.Controller as cogworksUmbracoflareFilespickerController">
     <div class="umb-panel-body no-header with-footer umb-scrollable">
         <fs-tree section="dummy"
                  treealias="fileSystemTree"
@@ -16,7 +16,7 @@
                 </a>
             </div>
             <div class="btn-toolbar umb-btn-toolbar">
-                <a href="#" ng-click="fileSystemPickerDialogController.fileSystemPickerDialog.selectFiles()" prevent-default class="btn btn-success btn-link">
+                <a href="#" ng-click="cogworksUmbracoflareFilepickerController.filesPicker.selectFiles()" prevent-default class="btn btn-success btn-link">
                     <localize key="general_add">Add</localize>
                 </a>
             </div>

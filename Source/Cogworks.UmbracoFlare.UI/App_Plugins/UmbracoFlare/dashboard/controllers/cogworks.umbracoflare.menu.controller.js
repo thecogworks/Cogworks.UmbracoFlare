@@ -1,14 +1,14 @@
 ﻿(function () {
         angular
             .module('umbraco')
-            .controller('cogworks.umbracoflare.menu.controller', CogworksUmbracoflareMenuController);
+            .controller('Cogworks.Umbracoflare.Menu.Controller', CogworksUmbracoflareMenuController);
 
         CogworksUmbracoflareMenuController.$inject = [
             '$scope',
-            'cogworksUmbracoflareResource'
+            'Cogworks.Umbracoflare.Resources'
         ];
 
-        function CogworksUmbracoflareMenuController($scope, cogworksUmbracoflareResource) {
+        function CogworksUmbracoflareMenuController($scope, cogworksUmbracoflareResources) {
             var vm = this;
 
             /////////////////////////////Menu/////////////////////////////////
@@ -28,7 +28,7 @@
                 vm.menu.busy = true;
                 vm.menu.busyElement.classList.remove(vm.menu.hiddenClass);
                 
-                cogworksUmbracoflareResource.purgeCacheForNodeId(node.id, $scope.purgeChildren)
+                cogworksUmbracoflareResources.purgeCacheForNodeId(node.id, $scope.purgeChildren)
                     .success(function (statusWithMessage) {
                         vm.menu.busy = false;
                         vm.menu.busyElement.classList.add(vm.menu.hiddenClass);

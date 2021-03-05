@@ -1,7 +1,7 @@
 <!--Included in /config/Dashboard.config-->
-<div ng-controller="Cloudflare.Dashboard.Controller as cloudflareDashboardController" class="umbracoflare umb-scrollable">
+<div ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare umb-scrollable">
     <div class="cloudflare-config">
-        <h2>Status Cloudflare Account: <span ng-show="cloudflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cloudflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
+        <h2>Status Cloudflare Account: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
         <hr />
         <div class="row-fluid">
             <div class="span3">
@@ -10,16 +10,16 @@
                     <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
                     <div class="config-group">
                         <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cloudflareDashboardController.dashboard.currentApiKey" />
+                        <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
                     </div>
                     <div class="config-group">
                         <label>Account Email </label>
-                        <input type="text" ng-model="cloudflareDashboardController.dashboard.currentAccountEmail" />
+                        <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
                     </div>
                     <div class="config-group position-relative">
-                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatedCredentials}"></div>
-                        <div class="umb-button__progress" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatingCredentials}"></div>
-                        <button class="btn btn-success" ng-disabled="cloudflareDashboardController.dashboard.updatingCredentials" ng-click="cloudflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
+                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
+                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingCredentials}"></div>
+                        <button class="btn btn-success" ng-disabled="cogworksUmbracoflareDashboardController.dashboard.updatingCredentials" ng-click="cogworksUmbracoflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
                     </div>
                 </div>
 
@@ -27,15 +27,15 @@
                     <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
                     <div class="toggle-container">
                         <span>CloudFlare Auto-Purge on "Save and publish"</span>
-                        <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cloudflareDashboardController.dashboard.updatingAutoPurge}">
-                            <div ng-click="cloudflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cloudflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cloudflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
+                        <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}">
+                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
                                 <div class="toggle-label">ON</div>
                             </div>
-                            <div ng-click="cloudflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cloudflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cloudflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
+                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
                                 <div class="toggle-label">OFF</div>
                             </div>
-                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatedAutoPurge}"></div>
-                            <div class="umb-button__progress" ng-class="{'-hidden': !cloudflareDashboardController.dashboard.updatingAutoPurge}"></div>
+                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedAutoPurge}"></div>
+                            <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}"></div>
                         </div>
                     </div>
                     <p>
@@ -52,19 +52,19 @@
             <div class="span4 offset1">
                 <h3>Domain(s) to purge</h3>
                 <ul class="unstyled umbracoflare">
-                    <li ng-repeat="domain in cloudflareDashboardController.dashboard.allowedDomains">
+                    <li ng-repeat="domain in cogworksUmbracoflareDashboardController.dashboard.allowedDomains">
                         <label for="{{domain}}">
-                            <input type="checkbox" value="{{domain}}" ng-click="cloudflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cloudflareDashboardController.dashboard.isChecked(domain)" />
+                            <input type="checkbox" value="{{domain}}" ng-click="cogworksUmbracoflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cogworksUmbracoflareDashboardController.dashboard.isChecked(domain)" />
                             {{domain}}
                         </label>
                     </li>
                 </ul>
-                <span ng-show="cloudflareDashboardController.dashboard.allowedDomains.length == 0">You do not have any hostnames registered with Umbraco.</span>
+                <span ng-show="cogworksUmbracoflareDashboardController.dashboard.allowedDomains.length == 0">You do not have any hostnames registered with Umbraco.</span>
             </div>
         </div>
     </div>
 
-    <div ng-class="{'-grey-out' : !cloudflareDashboardController.dashboard.credentialsAreValid}">
+    <div ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid}">
 
         <div class="manual-purge-container">
             <h2>Purge Options</h2>
@@ -73,7 +73,7 @@
                 <div class="span3">
                     <h3>Site Purge</h3>
                     <p>Purge everything on your site. This will take a while depending on your site and servers.</p>
-                    <button ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cloudflareDashboardController.dashboard.purgeSite()">Purge Site</button>
+                    <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSite()">Purge Site</button>
                 </div>
 
                 <div class="span3 offset1">
@@ -87,17 +87,17 @@
 
                     <div class="file-system-picker-control pull-right">
                         <div class="umb-editor">
-                            <ul class="unstyled" ng-show="cloudflareDashboardController.dashboard.selectedFiles.length !== 0">
-                                <li ng-repeat="selectedFile in cloudflareDashboardController.dashboard.selectedFiles">
-                                    <a href="#" prevent-default ng-click="cloudflareDashboardController.dashboard.removeSelectedValues(selectedFile)">
+                            <ul class="unstyled" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length !== 0">
+                                <li ng-repeat="selectedFile in cogworksUmbracoflareDashboardController.dashboard.selectedFiles">
+                                    <a href="#" prevent-default ng-click="cogworksUmbracoflareDashboardController.dashboard.removeSelectedValues(selectedFile)">
                                         <i class="icon icon-delete red"></i> {{selectedFile}}
                                     </a>
                                 </li>
                             </ul>
-                            <ul class="unstyled list-icons" ng-show="cloudflareDashboardController.dashboard.selectedFiles.length === 0">
+                            <ul class="unstyled list-icons" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0">
                                 <li>
                                     <i class="icon icon-add blue"></i>
-                                    <a href="#" ng-click="cloudflareDashboardController.dashboard.openFilePicker()" prevent-default>
+                                    <a href="#" ng-click="cogworksUmbracoflareDashboardController.dashboard.openFilePicker()" prevent-default>
                                         <localize key="general_add">Add</localize>
                                     </a>
                                 </li>
@@ -106,17 +106,17 @@
                     </div>
 
                     <div class="button-container pull-left">
-                        <div class="icon-check umb-button__success status-indicator" ng-class="{'-hidden': cloudflareDashboardController.dashboard.state !== cloudflareDashboardController.dashboard.purgeStaticSuccess}"></div>
-                        <div class="umb-button__progress status-indicator" ng-class="{'-hidden': cloudflareDashboardController.dashboard.state !== cloudflareDashboardController.dashboard.purgeStaticBusy}"></div>
-                        <button class="btn btn-success -float-right" ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid || cloudflareDashboardController.dashboard.state === cloudflareDashboardController.dashboard.purgeStaticBusy || cloudflareDashboardController.dashboard.selectedFiles.length === 0'
-                                ng-click="cloudflareDashboardController.dashboard.purgeStaticFiles(cloudflareDashboardController.dashboard.selectedFiles)">
+                        <div class="icon-check umb-button__success status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticSuccess}"></div>
+                        <div class="umb-button__progress status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy}"></div>
+                        <button class="btn btn-success -float-right" ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.state === cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy || cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0'
+                                ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeStaticFiles(cogworksUmbracoflareDashboardController.dashboard.selectedFiles)">
                             Purge Static Files
                         </button>
                     </div>
                 </div>
 
                 <div class="span3 offset1">
-                    <form ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
+                    <form ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
                         <h3>Purge By Url</h3>
                         <p>
                             URLs must be relative and begin with a / and should not include the domain. This also support wild cards.
@@ -124,7 +124,7 @@
                         <span>Example: /products/umbracoflare/*</span>
                         <br/>
                         <span>Example: /products/umbracoflare/dashboard</span>
-                        <input-adder class="input-adder" ng-model="cloudflareDashboardController.dashboard.urls" state="cloudflareDashboardController.dashboard.state" on-submit="cloudflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
+                        <input-adder class="input-adder" ng-model="cogworksUmbracoflareDashboardController.dashboard.urls" state="cogworksUmbracoflareDashboardController.dashboard.state" on-submit="cogworksUmbracoflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
                     </form>
                 </div>
             </div>

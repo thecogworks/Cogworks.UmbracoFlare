@@ -284,16 +284,14 @@
     <Content Include="App_Plugins\ModelsBuilder\modelsbuilder.resource.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\styles.css" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-black-18x20px.png" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\dashboardViews\domainDialog.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\filesystem-picker-dialog.html" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.filespicker.html" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\directiveViews\input.adder.html" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\cloudflare.domainDialog.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\confirmmodal.controller.js" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\controllers\umbracoflare.filesystempickerdialog.controller.js" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.filespicker.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\bnModals.directive.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\input.adder.directives.js" />
-    <Content Include="App_Plugins\UmbracoFlare\backoffice\js\directives\filesystem-picker.directives.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\resources\cogworks.umbracoflare.resource.js" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\filespicker.directives.js" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\resources\cogworks.umbracoflare.resources.js" />
     <Content Include="App_Plugins\UmbracoFlare\backoffice\js\resources\modal.service.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.menu.controller.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.dashboard.controller.js" />
@@ -377,10 +375,7 @@
       <Name>Cogworks.UmbracoFlare.Core</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Plugins\UmbracoFlare\backoffice\treeViews\" />
-    <Folder Include="App_Plugins\UmbracoFlare\dashboard\directives\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.3.2\analyzers\dotnet\cs\Microsoft.CodeAnalysis.Analyzers.dll" />
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.Analyzers.3.3.2\analyzers\dotnet\cs\Microsoft.CodeAnalysis.CSharp.Analyzers.dll" />
