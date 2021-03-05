@@ -2,7 +2,7 @@
 <dashBoard xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
   <section alias="StartupDeveloperDashboardSection" xdt:Locator="Match(alias)">
     <tab caption="UmbracoFlare" xdt:Locator="Match(caption)" xdt:Transform="Remove">
-      <control>/App_Plugins/UmbracoFlare/backoffice/dashboardViews/Cloudflare-Dashboard-Tab.html</control>
+	    <control>/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.dashboard.html</control>
     </tab>
   </section>
 </dashBoard>

@@ -5,12 +5,12 @@
 
     CloudflareDomainDialogController.$inject = [
         '$scope',
-        'cloudflareResource',
+        'cogworksUmbracoflareResource',
         'notificationsService',
         'dialogService'
     ];
 
-    function CloudflareDomainDialogController($scope, cloudflareResource, notificationsService, dialogService) {
+    function CloudflareDomainDialogController($scope, cogworksUmbracoflareResource, notificationsService, dialogService) {
         var vm = this;
         $scope.vm = vm;
 
@@ -26,7 +26,7 @@
         vm.domainDialog.ignoreSelectedDomainsWatch = true;
         vm.domainDialog.ignoreAllSelectedWatch = true;
 
-        cloudflareResource.getAllowedDomains().success(function (domains) {
+        cogworksUmbracoflareResource.getAllowedDomains().success(function (domains) {
             vm.domainDialog.allowedDomains = domains;
         }).error(function (e) {
             notificationsService.error('There was an error getting the umbraco domains.');

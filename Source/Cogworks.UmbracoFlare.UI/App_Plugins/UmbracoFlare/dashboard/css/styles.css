@@ -462,21 +462,21 @@
         position: relative;
     }
 
-    .cloudflare-config.cloudflare-auto-purge{
+    .cloudflare-config.cloudflare-auto-purge {
         margin-top: 40px;
     }
 
-    .cloudflare-config.cloudflare-auto-purge .umb-button__success {
-        position: relative;
-        top: -3px;
-        margin-left: 110px;
-    }
+        .cloudflare-config.cloudflare-auto-purge .umb-button__success {
+            position: relative;
+            top: -3px;
+            margin-left: 110px;
+        }
 
-    .cloudflare-config.cloudflare-auto-purge .umb-button__progress {
-        position: relative;
-        left: 173px;
-        top: -32px;
-    }
+        .cloudflare-config.cloudflare-auto-purge .umb-button__progress {
+            position: relative;
+            left: 173px;
+            top: -32px;
+        }
 
 i.active {
     color: #53a93f;
@@ -494,4 +494,21 @@ i.inactive {
 
 .pointer-events {
     pointer-events: none;
+}
+
+.purge-menu .-hidden {
+    display: none
+}
+
+.purge-menu input[type=checkbox] {
+    margin-top: -50px;
+    margin-left: -70px;
+}
+
+.purge-menu .purge-menu-success .btn-primary {
+    margin-left: 4px;
+}
+
+.icon-umbracoflare-tiny::before {
+    content: url('umbracoflare-black-18x20px.png')
 }

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Helpers;
+using System.Linq;
 using System.Net.Http.Formatting;
 using Umbraco.Core;
 using Umbraco.Core.IO;
@@ -25,21 +27,12 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
 
         protected override MenuItemCollection GetMenuForNode(string id, FormDataCollection queryStrings)
         {
-            var menu = new MenuItemCollection();
-
-            menu.Items.Add(new MenuItem("create", "Create"));
-
-            return menu;
+            return new MenuItemCollection();
         }
 
         private TreeNodeCollection AddFiles(string folder, FormDataCollection queryStrings)
         {
-            var pickerApiController = new FileSystemPickerApiController();
-
-            if (string.IsNullOrWhiteSpace(folder))
-            {
-                return null;
-            }
+            if (!folder.HasValue()) { return null; }
 
             var filter = queryStrings.Get("filter").Split(',').Select(a => a.Trim().EnsureStartsWith(".")).ToArray();
 
@@ -47,7 +40,7 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
             var rootPath = IOHelper.MapPath(queryStrings.Get("startfolder"));
             var treeNodeCollection = new TreeNodeCollection();
 
-            foreach (var file in pickerApiController.GetFiles(folder, filter))
+            foreach (var file in FilesHelper.GetFiles(folder, filter))
             {
                 var nodeTitle = file.Name;
                 var filePath = file.FullName.Replace(rootPath, "").Replace("\\", "/");
@@ -61,15 +54,19 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
 
         private TreeNodeCollection AddFolders(string parent, FormDataCollection queryStrings)
         {
-            var pickerApiController = new FileSystemPickerApiController();
-
             var filter = queryStrings.Get("filter").Split(',').Select(a => a.Trim().EnsureStartsWith(".")).ToArray();
-
             var treeNodeCollection = new TreeNodeCollection();
-            treeNodeCollection.AddRange(pickerApiController.GetFolders(parent, filter)
-                .Select(dir => CreateTreeNode(dir.FullName.Replace(IOHelper.MapPath("~"), "").Replace("\\", "/"),
-                    parent, queryStrings, dir.Name,
-                    "icon-folder", filter[0] == "." ? dir.EnumerateDirectories().Any() || pickerApiController.GetFiles(dir.FullName.Replace(IOHelper.MapPath("~"), "").Replace("\\", "/"), filter).Any() : pickerApiController.GetFiles(dir.FullName.Replace(IOHelper.MapPath("~"), "").Replace("\\", "/"), filter).Any())));
+            var rootFolderPath = IOHelper.MapPath("~");
+            var folders = FilesHelper.GetFolders(parent, filter);
+
+            foreach (var folder in folders)
+            {
+                var folderFullName = folder.FullName.Replace(rootFolderPath, "").Replace("\\", "/");
+                var folderHasFiles = folder.EnumerateDirectories().Any() || FilesHelper.GetFiles(folderFullName, filter).Any();
+                var treeNode = CreateTreeNode(folderFullName, parent, queryStrings, folder.Name, "icon-folder", folderHasFiles);
+
+                treeNodeCollection.Add(treeNode);
+            }
 
             return treeNodeCollection;
         }

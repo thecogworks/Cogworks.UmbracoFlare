@@ -19,6 +19,7 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             }
 
             var directories = new DirectoryInfo(path).EnumerateDirectories();
+
             return directories.Where(x => x.EnumerateFiles().Any(f => filter.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)));
         }
 
@@ -38,46 +39,24 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
 
         public static IEnumerable<FileInfo> GetFilesIncludingSubDirs(string path)
         {
-            //string[] entries = Directory.GetFileSystemEntries(path, "*", SearchOption.AllDirectories);
             var queue = new Queue<string>();
-
             queue.Enqueue(path);
 
             while (queue.Count > 0)
             {
                 path = queue.Dequeue();
 
-                try
+                foreach (var subDir in Directory.GetDirectories(path))
                 {
-                    foreach (var subDir in Directory.GetDirectories(path))
-                    {
-                        queue.Enqueue(subDir);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //Console.Error.WriteLine(ex);
+                    queue.Enqueue(subDir);
                 }
 
-                FileInfo[] files = null;
+                var files = new DirectoryInfo(path).GetFiles();
+                if (!files.HasValue()) { continue; }
 
-                try
+                foreach (var file in files)
                 {
-                    files = new DirectoryInfo(path).GetFiles();
-                }
-                catch (Exception ex)
-                {
-                    //Console.Error.WriteLine(ex);
-                }
-
-                if (!files.HasValue())
-                {
-                    continue;
-                }
-
-                foreach (var t in files)
-                {
-                    yield return t;
+                    yield return file;
                 }
             }
         }

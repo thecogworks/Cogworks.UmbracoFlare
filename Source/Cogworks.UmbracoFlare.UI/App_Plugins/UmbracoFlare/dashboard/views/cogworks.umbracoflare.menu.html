@@ -1,0 +1,36 @@
+﻿<div ng-controller="cogworks.umbracoflare.menu.controller as cogworksUmbracoflareMenuController"class="purge-menu">
+    <div class="umb-pane">
+        <div ng-hide="cogworksUmbracoflareMenuController.menu.success">
+            <p class="abstract">
+                Are you sure you want to purge the Cloudflare cache for this node?
+            </p>
+            <umb-pane ng-hide="cogworksUmbracoflareMenuController.menu.busy">
+                <umb-control-group label="Include Descendants?">
+                    <input type="checkbox" ng-model="$parent.$parent.purgeChildren" />
+                </umb-control-group>
+            </umb-pane>
+        </div>
+
+        <div id="purge-menu-error" class="alert alert-error -hidden">
+            <h4>{{cogworksUmbracoflareMenuController.menu.errorMsg}}</h4>
+        </div>
+
+        <div id="purge-menu-loader" class="umb-loader-wrapper -hidden">
+            <div class="umb-loader"></div>
+        </div>
+
+        <div id="purge-menu-success" class="alert alert-success -hidden">
+            You have successfully cleared the cache for this node!
+            <button class="btn btn-primary" ng-click="nav.hideDialog()">Ok</button>
+        </div>
+    </div>
+
+    <div class="umb-dialog-footer btn-toolbar umb-btn-toolbar" ng-hide="cogworksUmbracoflareMenuController.menu.success">
+        <a class="btn btn-link" ng-click="nav.hideDialog()" ng-if="!cogworksUmbracoflareMenuController.menu.busy">
+            <localize key="general_cancel">Cancel</localize>
+        </a>
+        <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.purge()" ng-disabled="cogworksUmbracoflareMenuController.menu.busy">
+            Purge Cache
+        </button>
+    </div>
+</div>

@@ -44,7 +44,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
             MediaService.Saved += PurgeCloudflareCacheForMedia;
             DataTypeService.Saved += RefreshImageCropsCache;
-            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
+            
         }
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
@@ -219,24 +219,6 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 //We can do that by simply getting the crops
                 ImageCropperManager.Instance.GetAllCrops(true); //true to bypass the cache & refresh it.
             }
-        }
-
-        private static void AddPurgeCacheForContentMenu(TreeControllerBase sender, MenuRenderingEventArgs args)
-        {
-            if (sender.TreeAlias != "content")
-            {
-                //We aren't dealing with the content menu
-                return;
-            }
-
-            var menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
-            {
-                Icon = "umbracoflare-tiny"
-            };
-
-            menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/backoffice/treeViews/PurgeCacheDialog.html", "Purge Cloudflare Cache");
-
-            args.Menu.Items.Insert(args.Menu.Items.Count - 1, menuItem);
         }
     }
 }

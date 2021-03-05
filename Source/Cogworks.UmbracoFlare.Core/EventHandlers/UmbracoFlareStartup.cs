@@ -1,10 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Mvc;
-using Cogworks.UmbracoFlare.Core.Client;
+﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Services;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using LightInject;
@@ -12,7 +6,15 @@ using LightInject.Mvc;
 using LightInject.WebApi;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Linq;
+using System.Net;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Mvc;
 using Umbraco.Core;
+using Umbraco.Web.Models.Trees;
+using Umbraco.Web.Trees;
 
 namespace Cogworks.UmbracoFlare.Core.EventHandlers
 {
@@ -44,6 +46,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore
             };
+
+            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
         }
 
         private static void RegisterCoreUmbracoServices(IServiceRegistry container, ApplicationContext applicationContext)
@@ -90,6 +94,20 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                     container.Register(controllerType, new PerRequestLifeTime());
                 }
             }
+        }
+
+        private static void AddPurgeCacheForContentMenu(TreeControllerBase sender, MenuRenderingEventArgs args)
+        {
+            if (sender.TreeAlias != "content") { return; }
+
+            var menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
+            {
+                Icon = "umbracoflare-tiny"
+            };
+
+            menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.menu.html", "Purge Cloudflare Cache");
+
+            args.Menu.Items.Insert(args.Menu.Items.Count - 1, menuItem);
         }
     }
 }

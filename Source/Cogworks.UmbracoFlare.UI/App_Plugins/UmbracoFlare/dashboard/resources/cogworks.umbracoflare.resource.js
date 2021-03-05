@@ -1,4 +1,4 @@
-﻿angular.module('umbraco.resources').factory('cloudflareResource', function ($q, $http) {
+﻿angular.module('umbraco.resources').factory('cogworksUmbracoflareResource', function ($q, $http) {
     return {
         purgeCacheForUrls: function (urls, domains) {
             return $http({
