@@ -21,7 +21,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         string PrintResultsSummary(IEnumerable<StatusWithMessage> results);
 
-        UserDetails GetCloudflareUserDetails(UmbracoFlareConfigModel configurationFile);
+        UserDetails GetCloudflareUserDetails();
 
         IEnumerable<string> GetFilePaths(IEnumerable<string> filesOrFolders);
     }
@@ -103,9 +103,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return resultsSummary;
         }
 
-        public UserDetails GetCloudflareUserDetails(UmbracoFlareConfigModel configurationFile)
+        public UserDetails GetCloudflareUserDetails()
         {
-            return _cloudflareApiClient.GetUserDetails(configurationFile);
+            return _cloudflareApiClient.GetUserDetails();
         }
 
         public IEnumerable<string> GetFilePaths(IEnumerable<string> filesOrFolders)

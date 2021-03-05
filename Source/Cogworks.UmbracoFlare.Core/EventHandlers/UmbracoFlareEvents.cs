@@ -1,50 +1,42 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.ImageCropperHelpers;
 using Cogworks.UmbracoFlare.Core.Services;
 using Cogworks.UmbracoFlare.Core.Wrappers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Mvc;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
 using Umbraco.Core.Publishing;
 using Umbraco.Core.Services;
 using Umbraco.Web;
-using Umbraco.Web.Models.Trees;
-using Umbraco.Web.Trees;
+using UrlHelper = Cogworks.UmbracoFlare.Core.Helpers.UrlHelper;
 
 namespace Cogworks.UmbracoFlare.Core.EventHandlers
 {
     public class UmbracoFlareEvents : ApplicationEventHandler
     {
-        private readonly ICloudflareService _cloudflareService;
-        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
-        private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
+        private ICloudflareService _cloudflareService;
+        private IUmbracoFlareDomainService _umbracoFlareDomainService;
+        private IUmbracoHelperWrapper _umbracoHelperWrapper;
         private static bool _purgeCacheOn;
-
-        public UmbracoFlareEvents(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IUmbracoHelperWrapper umbracoHelperWrapper, IConfigurationService configurationService)
-        {
-            var configurationFile = configurationService.LoadConfigurationFile();
-            _purgeCacheOn = configurationFile.PurgeCacheOn;
-
-            _cloudflareService = cloudflareService;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
-            _umbracoHelperWrapper = umbracoHelperWrapper;
-        }
 
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
+            _purgeCacheOn = DependencyResolver.Current.GetService<IConfigurationService>().LoadConfigurationFile().PurgeCacheOn;
+            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
+            _umbracoFlareDomainService = DependencyResolver.Current.GetService<IUmbracoFlareDomainService>();
+            _umbracoHelperWrapper = DependencyResolver.Current.GetService<IUmbracoHelperWrapper>();
+
             ContentService.Published += PurgeCloudflareCache;
-            ContentService.Published += UpdateContentIdToUrlCache;
+            
             FileService.SavedScript += PurgeCloudflareCacheForScripts;
             FileService.SavedStylesheet += PurgeCloudflareCacheForStylesheets;
 
             MediaService.Saved += PurgeCloudflareCacheForMedia;
             DataTypeService.Saved += RefreshImageCropsCache;
-            
         }
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
@@ -152,36 +144,16 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected void PurgeCloudflareCacheForMedia(IMediaService sender, SaveEventArgs<IMedia> e)
         {
+            //WORKING HERE
             if (!_purgeCacheOn) { return; }
 
             var imageCropSizes = ImageCropperManager.Instance.GetAllCrops();
             var urls = new List<string>();
+            var allowedCloudflareDomains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
 
-            //GetUmbracoDomains
-            var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
-
-            //delete the cloudflare cache for the saved entities.
             foreach (var media in e.SavedEntities)
             {
-                if (media.IsNewEntity())
-                {
-                    //If its new we don't want to purge the cache as this causes slow upload times.
-                    continue;
-                }
-
-                try
-                {
-                    //Check to see if the page has cache purging on publish disabled.
-                    if (media.GetValue<bool>("cloudflareDisabledOnPublish"))
-                    {
-                        //it was disabled so just continue;
-                        continue;
-                    }
-                }
-                catch (Exception)
-                {
-                    //continue;
-                }
+                if (media.IsNewEntity() || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
                 var publishedMedia = _umbracoHelperWrapper.TypedMedia(media.Id);
 
@@ -195,7 +167,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.Add(publishedMedia.Url);
             }
 
-            var results = _cloudflareService.PurgePages(UrlHelper.GetFullUrlForPurgeEvents(urls, domains, true));
+            var fullUrls = UrlHelper.GetFullUrlForPurgeEvents(urls, allowedCloudflareDomains, true);
+            var results = _cloudflareService.PurgePages(fullUrls);
 
             if (results.HasAny() && results.Any(x => !x.Success))
             {

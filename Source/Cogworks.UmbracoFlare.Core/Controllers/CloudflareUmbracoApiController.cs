@@ -37,7 +37,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 return configurationFile;
             }
 
-            var userDetails = _cloudflareService.GetCloudflareUserDetails(configurationFile);
+            var userDetails = _cloudflareService.GetCloudflareUserDetails();
             configurationFile.CredentialsAreValid = userDetails != null && userDetails.Success;
 
             return configurationFile;
@@ -46,7 +46,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         [HttpPost]
         public UmbracoFlareConfigModel UpdateConfigStatus([FromBody] UmbracoFlareConfigModel config)
         {
-            var userDetails = _cloudflareService.GetCloudflareUserDetails(config);
+            var userDetails = _cloudflareService.GetCloudflareUserDetails();
             config.CredentialsAreValid = userDetails != null && userDetails.Success;
 
             var configurationFile = _configurationService.SaveConfigurationFile(config);

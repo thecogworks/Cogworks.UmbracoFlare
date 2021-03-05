@@ -1,14 +1,12 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Helpers;
-using Cogworks.UmbracoFlare.Core.Models;
+using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -71,7 +69,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var content = _umbracoHelperWrapper.TypedContent(contentId);
             var urls = new List<string>();
             if (!content.HasValue()) { return urls; }
-            
+
             if (includeDescendants)
             {
                 foreach (var descendantContent in content.DescendantsOrSelf())
@@ -79,6 +77,11 @@ namespace Cogworks.UmbracoFlare.Core.Services
                     urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(descendantContent.Id, true));
                     urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(descendantContent.Id));
                 }
+            }
+            else
+            {
+                urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(content.Id, true));
+                urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id));
             }
 
             return urls;

@@ -41,7 +41,6 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
-                //Formatting = Formatting.Indented,
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore
