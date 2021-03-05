@@ -8,7 +8,7 @@ using Umbraco.Web.Models.Trees;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.Trees;
 
-namespace Cogworks.UmbracoFlare.Core.Controllers
+namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
 {
     [Tree("dummy", "fileSystemTree", "File System")]
     [PluginController("FileSystemPicker")]
