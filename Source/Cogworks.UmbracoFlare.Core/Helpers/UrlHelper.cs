@@ -8,22 +8,22 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
 {
     public class UrlHelper
     {
-        //is this a GetFullUrl ?? test it
         public static string GetDomainFromUrl(string url, bool withScheme)
         {
-            Uri uri;
+            string domain;
+            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out var uriWithDomain);
 
-            try
+            if (isValidUri)
             {
-                uri = new UriBuilder(url).Uri;
-            }
-            catch (Exception)
-            {
-                var currentDomain = GetCurrentDomain(url);
-                return MakeFullUrlWithDomain(url, currentDomain, withScheme);
+                var uri = uriWithDomain;
+                domain = withScheme ? AddSchemeToUrl(uri.ToString()) : uri.DnsSafeHost;
+                return domain;
             }
 
-            return withScheme ? AddSchemeToUrl(uri.ToString()) : uri.DnsSafeHost;
+            var currentDomain = GetCurrentDomain(url);
+            domain = MakeFullUrlWithDomain(url, currentDomain, withScheme);
+
+            return domain;
         }
 
         public static IEnumerable<string> GetFullUrlForPurgeStaticFiles(string url, IEnumerable<string> domains, bool withScheme)
@@ -37,12 +37,9 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             return urlsWithDomain;
         }
 
-        public static IEnumerable<string> GetFullUrlForPurgeFromContentNode(string url, IEnumerable<string> domains)
+        public static IEnumerable<string> GetFullUrlForPurgeContentNode(string url)
         {
             var urlsWithDomain = new List<string>();
-
-            if (!url.HasValue() || domains.HasAny()) { return urlsWithDomain; }
-
             var currentDomain = GetCurrentDomain(url);
             var currentHost = MakeFullUrlWithDomain(url, currentDomain, false);
 
@@ -51,7 +48,7 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             return urlsWithDomain;
         }
 
-        public static IEnumerable<string> GetFullUrlForPurgeFromEvents(IEnumerable<string> urls, IEnumerable<string> domains, bool withScheme)
+        public static IEnumerable<string> GetFullUrlForPurgeEvents(IEnumerable<string> urls, IEnumerable<string> domains, bool withScheme)
         {
             var urlsWithDomains = MakeFullUrlsWithDomain(urls, domains, withScheme);
             return urlsWithDomains;
@@ -112,12 +109,10 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
         {
             if (path1.EndsWith("/") && path2.StartsWith("/"))
             {
-                //strip the first / so they aren't doubled up when we combine them.
                 path1 = path1.TrimEnd('/');
             }
             else if (!path1.EndsWith("/") && !path2.StartsWith("/"))
             {
-                //neither of them had a / so we have to add one.
                 path1 += "/";
             }
 

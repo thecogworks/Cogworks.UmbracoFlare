@@ -240,8 +240,8 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="FileSystemPickerControllers\FileSystemPickerApiController.cs" />
     <Compile Include="FileSystemPickerControllers\FolderSystemTreeController.cs" />
+    <Compile Include="Helpers\FilesHelper.cs" />
     <Compile Include="Helpers\UmbracoContextHelper.cs" />
     <Compile Include="Helpers\UrlHelper.cs" />
     <Compile Include="ImageCropperHelpers\Caching\ImageCropperCacheManager.cs" />

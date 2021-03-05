@@ -3,6 +3,7 @@
     public static class ApplicationConstants
     {
         public const string ContentTypeApplicationJson = "application/json";
+        public static readonly string[] AllowedFileExtensions = { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
 
         public static class UmbracoFlareBackendProperties
         {

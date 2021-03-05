@@ -1,19 +1,15 @@
-﻿using System;
+﻿using Cogworks.UmbracoFlare.Core.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Cogworks.UmbracoFlare.Core.Extensions;
 using Umbraco.Core.IO;
-using Umbraco.Web.Editors;
-using Umbraco.Web.Mvc;
 
-//test
-namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
+namespace Cogworks.UmbracoFlare.Core.Helpers
 {
-    [PluginController("FileSystemPicker")]
-    public class FileSystemPickerApiController : UmbracoAuthorizedJsonController
+    public static class FilesHelper
     {
-        public IEnumerable<DirectoryInfo> GetFolders(string folder, string[] filter)
+        public static IEnumerable<DirectoryInfo> GetFolders(string folder, string[] filter)
         {
             var path = IOHelper.MapPath("~/" + folder.TrimStart('~', '/'));
 
@@ -22,13 +18,11 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
                 return new DirectoryInfo(path).GetDirectories("*");
             }
 
-
             var directories = new DirectoryInfo(path).EnumerateDirectories();
             return directories.Where(x => x.EnumerateFiles().Any(f => filter.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)));
-
         }
 
-        public IEnumerable<FileInfo> GetFiles(string folder, string[] filter)
+        public static IEnumerable<FileInfo> GetFiles(string folder, string[] filter)
         {
             var path = IOHelper.MapPath("~/" + folder.TrimStart('~', '/'));
             var directory = new DirectoryInfo(path);
@@ -42,15 +36,17 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
             return new DirectoryInfo(path).GetFiles();
         }
 
-        public IEnumerable<FileInfo> GetFilesIncludingSubDirs(string path)
+        public static IEnumerable<FileInfo> GetFilesIncludingSubDirs(string path)
         {
+            //string[] entries = Directory.GetFileSystemEntries(path, "*", SearchOption.AllDirectories);
             var queue = new Queue<string>();
+
             queue.Enqueue(path);
 
             while (queue.Count > 0)
             {
                 path = queue.Dequeue();
-                
+
                 try
                 {
                     foreach (var subDir in Directory.GetDirectories(path))
@@ -60,21 +56,24 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex);
+                    //Console.Error.WriteLine(ex);
                 }
 
                 FileInfo[] files = null;
-                
+
                 try
                 {
                     files = new DirectoryInfo(path).GetFiles();
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine(ex);
+                    //Console.Error.WriteLine(ex);
                 }
 
-                if (!files.HasValue()) { continue; }
+                if (!files.HasValue())
+                {
+                    continue;
+                }
 
                 foreach (var t in files)
                 {
@@ -82,7 +81,5 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
                 }
             }
         }
-
-       
     }
 }

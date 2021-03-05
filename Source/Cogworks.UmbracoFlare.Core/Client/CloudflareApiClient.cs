@@ -84,7 +84,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
         {
             using (var client = new HttpClient())
             {
-                const string url = CloudflareApiBaseUrl + CloudflareApiZonesEndpoint;
+                var url = $"{CloudflareApiBaseUrl}{CloudflareApiZonesEndpoint}";
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
 
                 var request = new HttpRequestMessage

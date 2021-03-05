@@ -119,10 +119,11 @@
                     <form ng-disabled='!cloudflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
                         <h3>Purge By Url</h3>
                         <p>
-                            URLs must be relative and begin with a / and should not include
-                            the domain. You will have an opportunity to choose domains.
+                            URLs must be relative and begin with a / and should not include the domain. This also support wild cards.
                         </p>
-                        <span>Example: /products/umbracoflare/dashboard.</span>
+                        <span>Example: /products/umbracoflare/*</span>
+                        <br/>
+                        <span>Example: /products/umbracoflare/dashboard</span>
                         <input-adder class="input-adder" ng-model="cloudflareDashboardController.dashboard.urls" state="cloudflareDashboardController.dashboard.state" on-submit="cloudflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
                     </form>
                 </div>

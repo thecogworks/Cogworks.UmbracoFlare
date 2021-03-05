@@ -8,19 +8,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Umbraco.Core.Models;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
+// ReSharper disable PossibleMultipleEnumeration
 namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IUmbracoFlareDomainService
     {
         IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains);
 
-        List<string> GetUrlsForNode(int contentId, bool includeDescendants = false);
-
-        List<string> GetUrlsForNode(IPublishedContent content, bool includeDescendants = false);
+        IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false);
 
         IEnumerable<Zone> GetAllowedCloudflareZones();
 
@@ -66,49 +64,30 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return filteredDomains;
         }
 
-        public List<string> GetUrlsForNode(int contentId, bool includeDescendants = false)
+        //TODO: IMPORTANT CACHE THIS!!
+        public IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false)
         {
             var content = _umbracoHelperWrapper.TypedContent(contentId);
-            return content == null ? new List<string>() : GetUrlsForNode(content, includeDescendants);
-        }
-
-        public List<string> GetUrlsForNode(IPublishedContent content, bool includeDescendants = false)
-        {
             var urls = new List<string>();
-
             if (!content.HasValue()) { return urls; }
 
-            var url = UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(content.Id, true);
+            //Why is getting the full url only for the initial url???? 
+            var fullUrl = UrlHelper.GetFullUrlForPurgeContentNode(content.UrlAbsolute());
+            var otherUrls = UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id);
 
-            urls.AddRange(UrlHelper.GetFullUrlForPurgeFromContentNode(url, RecursivelyGetParentsDomains(null, content)));
-            urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id));
+            urls.AddRangeUnique(fullUrl);
+            urls.AddRangeUnique(otherUrls);
 
             if (includeDescendants)
             {
-                //TODO: Descendants is very inefficient, find a way around
-                foreach (var descendant in content.Descendants())
+                foreach (var descendantContent in content.DescendantsOrSelf())
                 {
-                    urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(descendant.Id, true));
-                    urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(descendant.Id));
+                    urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(descendantContent.Id, true));
+                    urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(descendantContent.Id));
                 }
             }
 
             return urls;
-        }
-
-        private IEnumerable<string> RecursivelyGetParentsDomains(List<string> domains, IPublishedContent content)
-        {
-            if (!domains.HasAny())
-            {
-                domains = new List<string>();
-            }
-
-            if (!content.HasValue()) { return domains; }
-
-            domains.AddRange(_domainService.GetAssignedDomains(content.Id, false).Select(x => x.DomainName));
-            domains = RecursivelyGetParentsDomains(domains, content.Parent) as List<string>;
-
-            return domains;
         }
 
         public IEnumerable<Zone> GetAllowedCloudflareZones()
@@ -156,6 +135,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
         public IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls)
         {
             var resolvedUrls = new List<string>();
+
             if (!wildCardUrls.HasAny()) { return resolvedUrls; }
 
             var allContentUrls = GetAllContentUrls();
@@ -164,14 +144,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
             {
                 if (!wildCardUrl.Contains('*')) { continue; }
 
-                //Make one for modifying
-                var mutableWildCardUrl = wildCardUrl;
+                var wildCardUrlTrimmed = wildCardUrl.TrimEnd('/').TrimEnd('*');
 
-                mutableWildCardUrl = mutableWildCardUrl.TrimEnd('/');
-                mutableWildCardUrl = mutableWildCardUrl.TrimEnd('*');
-
-                //We can get wild cards by seeing if any of the urls start with the mutable wild card url
-                resolvedUrls.AddRange(allContentUrls.Where(x => x.StartsWith(mutableWildCardUrl)));
+                resolvedUrls.AddRange(allContentUrls.Where(x => x.StartsWith(wildCardUrlTrimmed)));
             }
 
             return resolvedUrls;
@@ -197,47 +172,19 @@ namespace Cogworks.UmbracoFlare.Core.Services
             _contentIdToUrlCache = null;
         }
 
-        //CACHE THIS METHOD BETTER
+        //TODO: IMPORTANT CACHE THIS !!!!!
         private IEnumerable<string> GetAllContentUrls()
         {
-            //if (_contentIdToUrlCache != null && _contentIdToUrlCache.Any())
-            //{
-            //    //just return the cache
-            //    return this._contentIdToUrlCache.SelectMany(x => x.Value);
-            //}
+            var urls = new List<string>();
+            var roots = _umbracoHelperWrapper.TypedContentAtRoot();
 
-            //var cache = new Dictionary<int, IEnumerable<string>>();
-            //var urls = new List<string>();
+            foreach (var root in roots)
+            {
+                var allContent = root.DescendantsOrSelf();
+                urls.AddRange(allContent.Select(content => content.Url));
+            }
 
-            ////Id like to use UmbracoContext.Current.ContentCache.GetByRoute() somehow but you cant always guarantee that urls
-            ////will be in  hierarchical order because of rewriting, etc.
-            //var roots = _umbracoHelperWrapper.TypedContentAtRoot();
-
-            //foreach (var content in roots)
-            //{
-            //    var contentUrls = _umbracoFlareDomainService.GetUrlsForNode(content.Id);
-
-            //    cache.Add(content.Id, contentUrls);
-            //    urls.AddRange(contentUrls);
-
-            //    foreach (var childContent in content.Descendants())
-            //    {
-            //        var childContentUrls = _umbracoFlareDomainService.GetUrlsForNode(childContent.Id);
-
-            //        cache.Add(childContent.Id, childContentUrls);
-            //        urls.AddRange(childContentUrls);
-            //    }
-            //}
-
-            //_contentIdToUrlCache = cache;
-            ////Add to the cache
-            //HttpRuntime.Cache.Insert(ApplicationConstants.CacheKeys.UmbracoUrlWildCardServiceCacheKey,
-            //    cache, null, DateTime.Now.AddDays(1),
-            //    System.Web.Caching.Cache.NoSlidingExpiration,
-            //    System.Web.Caching.CacheItemPriority.Normal,
-            //    null);
-
-            return new List<string>();
+            return urls;
         }
     }
 }

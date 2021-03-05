@@ -112,7 +112,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
         {
             var rootOfApplication = IOHelper.MapPath("~/");
             var filePaths = new List<string>();
-            var fileSystemApi = new FileSystemPickerApiController();
             var filesOrFoldersTest = filesOrFolders.HasAny() ? filesOrFolders.Where(x => x.HasValue()) : Enumerable.Empty<string>();
 
             foreach (var fileOrFolder in filesOrFoldersTest)
@@ -122,7 +121,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
                 if (fileAttributes.Equals(FileAttributes.Directory))
                 {
-                    var filesInTheFolder = fileSystemApi.GetFilesIncludingSubDirs(fileOrFolderPath);
+                    var filesInTheFolder = FilesHelper.GetFilesIncludingSubDirs(fileOrFolderPath);
                     var files = filesInTheFolder.Where(x => x.HasValue());
 
                     foreach (var file in files)

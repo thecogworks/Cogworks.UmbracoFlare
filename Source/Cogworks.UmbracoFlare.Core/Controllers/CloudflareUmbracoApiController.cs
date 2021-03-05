@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
+using Cogworks.UmbracoFlare.Core.Constants;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 
@@ -78,14 +79,13 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             var results = new List<StatusWithMessage>();
             var fullUrlsToPurge = new List<string>();
-            var allowedFileExtensions = new List<string> { ".css", ".js", ".jpg", ".png", ".gif", ".aspx", ".html" };
             var allFilePaths = _cloudflareService.GetFilePaths(model.StaticFiles);
 
             foreach (var filePath in allFilePaths)
             {
                 var extension = Path.GetExtension(filePath);
 
-                if (allowedFileExtensions.Contains(extension))
+                if (ApplicationConstants.AllowedFileExtensions.Contains(extension))
                 {
                     var urls = UrlHelper.GetFullUrlForPurgeStaticFiles(filePath, model.SelectedDomains, true);
                     fullUrlsToPurge.AddRange(urls);
@@ -113,7 +113,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             }
 
             var builtUrls = new List<string>();
-
+            
             if (model.Domains.HasAny())
             {
                 builtUrls.AddRange(UrlHelper.MakeFullUrlsWithDomain(model.Urls, model.Domains, true));
@@ -124,8 +124,8 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 ? builtUrls
                 : _umbracoFlareDomainService.GetAllUrlsForWildCardUrls(urlsWithWildCards);
 
-            builtUrls.AddRange(willCardsUrls);
-
+            builtUrls.AddRangeUnique(willCardsUrls);
+            
             var results = _cloudflareService.PurgePages(builtUrls);
 
             if (results.Any(x => !x.Success))
