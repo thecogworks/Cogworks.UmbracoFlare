@@ -138,7 +138,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.Add(file.VirtualPath);
             }
 
-            var results = _cloudflareService.PurgePages(UrlHelper.MakeFullUrlWithDomain(urls, domains, true));
+            var results = _cloudflareService.PurgePages(UrlHelper.GetFullUrlForPurgeFromEvents(urls, domains, true));
 
             if (results.HasAny() && results.Any(x => !x.Success))
             {
@@ -195,7 +195,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.Add(publishedMedia.Url);
             }
 
-            var results = _cloudflareService.PurgePages(UrlHelper.MakeFullUrlWithDomain(urls, domains, true));
+            var results = _cloudflareService.PurgePages(UrlHelper.GetFullUrlForPurgeFromEvents(urls, domains, true));
 
             if (results.HasAny() && results.Any(x => !x.Success))
             {

@@ -1,11 +1,15 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Controllers;
 using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.FileSystemPickerControllers;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Umbraco.Core.IO;
 
 namespace Cogworks.UmbracoFlare.Core.Services
 {
@@ -18,6 +22,8 @@ namespace Cogworks.UmbracoFlare.Core.Services
         string PrintResultsSummary(IEnumerable<StatusWithMessage> results);
 
         UserDetails GetCloudflareUserDetails(CloudflareConfigModel configurationFile);
+
+        IEnumerable<string> GetFilePaths(IEnumerable<string> filesOrFolders);
     }
 
     public class CloudflareService : ICloudflareService
@@ -102,6 +108,48 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return _cloudflareApiClient.GetUserDetails(configurationFile);
         }
 
+        public IEnumerable<string> GetFilePaths(IEnumerable<string> filesOrFolders)
+        {
+            var rootOfApplication = IOHelper.MapPath("~/");
+            var filePaths = new List<string>();
+            var fileSystemApi = new FileSystemPickerApiController();
+            var filesOrFoldersTest = filesOrFolders.HasAny() ? filesOrFolders.Where(x => x.HasValue()) : Enumerable.Empty<string>();
+
+            foreach (var fileOrFolder in filesOrFoldersTest)
+            {
+                var fileOrFolderPath = IOHelper.MapPath(fileOrFolder);
+                var fileAttributes = File.GetAttributes(fileOrFolderPath);
+
+                if (fileAttributes.Equals(FileAttributes.Directory))
+                {
+                    var filesInTheFolder = fileSystemApi.GetFilesIncludingSubDirs(fileOrFolderPath);
+                    var files = filesInTheFolder.Where(x => x.HasValue());
+
+                    foreach (var file in files)
+                    {
+                        if (file.Directory == null) { continue; }
+
+                        var directory = file.Directory.FullName.Replace(rootOfApplication, string.Empty);
+                        var filePath = $"{directory.Replace("\\", "/")}/{file.Name}";
+
+                        filePaths.Add(filePath);
+                    }
+                }
+                else
+                {
+                    if (!File.Exists(fileOrFolderPath))
+                    {
+                        _umbracoLoggingService.LogWarn<CloudflareUmbracoApiController>($"Could not find file with the path {fileOrFolderPath}");
+                        continue;
+                    }
+
+                    filePaths.Add(fileOrFolder.StartsWith("/") ? fileOrFolder.TrimStart('/') : fileOrFolder);
+                }
+            }
+
+            return filePaths;
+        }
+
         private Zone GetZoneFilteredByDomain(string domainUrl)
         {
             var allowedZones = _umbracoFlareDomainService.GetAllowedCloudflareZones();
@@ -109,7 +157,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
             if (filteredZonesByDomainUrl.HasAny())
             {
-                return filteredZonesByDomainUrl.First(x => x.Name == domainUrl);
+                return filteredZonesByDomainUrl.FirstOrDefault(x => x.Name == domainUrl);
             }
 
             var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {filteredZonesByDomainUrl}");

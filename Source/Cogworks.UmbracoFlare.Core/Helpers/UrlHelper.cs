@@ -1,26 +1,15 @@
 ﻿using Cogworks.UmbracoFlare.Core.Extensions;
-using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Web;
 
 namespace Cogworks.UmbracoFlare.Core.Helpers
 {
-    //MOVE THIS TO A URLSERVICE THIS DOES TOO MUCH TO BE A HELPER
     public class UrlHelper
     {
-        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-
-        /// <summary>
-        /// Takes the given url and returns the domain with the scheme (no path and query)
-        /// ex. http://www.example.com/blah/blah?blah=blah will return http://www.example.com(/)
-        /// </summary>
-        /// <param name="url"></param>
-        /// <param name="withTrailingSlash"></param>
-        /// <returns></returns>
-        public static string GetDomainFromUrl(string url, bool withScheme = false, bool withTrailingSlash = false)
+        //is this a GetFullUrl ?? test it
+        public static string GetDomainFromUrl(string url, bool withScheme)
         {
             Uri uri;
 
@@ -30,147 +19,96 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             }
             catch (Exception)
             {
-                return MakeFullUrlWithDomain(url, null, true, withScheme);
+                var currentDomain = GetCurrentDomain(url);
+                return MakeFullUrlWithDomain(url, currentDomain, withScheme);
             }
 
-            if (withScheme)
-            {
-                return AddSchemeToUrl(uri.ToString()) + (withTrailingSlash ? "/" : "");
-            }
-
-            return uri.DnsSafeHost + (withTrailingSlash ? "/" : "");
+            return withScheme ? AddSchemeToUrl(uri.ToString()) : uri.DnsSafeHost;
         }
 
-        public static IEnumerable<string> MakeFullUrlWithDomain(IEnumerable<string> urls, string host, bool withScheme = false)
-        {
-            return urls?.Select(url => MakeFullUrlWithDomain(url, host, !host.HasValue(), withScheme)).ToList();
-        }
-
-        public static IEnumerable<string> MakeFullUrlWithDomain(string url, IEnumerable<string> hosts, bool withScheme = false)
+        public static IEnumerable<string> GetFullUrlForPurgeStaticFiles(string url, IEnumerable<string> domains, bool withScheme)
         {
             var urlsWithDomain = new List<string>();
 
-            if (!url.HasValue())
-            {
-                return urlsWithDomain;
-            }
+            if (!url.HasValue()) { return urlsWithDomain; }
 
-            if (!hosts.HasAny())
-            {
-                //there aren't any hosts passed in so use the current domain.
-                var currentHost = MakeFullUrlWithDomain(url, null, true, false);
-                urlsWithDomain.Add(currentHost);
-
-                return urlsWithDomain;
-            }
-
-            urlsWithDomain.AddRange(hosts.Select(host => MakeFullUrlWithDomain(url, host, withScheme: withScheme)));
+            urlsWithDomain.AddRange(domains.Select(domain => MakeFullUrlWithDomain(url, domain, withScheme)));
 
             return urlsWithDomain;
         }
 
-        public static IEnumerable<string> MakeFullUrlWithDomain(IEnumerable<string> urls, IEnumerable<string> hosts, bool withScheme = false)
+        public static IEnumerable<string> GetFullUrlForPurgeFromContentNode(string url, IEnumerable<string> domains)
+        {
+            var urlsWithDomain = new List<string>();
+
+            if (!url.HasValue() || domains.HasAny()) { return urlsWithDomain; }
+
+            var currentDomain = GetCurrentDomain(url);
+            var currentHost = MakeFullUrlWithDomain(url, currentDomain, false);
+
+            urlsWithDomain.Add(currentHost);
+
+            return urlsWithDomain;
+        }
+
+        public static IEnumerable<string> GetFullUrlForPurgeFromEvents(IEnumerable<string> urls, IEnumerable<string> domains, bool withScheme)
+        {
+            var urlsWithDomains = MakeFullUrlsWithDomain(urls, domains, withScheme);
+            return urlsWithDomains;
+        }
+
+        public static IEnumerable<string> MakeFullUrlsWithDomain(IEnumerable<string> urls, IEnumerable<string> domains, bool withScheme)
         {
             var urlsWithDomains = new List<string>();
 
-            if (!urls.HasAny() || !hosts.Any())
-            {
-                return urlsWithDomains;
-            }
+            if (!urls.HasAny() || !domains.Any()) { return urlsWithDomains; }
 
             foreach (var url in urls)
             {
-                foreach (var host in hosts)
+                foreach (var domain in domains)
                 {
-                    urlsWithDomains.Add(MakeFullUrlWithDomain(url, host, withScheme: withScheme));
+                    urlsWithDomains.Add(MakeFullUrlWithDomain(url, domain, withScheme));
                 }
             }
 
             return urlsWithDomains;
         }
 
-        // Uses the HttpContext.Current to add on the scheme & host to the given url.
-        public static string MakeFullUrlWithDomain(string url, string host, bool useCurrentDomain = false, bool withScheme = false)
+        public static string MakeFullUrlWithDomain(string url, string domain, bool withScheme)
         {
-            if (!host.HasValue() && !useCurrentDomain)
+            if (!domain.HasValue()) { return url; }
+
+            var returnUrl = string.Empty;
+            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out var uriWithDomain);
+
+            if (isValidUri)
             {
-                return url;
-            }
-
-            if (useCurrentDomain && host.HasValue())
-            {
-                throw new Exception("If you are using the current domain, you CANNOT pass in a host as well.");
-            }
-
-            var returnUrl = "";
-            Uri uriWithDomain;
-
-            try
-            {
-                uriWithDomain = new Uri(url);
-
                 if (uriWithDomain.Host.HasValue())
                 {
-                    //The url already has a host, but we want it to have the host we passed in.
-                    returnUrl = CombinePaths(host, uriWithDomain.PathAndQuery);
+                    returnUrl = CombinePaths(domain, uriWithDomain.PathAndQuery);
                 }
             }
-            catch
+            else
             {
-                // ignored
-            }
-
-            //if we made it here we know that the host was not added to the url.
-            try
-            {
-                if (useCurrentDomain)
-                {
-                    if (HttpContext.Current == null)
-                    {
-                        Log.Error("HttpContext.Current or HttpContext.Current.Request is null.");
-                    }
-
-                    var root = new Uri($"{HttpContext.Current.Request.Url.Scheme}{Uri.SchemeDelimiter}{HttpContext.Current.Request.Url.Host}");
-
-                    uriWithDomain = new Uri(root, url);
-
-                    returnUrl = uriWithDomain.ToString();
-                }
-                else
-                {
-                    returnUrl = CombinePaths(host, url);
-                }
-            }
-            catch
-            {
-                Log.Error($"Could not create root uri using http context request url {HttpContext.Current?.Request.Url}");
-                return string.Empty;
+                returnUrl = CombinePaths(domain, url);
             }
 
             return withScheme ? AddSchemeToUrl(returnUrl) : returnUrl;
         }
 
-        public static string AddSchemeToUrl(string url)
+        private static string AddSchemeToUrl(string url)
         {
-            try
-            {
-                var urlHasScheme = new Uri(url).Scheme;
+            var isValidUri = Uri.TryCreate(url, UriKind.Absolute, out var uriWithDomain);
 
-                if (urlHasScheme.HasValue())
-                {
-                    //It already has a scheme
-                    return url;
-                }
-
-                return new UriBuilder(url).Scheme + "://" + url;
-            }
-            catch (Exception)
+            if (isValidUri)
             {
-                return new UriBuilder(url).Scheme + "://" + url;
+                return uriWithDomain.Scheme.HasValue() ? url : $"{uriWithDomain.Scheme}://{url}";
             }
+
+            return new UriBuilder(url).Scheme + "://" + url;
         }
 
-        public static string CombinePaths(string path1, string path2)
+        private static string CombinePaths(string path1, string path2)
         {
             if (path1.EndsWith("/") && path2.StartsWith("/"))
             {
@@ -184,6 +122,23 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
             }
 
             return path1 + path2;
+        }
+
+        private static string GetCurrentDomain(string url)
+        {
+            var rootUrl = $"{HttpContext.Current.Request.Url.Scheme}{Uri.SchemeDelimiter}{HttpContext.Current.Request.Url.Host}";
+            var isValidUri = Uri.TryCreate(rootUrl, UriKind.Absolute, out var uriWithDomain);
+            var returnUrl = string.Empty;
+
+            if (isValidUri)
+            {
+                var currentDomainUri = new Uri(uriWithDomain, url);
+                returnUrl = currentDomainUri.HasValue() ? uriWithDomain.ToString() : url;
+
+                return returnUrl;
+            }
+
+            return returnUrl;
         }
     }
 }

@@ -80,7 +80,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
             var url = UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(content.Id, true);
 
-            urls.AddRange(UrlHelper.MakeFullUrlWithDomain(url, RecursivelyGetParentsDomains(null, content)));
+            urls.AddRange(UrlHelper.GetFullUrlForPurgeFromContentNode(url, RecursivelyGetParentsDomains(null, content)));
             urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id));
 
             if (includeDescendants)
