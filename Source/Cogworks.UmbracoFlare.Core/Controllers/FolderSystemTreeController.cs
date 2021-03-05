@@ -40,7 +40,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             var rootPath = IOHelper.MapPath(queryStrings.Get("startfolder"));
             var treeNodeCollection = new TreeNodeCollection();
 
-            foreach (var file in FilesHelper.GetFiles(folder, filter))
+            foreach (var file in UmbracoFlareFileHelper.GetFiles(folder, filter))
             {
                 var nodeTitle = file.Name;
                 var filePath = file.FullName.Replace(rootPath, "").Replace("\\", "/");
@@ -57,12 +57,12 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             var filter = queryStrings.Get("filter").Split(',').Select(a => a.Trim().EnsureStartsWith(".")).ToArray();
             var treeNodeCollection = new TreeNodeCollection();
             var rootFolderPath = IOHelper.MapPath("~");
-            var folders = FilesHelper.GetFolders(parent, filter);
+            var folders = UmbracoFlareFileHelper.GetFolders(parent, filter);
 
             foreach (var folder in folders)
             {
                 var folderFullName = folder.FullName.Replace(rootFolderPath, "").Replace("\\", "/");
-                var folderHasFiles = folder.EnumerateDirectories().Any() || FilesHelper.GetFiles(folderFullName, filter).Any();
+                var folderHasFiles = folder.EnumerateDirectories().Any() || UmbracoFlareFileHelper.GetFiles(folderFullName, filter).Any();
                 var treeNode = CreateTreeNode(folderFullName, parent, queryStrings, folder.Name, "icon-folder", folderHasFiles);
 
                 treeNodeCollection.Add(treeNode);

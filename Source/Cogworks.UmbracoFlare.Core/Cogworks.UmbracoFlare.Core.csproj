@@ -241,11 +241,9 @@
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Controllers\FolderSystemTreeController.cs" />
-    <Compile Include="Helpers\FilesHelper.cs" />
-    <Compile Include="Helpers\UmbracoContextHelper.cs" />
-    <Compile Include="Helpers\UrlHelper.cs" />
-    <Compile Include="ImageCropperHelpers\Caching\ImageCropperCacheManager.cs" />
-    <Compile Include="ImageCropperHelpers\ImageCropperManager.cs" />
+    <Compile Include="Helpers\UmbracoFlareFileHelper.cs" />
+    <Compile Include="Helpers\UmbracoFlareUmbracoContextHelper.cs" />
+    <Compile Include="Helpers\UmbracoFlareUrlHelper.cs" />
     <Compile Include="Models\Api\PurgeFromContentTree.cs" />
     <Compile Include="Models\Cloudflare\BasicCloudflareResponse.cs" />
     <Compile Include="Models\UmbracoFlareConfigModel.cs" />
@@ -262,6 +260,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\CloudflareService.cs" />
     <Compile Include="Services\ConfigurationService.cs" />
+    <Compile Include="Services\ImageCropperService.cs" />
     <Compile Include="Services\UmbracoFlareDomainService.cs" />
     <Compile Include="Services\UmbracoLoggingService.cs" />
     <Compile Include="Wrappers\UmbracoContextWrapper.cs" />

@@ -20,7 +20,7 @@ namespace Cogworks.UmbracoFlare.Core.Wrappers
 
         public UmbracoHelperWrapper(IUmbracoContextWrapper umbracoContext)
         {
-            UmbracoContextHelper.EnsureContext();
+            UmbracoFlareUmbracoContextHelper.EnsureContext();
             _umbracoHelper = new UmbracoHelper(umbracoContext.Current);
         }
 

@@ -87,7 +87,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
                 if (ApplicationConstants.AllowedFileExtensions.Contains(extension))
                 {
-                    var urls = UrlHelper.GetFullUrlForPurgeStaticFiles(filePath, model.SelectedDomains, true);
+                    var urls = UmbracoFlareUrlHelper.GetFullUrlForPurgeStaticFiles(filePath, model.SelectedDomains, true);
                     fullUrlsToPurge.AddRange(urls);
                 }
             }
@@ -116,7 +116,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             
             if (model.Domains.HasAny())
             {
-                builtUrls.AddRange(UrlHelper.MakeFullUrlsWithDomain(model.Urls, model.Domains, true));
+                builtUrls.AddRange(UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(model.Urls, model.Domains, true));
             }
 
             var urlsWithWildCards = builtUrls.Where(x => x.Contains('*'));

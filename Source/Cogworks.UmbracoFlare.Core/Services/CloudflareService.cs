@@ -44,7 +44,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var results = new List<StatusWithMessage>();
 
             urls = _umbracoFlareDomainService.FilterToAllowedDomains(urls);
-            var groupings = urls.GroupBy(url => UrlHelper.GetDomainFromUrl(url, true));
+            var groupings = urls.GroupBy(url => UmbracoFlareUrlHelper.GetDomainFromUrl(url, true));
 
             foreach (var domainUrlGroup in groupings)
             {
@@ -121,7 +121,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
                 if (fileAttributes.Equals(FileAttributes.Directory))
                 {
-                    var filesInTheFolder = FilesHelper.GetFilesIncludingSubDirs(fileOrFolderPath);
+                    var filesInTheFolder = UmbracoFlareFileHelper.GetFilesIncludingSubDirs(fileOrFolderPath);
                     var files = filesInTheFolder.Where(x => x.HasValue());
 
                     foreach (var file in files)

@@ -8,7 +8,7 @@ using Umbraco.Web.Security;
 
 namespace Cogworks.UmbracoFlare.Core.Helpers
 {
-    public static class UmbracoContextHelper
+    public static class UmbracoFlareUmbracoContextHelper
     {
         public static void EnsureContext()
         {

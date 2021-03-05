@@ -6,7 +6,7 @@ using System.Web;
 
 namespace Cogworks.UmbracoFlare.Core.Helpers
 {
-    public class UrlHelper
+    public class UmbracoFlareUrlHelper
     {
         public static string GetDomainFromUrl(string url, bool withScheme)
         {

@@ -7,7 +7,7 @@ using Umbraco.Core.IO;
 
 namespace Cogworks.UmbracoFlare.Core.Helpers
 {
-    public static class FilesHelper
+    public static class UmbracoFlareFileHelper
     {
         public static IEnumerable<DirectoryInfo> GetFolders(string folder, string[] filter)
         {

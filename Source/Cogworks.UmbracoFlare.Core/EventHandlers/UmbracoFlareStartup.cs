@@ -23,6 +23,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
         protected override void ApplicationInitialized(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
 
             var container = new ServiceContainer();
 
@@ -45,8 +46,6 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore
             };
-
-            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
         }
 
         private static void RegisterCoreUmbracoServices(IServiceRegistry container, ApplicationContext applicationContext)
@@ -66,6 +65,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             container.Register<IUmbracoLoggingService, UmbracoLoggingService>();
             container.Register<ICloudflareApiClient, CloudflareApiClient>();
             container.Register<IConfigurationService, ConfigurationService>();
+            container.Register<IImageCropperService, ImageCropperService>();
 
             //if (ConfigurationSettings.IsCacheEnabled)
             //{

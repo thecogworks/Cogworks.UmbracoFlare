@@ -19,6 +19,8 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false);
 
+        IEnumerable<string> GetUmbracoDomains();
+
         IEnumerable<Zone> GetAllowedCloudflareZones();
 
         IEnumerable<string> GetAllowedCloudflareDomains();
@@ -101,6 +103,13 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var allowedDomains = allowedZonesAndDomains.Value;
 
             return allowedDomains;
+        }
+
+        public IEnumerable<string> GetUmbracoDomains()
+        {
+            var umbracoDomains = _domainService.GetAll(false);
+            var umbracoDomainNames = umbracoDomains.Select(umbracoDomain => umbracoDomain.DomainName).ToList();
+            return umbracoDomainNames;
         }
 
         private KeyValuePair<IEnumerable<Zone>, IEnumerable<string>> GetAllowedZonesAndDomains()
