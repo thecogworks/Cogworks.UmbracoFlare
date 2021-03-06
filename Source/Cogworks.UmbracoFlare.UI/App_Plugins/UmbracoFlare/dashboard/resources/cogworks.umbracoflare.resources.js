@@ -51,10 +51,12 @@
             );
         }
 
-        function updateConfigurationStatus(on) {
-            return $http.post(API_ROOT + 'UpdateConfigStatus', { on });
+        function updateConfigurationStatus(configObject) {
+            return $http.post(API_ROOT + 'UpdateConfigStatus',
+                { PurgeCacheOn : configObject.PurgeCacheOn, ApiKey: configObject.ApiKey,
+                    AccountEmail: configObject.AccountEmail, SelectedDomains: configObject.SelectedDomains });
         }
-
+        
         function getAllowedDomains() {
             return $http.get(API_ROOT + 'GetAllowedDomains');
         }

@@ -74,11 +74,11 @@
             }, 5000);
         }
 
-        vm.dashboard.updateCredentials = function (autoPurge) {
-            if (!autoPurge) {
+        vm.dashboard.updateCredentials = function (isAutoPurgeCall) {
+            if (!isAutoPurgeCall) {
                 vm.dashboard.updatingCredentials = true;
             }
-
+            
             vm.dashboard.newConfig.ApiKey = vm.dashboard.currentApiKey;
             vm.dashboard.newConfig.AccountEmail = vm.dashboard.currentAccountEmail;
             vm.dashboard.newConfig.PurgeCacheOn = vm.dashboard.currentPurgeCacheOn;
@@ -96,7 +96,7 @@
                         vm.dashboard.newConfig = configFromServer;
                     }
 
-                    if (autoPurge) {
+                    if (isAutoPurgeCall) {
                         vm.dashboard.updatingAutoPurge = false;
                         vm.dashboard.updatedAutoPurge = true;
                     } else {
@@ -113,10 +113,6 @@
             vm.dashboard.currentPurgeCacheOn = !vm.dashboard.currentPurgeCacheOn;
             vm.dashboard.updateCredentials(true);
         };
-
-        vm.dashboard.openModal = function (type) {
-            modals.open(type);
-        }
 
         vm.dashboard.toggleSelectedDomain = function (domain) {
             var index = vm.dashboard.selectedDomains.indexOf(domain);
