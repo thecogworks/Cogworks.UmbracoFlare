@@ -60,7 +60,12 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
             var results = domains.Select(domain => _cloudflareService.PurgeEverything(domain)).ToList();
 
-            return new StatusWithMessage { Success = results.All(x => x.Success), Message = _cloudflareService.PrintResultsSummary(results) };
+            if (results.Any(x => !x.Success))
+            {
+                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
+            }
+
+            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} domains purged successfully.");
         }
 
         [HttpGet]

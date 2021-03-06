@@ -1,11 +1,5 @@
 ﻿{
   "javascript": [
-    "~/App_Plugins/UmbracoFlare/backoffice/js/resources/modal.service.js",
-    "~/App_Plugins/UmbracoFlare/backoffice/js/controllers/confirmmodal.controller.js",
-    "~/App_Plugins/UmbracoFlare/backoffice/js/directives/bnModals.directive.js",
-
-
-
     "~/App_Plugins/UmbracoFlare/dashboard/controllers/cogworks.umbracoflare.menu.controller.js",
     "~/App_Plugins/UmbracoFlare/dashboard/controllers/cogworks.umbracoflare.dashboard.controller.js",
     "~/App_Plugins/UmbracoFlare/dashboard/resources/cogworks.umbracoflare.resources.js",

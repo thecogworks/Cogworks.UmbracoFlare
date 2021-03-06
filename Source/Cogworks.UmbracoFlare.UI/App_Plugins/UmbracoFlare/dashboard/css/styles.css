@@ -116,11 +116,11 @@
     margin: 40px 0;
 }
 
-    .umbracoflare .manual-purge-container .umb-button__progress {
+    .umbracoflare .manual-purge-container .purge-static-files .umb-button__progress, .umbracoflare .manual-purge-container .purge-by-url .umb-button__progress {
         margin-left: 90px;
     }
 
-    .umbracoflare .manual-purge-container .icon-check {
+    .umbracoflare .manual-purge-container .purge-static-files .icon-check, .umbracoflare .manual-purge-container .purge-by-url .umb-button__progress {
         margin-left: 100px;
     }
 
@@ -458,25 +458,37 @@
         top: 25px;
     }
 
-    .cloudflare-config.cloudflare-account .position-relative {
+.position-relative {
+    position: relative;
+}
+
+.cloudflare-config.cloudflare-auto-purge {
+    margin-top: 40px;
+}
+
+    .cloudflare-config.cloudflare-auto-purge .umb-button__success {
         position: relative;
+        top: -3px;
+        margin-left: 110px;
     }
 
-    .cloudflare-config.cloudflare-auto-purge {
-        margin-top: 40px;
+    .cloudflare-config.cloudflare-auto-purge .umb-button__progress {
+        position: relative;
+        left: 173px;
+        top: -32px;
     }
 
-        .cloudflare-config.cloudflare-auto-purge .umb-button__success {
-            position: relative;
-            top: -3px;
-            margin-left: 110px;
-        }
+.site-purge .config-group {
+    width: 25%
+}
 
-        .cloudflare-config.cloudflare-auto-purge .umb-button__progress {
-            position: relative;
-            left: 173px;
-            top: -32px;
-        }
+.site-purge .icon-check {
+    margin-left: 60px;
+}
+
+.site-purge .umb-button__progress {
+    margin-left: 50px;
+}
 
 i.active {
     color: #53a93f;

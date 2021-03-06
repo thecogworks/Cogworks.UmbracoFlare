@@ -70,13 +70,22 @@
             <h2>Purge Options</h2>
             <hr />
             <div class="row-fluid">
-                <div class="span3">
+                <div class="span3 site-purge">
                     <h3>Site Purge</h3>
                     <p>Purge everything on your site. This will take a while depending on your site and servers.</p>
-                    <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSite()">Purge Site</button>
+                    <div class="config-group position-relative">
+                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy' class="btn btn-success" ng-show="!cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteConfirmation()">Purge Site</button>
+                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteDone}"></div>
+                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy}"></div>
+                    </div>
+
+                    <div class="purge-confirmation-message" ng-show="cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage">
+                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSite()">Yes, purge it.</button>
+                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-danger offset1" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteCancel()">Cancel</button>
+                    </div>
                 </div>
 
-                <div class="span3 offset1">
+                <div class="span3 offset1 purge-static-files">
                     <h3>Pick Files</h3>
                     <p>
                         Add individual files by selecting them from the picker below.
@@ -115,14 +124,14 @@
                     </div>
                 </div>
 
-                <div class="span3 offset1">
+                <div class="span3 offset1 purge-by-url">
                     <form ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
                         <h3>Purge By Url</h3>
                         <p>
                             URLs must be relative and begin with a / and should not include the domain. This also support wild cards.
                         </p>
                         <span>Example: /products/umbracoflare/*</span>
-                        <br/>
+                        <br />
                         <span>Example: /products/umbracoflare/dashboard</span>
                         <input-adder class="input-adder" ng-model="cogworksUmbracoflareDashboardController.dashboard.urls" state="cogworksUmbracoflareDashboardController.dashboard.state" on-submit="cogworksUmbracoflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
                     </form>
@@ -130,23 +139,4 @@
             </div>
         </div>
     </div>
-</div>
-
-<div bn-modals ng-show="subview" class="m-modals umbracoflare" ng-switch="subview">
-    <!-- BEGIN: confirmModal -->
-    <div ng-switch-when="confirmModal" ng-controller="ConfirmModalController" class="umbracoflare-modal">
-
-        <span class="close" ng-click="close()"><i class="fa fa-times fa-lg"></i></span>
-        <h2>Purge Entire Site?</h2>
-
-        <span>Are you sure you want to purge the entire site? The server might take a performance hit while Cloudflare rebuilds your cache.</span> <br />
-        <br />
-        <div class="pull-right">
-            <a href="#" class="btn btn-link" ng-click="close()" prevent-default>Cancel</a>
-        </div>
-        <div>
-            <a href="#" class="btn btn-success" style="color:white;" ng-click="yes()" prevent-default>Yes, purge it.</a>
-        </div>
-    </div>
-    <!-- END: confirmModal -->
 </div>
