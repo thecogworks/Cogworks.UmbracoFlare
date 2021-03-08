@@ -284,6 +284,7 @@
     <Content Include="App_Plugins\ModelsBuilder\modelsbuilder.resource.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\styles.css" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-black-18x20px.png" />
+    <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-logo-light.png" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.filespicker.html" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.inputadder.html" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.filespicker.controller.js" />
