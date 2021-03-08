@@ -345,6 +345,7 @@
     <Content Include="config\404handlers.config" />
     <Content Include="App_Plugins\UmbracoFlare\package.manifest" />
     <Content Include="config\cloudflare.config" />
+    <Content Include="Cogworks.UmbracoFlare.nuspec" />
     <None Include="packages.config" />
     <Content Include="Views\Web.config" />
     <Content Include="Views\Partials\Grid\Editors\Textstring.cshtml" />
