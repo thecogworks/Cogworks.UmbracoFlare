@@ -1,4 +1,6 @@
-﻿using Cogworks.UmbracoFlare.Core.Extensions;
+﻿using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using Cogworks.UmbracoFlare.Core.Models.Api;
@@ -7,7 +9,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web.Http;
-using Cogworks.UmbracoFlare.Core.Constants;
 using Umbraco.Web.Mvc;
 using Umbraco.Web.WebApi;
 
@@ -20,12 +21,11 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IConfigurationService _configurationService;
 
-        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService,
-            IConfigurationService configurationService)
+        public CloudflareUmbracoApiController()
         {
-            _cloudflareService = cloudflareService;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
-            _configurationService = configurationService;
+            _cloudflareService = ServiceFactory.GetCloudflareService();
+            _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
+            _configurationService = ServiceFactory.GetConfigurationService();
         }
 
         [HttpGet]
@@ -46,10 +46,11 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         [HttpPost]
         public UmbracoFlareConfigModel UpdateConfigStatus([FromBody] UmbracoFlareConfigModel config)
         {
-            var userDetails = _cloudflareService.GetCloudflareUserDetails();
-            config.CredentialsAreValid = userDetails != null && userDetails.Success;
-
             var configurationFile = _configurationService.SaveConfigurationFile(config);
+            var userDetails = _cloudflareService.GetCloudflareUserDetails();
+            configurationFile.CredentialsAreValid = userDetails != null && userDetails.Success;
+
+            configurationFile = _configurationService.SaveConfigurationFile(config);
 
             return configurationFile;
         }
@@ -58,7 +59,10 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         public StatusWithMessage PurgeAll()
         {
             var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
-            var results = domains.Select(domain => _cloudflareService.PurgeEverything(domain)).ToList();
+            var results = domains
+                .Where(x=> x.HasValue())
+                .Select(domain => _cloudflareService.PurgeEverything(domain))
+                .ToList();
 
             if (results.Any(x => !x.Success))
             {
@@ -118,7 +122,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             }
 
             var builtUrls = new List<string>();
-            
+
             if (model.Domains.HasAny())
             {
                 builtUrls.AddRange(UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(model.Urls, model.Domains, true));
@@ -130,7 +134,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 : _umbracoFlareDomainService.GetAllUrlsForWildCardUrls(urlsWithWildCards);
 
             builtUrls.AddRangeUnique(willCardsUrls);
-            
+
             var results = _cloudflareService.PurgePages(builtUrls);
 
             if (results.Any(x => !x.Success))
@@ -148,10 +152,10 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             {
                 return new StatusWithMessage(false, "You must provide a node id.");
             }
-            
+
             var urls = new List<string>();
             urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(model.NodeId, model.PurgeChildren));
-            
+
             var results = _cloudflareService.PurgePages(urls);
 
             if (results.Any(x => !x.Success))

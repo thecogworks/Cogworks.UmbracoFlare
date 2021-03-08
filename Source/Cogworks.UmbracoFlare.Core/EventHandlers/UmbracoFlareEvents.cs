@@ -1,10 +1,10 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Services;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Mvc;
 using Umbraco.Core;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -25,11 +25,11 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
-            _purgeCacheOn = DependencyResolver.Current.GetService<IConfigurationService>().LoadConfigurationFile().PurgeCacheOn;
-            _cloudflareService = DependencyResolver.Current.GetService<ICloudflareService>();
-            _umbracoFlareDomainService = DependencyResolver.Current.GetService<IUmbracoFlareDomainService>();
-            _umbracoHelperWrapper = DependencyResolver.Current.GetService<IUmbracoHelperWrapper>();
-            _imageCropperService = DependencyResolver.Current.GetService<IImageCropperService>();
+            _purgeCacheOn = ServiceFactory.GetConfigurationService().LoadConfigurationFile().PurgeCacheOn;
+            _cloudflareService = ServiceFactory.GetCloudflareService();
+            _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
+            _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
+            _imageCropperService = ServiceFactory.GetImageCropperService();
 
             ContentService.Published += PurgeCloudflareCache;
             //What happens when the node gets unpublished or deleted???

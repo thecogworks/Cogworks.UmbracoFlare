@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Umbraco.Core.Services;
 
 namespace Cogworks.UmbracoFlare.Core.Services
@@ -17,9 +18,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly IDataTypeService _dataTypeService;
 
-        public ImageCropperService(IDataTypeService dataTypeService)
+        public ImageCropperService()
         {
-            _dataTypeService = dataTypeService;
+            _dataTypeService = ServiceFactory.GetDataTypeService();
         }
 
         public IEnumerable<Crop> GetAllCrops()

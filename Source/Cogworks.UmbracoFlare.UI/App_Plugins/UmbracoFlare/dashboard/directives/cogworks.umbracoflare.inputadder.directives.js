@@ -17,6 +17,11 @@
                     return;
                 }
 
+                if (!item.startsWith('/')){
+                    notificationsService.error('The url field needs to start with "/".');
+                    return;
+                }
+
                 if (scope.collection.indexOf(item) === -1) {
                     scope.collection.push(item);
                     scope.activeInput = '';

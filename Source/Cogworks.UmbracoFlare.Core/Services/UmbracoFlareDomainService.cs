@@ -1,12 +1,11 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
-using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -26,10 +25,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
         IEnumerable<string> GetAllowedCloudflareDomains();
 
         IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls);
-
-        void UpdateContentIdToUrlCache(int id, IEnumerable<string> urls);
-
-        void DeletedContentIdToUrlCache();
     }
 
     public class UmbracoFlareDomainService : IUmbracoFlareDomainService
@@ -37,13 +32,12 @@ namespace Cogworks.UmbracoFlare.Core.Services
         private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IDomainService _domainService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
-        private Dictionary<int, IEnumerable<string>> _contentIdToUrlCache;
 
-        public UmbracoFlareDomainService(IUmbracoHelperWrapper umbracoHelperWrapper, ICloudflareApiClient cloudflareApiClient, IDomainService domainService)
+        public UmbracoFlareDomainService()
         {
-            _umbracoHelperWrapper = umbracoHelperWrapper;
-            _cloudflareApiClient = cloudflareApiClient;
-            _domainService = domainService;
+            _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
+            _cloudflareApiClient = ServiceFactory.GetCloudflareApiClient();
+            _domainService = ServiceFactory.GetDomainService();
         }
 
         public IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains)
@@ -65,7 +59,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return filteredDomains;
         }
 
-        //TODO: IMPORTANT CACHE THIS!!
         public IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false)
         {
             var content = _umbracoHelperWrapper.TypedContent(contentId);
@@ -150,7 +143,8 @@ namespace Cogworks.UmbracoFlare.Core.Services
             {
                 if (!wildCardUrl.Contains('*')) { continue; }
 
-                var wildCardUrlTrimmed = wildCardUrl.TrimEnd('/').TrimEnd('*');
+                var wildCardUrlTrimmed = wildCardUrl.TrimEnd('*');
+                wildCardUrlTrimmed = wildCardUrlTrimmed.TrimEnd('/');
 
                 resolvedUrls.AddRange(allContentUrls.Where(x => x.StartsWith(wildCardUrlTrimmed)));
             }
@@ -158,27 +152,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return resolvedUrls;
         }
 
-        public void UpdateContentIdToUrlCache(int id, IEnumerable<string> urls)
-        {
-            if (!_contentIdToUrlCache.HasAny()) { return; }
-
-            if (_contentIdToUrlCache.ContainsKey(id))
-            {
-                _contentIdToUrlCache[id] = urls;
-            }
-            else
-            {
-                _contentIdToUrlCache.Add(id, urls);
-            }
-        }
-
-        public void DeletedContentIdToUrlCache()
-        {
-            HttpRuntime.Cache.Remove(ApplicationConstants.CacheKeys.UmbracoUrlWildCardServiceCacheKey);
-            _contentIdToUrlCache = null;
-        }
-
-        //TODO: IMPORTANT CACHE THIS !!!!!
         private IEnumerable<string> GetAllContentUrls()
         {
             var urls = new List<string>();

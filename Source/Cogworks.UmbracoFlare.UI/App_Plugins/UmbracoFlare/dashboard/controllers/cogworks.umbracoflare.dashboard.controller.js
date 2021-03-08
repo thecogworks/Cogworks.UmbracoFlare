@@ -29,7 +29,7 @@
         vm.dashboard.updatedAutoPurge = false;
         vm.dashboard.updatingAutoPurge = false;
         vm.dashboard.allowedDomains = {};
-        vm.dashboard.selectedDomains = [];
+        vm.dashboard.selectedDomains = {};
         vm.dashboard.purgeConfirmationMessage = false;
         vm.dashboard.purgeSiteDone = false;
         vm.dashboard.purgeSiteBusy = false;
@@ -49,7 +49,7 @@
                     vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
                     vm.dashboard.currentPurgeCacheOn = vm.dashboard.newConfig.PurgeCacheOn;
                     vm.dashboard.credentialsAreValid = vm.dashboard.newConfig.CredentialsAreValid;
-                    vm.dashboard.selectedDomains = vm.dashboard.newConfig.SelectedDomains;
+                    vm.dashboard.selectedDomains = vm.dashboard.newConfig.SelectedDomains.filter(function (item) { return (item != null && item !== ""); });
 
                     if (vm.dashboard.credentialsAreValid) {
                         getAllowedDomains();
@@ -78,7 +78,7 @@
             if (!isAutoPurgeCall) {
                 vm.dashboard.updatingCredentials = true;
             }
-            
+
             vm.dashboard.newConfig.ApiKey = vm.dashboard.currentApiKey;
             vm.dashboard.newConfig.AccountEmail = vm.dashboard.currentAccountEmail;
             vm.dashboard.newConfig.PurgeCacheOn = vm.dashboard.currentPurgeCacheOn;
@@ -94,6 +94,7 @@
                     } else {
                         notificationsService.success("Successfully updated your configuration!");
                         vm.dashboard.newConfig = configFromServer;
+                        vm.dashboard.credentialsAreValid = true;
                     }
 
                     if (isAutoPurgeCall) {
@@ -105,6 +106,7 @@
                     }
 
                     refreshStateAfterTime();
+                    getCloudflareStatus();
                 });
         };
 
@@ -116,7 +118,7 @@
 
         vm.dashboard.toggleSelectedDomain = function (domain) {
             var index = vm.dashboard.selectedDomains.indexOf(domain);
-            if (index >= 0) {
+            if (index > -1) {
                 vm.dashboard.selectedDomains.splice(index, 1);
             } else {
                 vm.dashboard.selectedDomains.push(domain);
@@ -129,31 +131,30 @@
             return vm.dashboard.selectedDomains.indexOf(domain) > -1;
         }
 
-        vm.dashboard.purgeSiteConfirmation = function() {
+        vm.dashboard.purgeSiteConfirmation = function () {
             vm.dashboard.purgeConfirmationMessage = true;
         }
 
-        vm.dashboard.purgeSiteCancel = function() {
+        vm.dashboard.purgeSiteCancel = function () {
             vm.dashboard.purgeConfirmationMessage = false;
         }
 
         vm.dashboard.purgeSite = function () {
             vm.dashboard.purgeConfirmationMessage = false;
             vm.dashboard.purgeSiteBusy = true;
-            
+
             cogworksUmbracoflareResources.purgeAll()
                 .success(function (statusWithMessage) {
+                    vm.dashboard.purgeSiteBusy = false;
                     if (statusWithMessage.Success) {
                         notificationsService.success('Purged Cache Successfully!');
+                        vm.dashboard.purgeSiteDone = true;
                     } else {
                         notificationsService.error(statusWithMessage.Message);
                     }
                 }).error(function () {
                     notificationsService.error('Sorry, we could not purge the cache, please check the error logs for details.');
                 });
-            
-            vm.dashboard.purgeSiteDone = true;
-            vm.dashboard.purgeSiteBusy = false;
 
             refreshStateAfterTime();
         }
@@ -176,7 +177,7 @@
                         refreshStateAfterTime();
                     });
             } else {
-                notificationsService.error('Please select domain(s) to purge');
+                notificationsService.error('Please select a domain(s) to purge');
             }
         };
 

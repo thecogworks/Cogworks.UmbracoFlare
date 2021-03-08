@@ -1,5 +1,6 @@
 ﻿using Cogworks.UmbracoFlare.Core.Helpers;
 using System.Collections.Generic;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Umbraco.Core.Models;
 using Umbraco.Web;
 
@@ -18,8 +19,10 @@ namespace Cogworks.UmbracoFlare.Core.Wrappers
     {
         private readonly UmbracoHelper _umbracoHelper;
 
-        public UmbracoHelperWrapper(IUmbracoContextWrapper umbracoContext)
+        public UmbracoHelperWrapper()
         {
+            var umbracoContext = ServiceFactory.GetUmbracoContextWrapper();
+
             UmbracoFlareUmbracoContextHelper.EnsureContext();
             _umbracoHelper = new UmbracoHelper(umbracoContext.Current);
         }

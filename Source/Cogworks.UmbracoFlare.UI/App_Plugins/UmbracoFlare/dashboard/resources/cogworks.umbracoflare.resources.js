@@ -30,7 +30,9 @@
         }
 
         function purgeAll() {
-            return $http.post(API_ROOT + 'PurgeAll');
+            return $http.post(
+                API_ROOT + 'PurgeAll'
+            );
         }
 
         function purgeStaticFiles(staticFiles, domains) {

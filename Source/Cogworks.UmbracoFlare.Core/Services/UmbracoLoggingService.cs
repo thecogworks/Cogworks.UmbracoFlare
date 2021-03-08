@@ -26,7 +26,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
         {
             Umbraco.Core.Logging.LogHelper.Error(callingType, message, ex);
         }
-        
+
         public void LogInfo<T>(string message)
         {
             Umbraco.Core.Logging.LogHelper.Info<T>(message);

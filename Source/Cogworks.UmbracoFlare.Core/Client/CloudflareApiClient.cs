@@ -1,5 +1,7 @@
-﻿using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Models;
+﻿using Cogworks.UmbracoFlare.Core.Constants;
+using Cogworks.UmbracoFlare.Core.Extensions;
+using Cogworks.UmbracoFlare.Core.Factories;
+using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Cogworks.UmbracoFlare.Core.Services;
 using Newtonsoft.Json;
 using System;
@@ -8,8 +10,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 
 namespace Cogworks.UmbracoFlare.Core.Client
 {
@@ -25,22 +25,24 @@ namespace Cogworks.UmbracoFlare.Core.Client
     public class CloudflareApiClient : ICloudflareApiClient
     {
         private readonly IUmbracoLoggingService _umbracoLoggingService;
-        private static UmbracoFlareConfigModel _configurationFile;
+        private readonly IConfigurationService _configurationService;
+
         public const string CloudflareApiBaseUrl = "https://api.cloudflare.com/client/v4/";
         public const string CloudflareApiUserEndpoint = "user";
         public const string CloudflareApiZonesEndpoint = "zones";
-        
-        public CloudflareApiClient(IUmbracoLoggingService umbracoLoggingService, IConfigurationService configurationService)
+
+        public CloudflareApiClient()
         {
-            _configurationFile = configurationService.LoadConfigurationFile();
-            _umbracoLoggingService = umbracoLoggingService;
+            _configurationService = ServiceFactory.GetConfigurationService();
+            _umbracoLoggingService = ServiceFactory.GetUmbracoLoggingService();
         }
 
         public UserDetails GetUserDetails()
         {
+            var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
             var userDetails = new UserDetails();
 
-            if (!_configurationFile.ApiKey.HasValue() || !_configurationFile.AccountEmail.HasValue())
+            if (!umbracoFlareConfigModel.ApiKey.HasValue() || !umbracoFlareConfigModel.AccountEmail.HasValue())
             {
                 return userDetails;
             }
@@ -67,11 +69,11 @@ namespace Cogworks.UmbracoFlare.Core.Client
                 }
                 catch (Exception e)
                 {
-                    _umbracoLoggingService.LogError<ICloudflareApiClient>($"Could not get the user details for user email {_configurationFile.AccountEmail}", e);
+                    _umbracoLoggingService.LogError<ICloudflareApiClient>($"Could not get the user details for user email {umbracoFlareConfigModel.AccountEmail}", e);
                     return userDetails;
                 }
 
-                _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"The request for <<GetUserDetails>> was not successful for user email {_configurationFile.AccountEmail}");
+                _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"The request for <<GetUserDetails>> was not successful for user email {umbracoFlareConfigModel.AccountEmail}");
 
                 return userDetails;
             }
@@ -159,10 +161,12 @@ namespace Cogworks.UmbracoFlare.Core.Client
             }
         }
 
-        private static void AddRequestHeaders(HttpRequestMessage request)
+        private void AddRequestHeaders(HttpRequestMessage request)
         {
-            request.Headers.Add("X-Auth-Key", _configurationFile.ApiKey);
-            request.Headers.Add("X-Auth-Email", _configurationFile.AccountEmail);
+            var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
+
+            request.Headers.Add("X-Auth-Key", umbracoFlareConfigModel.ApiKey);
+            request.Headers.Add("X-Auth-Email", umbracoFlareConfigModel.AccountEmail);
         }
     }
 }

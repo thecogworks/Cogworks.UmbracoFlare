@@ -1,17 +1,6 @@
-﻿using Cogworks.UmbracoFlare.Core.Client;
-using Cogworks.UmbracoFlare.Core.Services;
-using Cogworks.UmbracoFlare.Core.Wrappers;
-using LightInject;
-using LightInject.Mvc;
-using LightInject.WebApi;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System;
-using System.Linq;
 using System.Net;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Mvc;
 using Umbraco.Core;
 using Umbraco.Web.Models.Trees;
 using Umbraco.Web.Trees;
@@ -25,74 +14,12 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
 
-            var container = new ServiceContainer();
-
-            RegisterCoreUmbracoServices(container, applicationContext);
-            RegisterServices(container);
-            RegisterAssembliesControllers(container);
-
-            container.EnableMvc();
-            container.EnablePerWebRequestScope();
-            container.EnableWebApi(GlobalConfiguration.Configuration);
-
-            var resolver = new LightInjectWebApiDependencyResolver(container);
-
-            GlobalConfiguration.Configuration.DependencyResolver = resolver;
-            DependencyResolver.SetResolver(new LightInjectMvcDependencyResolver(container));
-
             JsonConvert.DefaultSettings = () => new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver(),
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
                 NullValueHandling = NullValueHandling.Ignore
             };
-        }
-
-        private static void RegisterCoreUmbracoServices(IServiceRegistry container, ApplicationContext applicationContext)
-        {
-            container.Register<IUmbracoContextWrapper, UmbracoContextWrapper>().RegisterInstance(new PerScopeLifetime());
-            container.Register<IUmbracoHelperWrapper, UmbracoHelperWrapper>().RegisterInstance(new PerScopeLifetime());
-            container.Register<IUmbracoLoggingService, UmbracoLoggingService>();
-
-            container.RegisterInstance(applicationContext.Services.DomainService);
-            container.RegisterInstance(applicationContext.Services.DataTypeService);
-        }
-
-        private static void RegisterServices(IServiceRegistry container)
-        {
-            container.Register<IUmbracoFlareDomainService, UmbracoFlareDomainService>();
-            container.Register<ICloudflareService, CloudflareService>();
-            container.Register<IUmbracoLoggingService, UmbracoLoggingService>();
-            container.Register<ICloudflareApiClient, CloudflareApiClient>();
-            container.Register<IConfigurationService, ConfigurationService>();
-            container.Register<IImageCropperService, ImageCropperService>();
-
-            //if (ConfigurationSettings.IsCacheEnabled)
-            //{
-            //    container.Register<UmbracoContentNodeService, UmbracoContentNodeService>();
-
-            //    container.Register<IUmbracoContentNodeService>(factory => new UmbracoContentNodeServiceCachedProxy(factory.GetInstance<UmbracoContentNodeService>(),
-            //        factory.GetInstance<IUmbracoHelperWrapper>()));
-            //}
-            //else
-            //{
-            //    container.Register<IUmbracoContentNodeService, UmbracoContentNodeService>();
-            //}
-        }
-
-        private static void RegisterAssembliesControllers(IServiceRegistry container)
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (var assembly in assemblies)
-            {
-                var controllerTypes = assembly.GetTypes().Where(t => !t.IsAbstract && (typeof(IController).IsAssignableFrom(t) || typeof(IHttpController).IsAssignableFrom(t)));
-
-                foreach (var controllerType in controllerTypes)
-                {
-                    container.Register(controllerType, new PerRequestLifeTime());
-                }
-            }
         }
 
         private static void AddPurgeCacheForContentMenu(TreeControllerBase sender, MenuRenderingEventArgs args)

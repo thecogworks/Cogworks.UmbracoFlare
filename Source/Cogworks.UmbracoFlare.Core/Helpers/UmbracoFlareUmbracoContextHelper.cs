@@ -20,7 +20,6 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
 
                 var httpBase = new HttpContextWrapper(httpContext);
 
-                // create UmbracoContext
                 UmbracoContext.EnsureContext(
                     httpBase,
                     ApplicationContext.Current,

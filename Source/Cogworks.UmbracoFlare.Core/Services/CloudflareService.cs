@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Umbraco.Core.IO;
 
@@ -32,11 +33,11 @@ namespace Cogworks.UmbracoFlare.Core.Services
         private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
 
-        public CloudflareService(IUmbracoLoggingService umbracoLoggingService, ICloudflareApiClient cloudflareApiClient, IUmbracoFlareDomainService umbracoFlareDomainService)
+        public CloudflareService()
         {
-            _umbracoLoggingService = umbracoLoggingService;
-            _cloudflareApiClient = cloudflareApiClient;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
+            _umbracoLoggingService = ServiceFactory.GetUmbracoLoggingService();
+            _cloudflareApiClient = ServiceFactory.GetCloudflareApiClient();
+            _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
         }
 
         public List<StatusWithMessage> PurgePages(IEnumerable<string> urls)
@@ -82,7 +83,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
                     false,
                     $"We could not purge the cache because the domain {domain} is not valid with the provided credentials. Please ensure this domain is registered under these credentials on your cloudflare dashboard.");
             }
-
+            
             var purgeCacheStatus = _cloudflareApiClient.PurgeCache(websiteZone.Id, Enumerable.Empty<string>(), true);
 
             return purgeCacheStatus
@@ -156,7 +157,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
             if (filteredZonesByDomainUrl.HasAny())
             {
-                return filteredZonesByDomainUrl.FirstOrDefault(x => x.Name == domainUrl);
+                return filteredZonesByDomainUrl.FirstOrDefault();
             }
 
             var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {filteredZonesByDomainUrl}");

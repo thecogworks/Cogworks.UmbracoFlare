@@ -9,12 +9,12 @@
                 <div class="cloudflare-config cloudflare-account">
                     <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
                     <div class="config-group">
-                        <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
-                    </div>
-                    <div class="config-group">
                         <label>Account Email </label>
                         <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
+                    </div>
+                    <div class="config-group">
+                        <label>Api Key </label>
+                        <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
                     </div>
                     <div class="config-group position-relative">
                         <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
@@ -49,7 +49,7 @@
                     </p>
                 </div>
             </div>
-            <div class="span4 offset1">
+            <div class="span4 offset1" ng-show="cogworksUmbracoflareDashboardController.dashboard.allowedDomains.length > 0">
                 <h3>Domain(s) to purge</h3>
                 <ul class="unstyled umbracoflare">
                     <li ng-repeat="domain in cogworksUmbracoflareDashboardController.dashboard.allowedDomains">
@@ -72,7 +72,7 @@
             <div class="row-fluid">
                 <div class="span3 site-purge">
                     <h3>Site Purge</h3>
-                    <p>Purge everything on your site. This will take a while depending on your site and servers.</p>
+                    <p>Purge everything on your site (domain and subdomains). This will take a while depending on your site and servers.</p>
                     <div class="config-group position-relative">
                         <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy' class="btn btn-success" ng-show="!cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteConfirmation()">Purge Site</button>
                         <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteDone}"></div>
