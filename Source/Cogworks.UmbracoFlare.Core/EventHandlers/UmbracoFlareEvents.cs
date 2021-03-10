@@ -21,11 +21,11 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
         private IUmbracoFlareDomainService _umbracoFlareDomainService;
         private IUmbracoHelperWrapper _umbracoHelperWrapper;
         private IImageCropperService _imageCropperService;
-        private static bool _purgeCacheOn;
+        private IConfigurationService _configurationService;
 
         protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
         {
-            _purgeCacheOn = ServiceFactory.GetConfigurationService().LoadConfigurationFile().PurgeCacheOn;
+            _configurationService = ServiceFactory.GetConfigurationService();
             _cloudflareService = ServiceFactory.GetCloudflareService();
             _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
             _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
@@ -42,7 +42,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
         {
-            if (!_purgeCacheOn) { return; }
+            var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
+            if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var urls = new List<string>();
 
@@ -80,7 +81,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         private void PurgeCloudflareCacheForFiles<T>(IEnumerable<File> files, SaveEventArgs<T> e)
         {
-            if (!_purgeCacheOn) { return; }
+            var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
+            if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var urls = new List<string>();
             var umbracoDomains = _umbracoFlareDomainService.GetUmbracoDomains();
@@ -106,7 +108,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
         protected void PurgeCloudflareCacheForMedia(IMediaService sender, SaveEventArgs<IMedia> e)
         {
-            if (!_purgeCacheOn) { return; }
+            var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
+            if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var imageCropSizes = _imageCropperService.GetAllCrops().ToList();
             var urls = new List<string>();
