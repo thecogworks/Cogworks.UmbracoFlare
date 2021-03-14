@@ -110,6 +110,7 @@
 
 .umbracoflare .-grey-out {
     opacity: .5;
+    pointer-events: none;
 }
 
 .umbracoflare .manual-purge-container {
@@ -513,7 +514,7 @@ i.inactive {
 }
 
 .purge-menu input[type=checkbox] {
-    margin-top: -50px;
+    margin-top: -53px;
     margin-left: -70px;
 }
 
@@ -522,5 +523,6 @@ i.inactive {
 }
 
 .icon-umbracoflare-tiny::before {
-    content: url('umbracoflare-black-18x20px.png')
+    content: url('umbracoflare-black-18x20px.png');
+    margin-left: -2px;
 }

@@ -6,6 +6,7 @@ using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -14,11 +15,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IUmbracoFlareDomainService
     {
-        IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains);
-
-        IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false);
-
-        IEnumerable<string> GetUmbracoDomains();
+        IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false);
 
         IEnumerable<Zone> GetAllowedCloudflareZones();
 
@@ -39,44 +36,23 @@ namespace Cogworks.UmbracoFlare.Core.Services
             _cloudflareApiClient = ServiceFactory.GetCloudflareApiClient();
             _domainService = ServiceFactory.GetDomainService();
         }
-
-        public IEnumerable<string> FilterToAllowedDomains(IEnumerable<string> domains)
-        {
-            var filteredDomains = new List<string>();
-            var allowedDomains = GetAllowedCloudflareDomains();
-
-            foreach (var allowedDomain in allowedDomains)
-            {
-                foreach (var posDomain in domains.Where(posDomain => posDomain.Contains(allowedDomain)))
-                {
-                    if (!filteredDomains.Contains(posDomain))
-                    {
-                        filteredDomains.Add(posDomain);
-                    }
-                }
-            }
-
-            return filteredDomains;
-        }
-
-        public IEnumerable<string> GetUrlsForNode(int contentId, bool includeDescendants = false)
+        
+        public IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false)
         {
             var content = _umbracoHelperWrapper.TypedContent(contentId);
             var urls = new List<string>();
+
             if (!content.HasValue()) { return urls; }
 
             if (includeDescendants)
             {
-                foreach (var descendantContent in content.DescendantsOrSelf())
-                {
-                    urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(descendantContent.Id, true));
-                    urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(descendantContent.Id));
-                }
+                urls.AddRange(content.DescendantsOrSelf().Select(
+                    descendantContent => UmbracoFlareUrlHelper.MakeFullUrlWithDomain(descendantContent.Url, currentDomain, true))
+                );
             }
             else
             {
-                urls.Add(UmbracoContext.Current.RoutingContext.UrlProvider.GetUrl(content.Id, true));
-                urls.AddRange(UmbracoContext.Current.RoutingContext.UrlProvider.GetOtherUrls(content.Id));
+                urls.Add(UmbracoFlareUrlHelper.MakeFullUrlWithDomain(content.Url, currentDomain, true));
             }
 
             return urls;
@@ -96,13 +72,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var allowedDomains = allowedZonesAndDomains.Value;
 
             return allowedDomains;
-        }
-
-        public IEnumerable<string> GetUmbracoDomains()
-        {
-            var umbracoDomains = _domainService.GetAll(false);
-            var umbracoDomainNames = umbracoDomains.Select(umbracoDomain => umbracoDomain.DomainName).ToList();
-            return umbracoDomainNames;
         }
 
         private KeyValuePair<IEnumerable<Zone>, IEnumerable<string>> GetAllowedZonesAndDomains()

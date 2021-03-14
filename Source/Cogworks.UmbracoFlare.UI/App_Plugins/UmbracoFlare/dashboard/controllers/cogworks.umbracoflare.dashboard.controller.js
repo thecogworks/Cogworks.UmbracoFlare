@@ -28,8 +28,7 @@
         vm.dashboard.updatedCredentials = false;
         vm.dashboard.updatedAutoPurge = false;
         vm.dashboard.updatingAutoPurge = false;
-        vm.dashboard.allowedDomains = {};
-        vm.dashboard.selectedDomains = {};
+
         vm.dashboard.purgeConfirmationMessage = false;
         vm.dashboard.purgeSiteDone = false;
         vm.dashboard.purgeSiteBusy = false;
@@ -38,6 +37,10 @@
         vm.dashboard.purgeStaticSuccess = 'purge-static-success';
         vm.dashboard.purgeUrlsBusy = 'purge-urls-busy';
         vm.dashboard.purgeUrlsSuccess = 'purge-urls-success';
+
+        vm.dashboard.currentDomain = window.location.hostname;
+        vm.dashboard.currentDomainIsValid = false;
+
 
         getCloudflareStatus();
 
@@ -49,8 +52,7 @@
                     vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
                     vm.dashboard.currentPurgeCacheOn = vm.dashboard.newConfig.PurgeCacheOn;
                     vm.dashboard.credentialsAreValid = vm.dashboard.newConfig.CredentialsAreValid;
-                    vm.dashboard.selectedDomains = vm.dashboard.newConfig.SelectedDomains.filter(function (item) { return (item != null && item !== ""); });
-
+                    
                     if (vm.dashboard.credentialsAreValid) {
                         getAllowedDomains();
                     }
@@ -60,7 +62,7 @@
         function getAllowedDomains() {
             cogworksUmbracoflareResources.getAllowedDomains()
                 .success(function (domains) {
-                    vm.dashboard.allowedDomains = domains;
+                    vm.dashboard.currentDomainIsValid = domains.includes(vm.dashboard.currentDomain);
                 });
         }
 
@@ -82,8 +84,7 @@
             vm.dashboard.newConfig.ApiKey = vm.dashboard.currentApiKey;
             vm.dashboard.newConfig.AccountEmail = vm.dashboard.currentAccountEmail;
             vm.dashboard.newConfig.PurgeCacheOn = vm.dashboard.currentPurgeCacheOn;
-            vm.dashboard.newConfig.SelectedDomains = vm.dashboard.selectedDomains;
-
+            
             cogworksUmbracoflareResources.updateConfigurationStatus(vm.dashboard.newConfig)
                 .success(function (configFromServer) {
                     if (configFromServer === null || configFromServer === undefined) {
@@ -116,21 +117,6 @@
             vm.dashboard.updateCredentials(true);
         };
 
-        vm.dashboard.toggleSelectedDomain = function (domain) {
-            var index = vm.dashboard.selectedDomains.indexOf(domain);
-            if (index > -1) {
-                vm.dashboard.selectedDomains.splice(index, 1);
-            } else {
-                vm.dashboard.selectedDomains.push(domain);
-            }
-
-            vm.dashboard.updateCredentials(false);
-        }
-
-        vm.dashboard.isChecked = function (domain) {
-            return vm.dashboard.selectedDomains.indexOf(domain) > -1;
-        }
-
         vm.dashboard.purgeSiteConfirmation = function () {
             vm.dashboard.purgeConfirmationMessage = true;
         }
@@ -143,7 +129,7 @@
             vm.dashboard.purgeConfirmationMessage = false;
             vm.dashboard.purgeSiteBusy = true;
 
-            cogworksUmbracoflareResources.purgeAll()
+            cogworksUmbracoflareResources.purgeAll(vm.dashboard.currentDomain)
                 .success(function (statusWithMessage) {
                     vm.dashboard.purgeSiteBusy = false;
                     if (statusWithMessage.Success) {
@@ -160,25 +146,24 @@
         }
 
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
-            if (vm.dashboard.selectedDomains.length > 0) {
-                vm.dashboard.state = vm.dashboard.purgeStaticBusy;
-                cogworksUmbracoflareResources.purgeStaticFiles(selectedFiles, vm.dashboard.selectedDomains)
-                    .success(function (statusWithMessage) {
-                        if (statusWithMessage.Success) {
-                            vm.dashboard.state = vm.dashboard.purgeStaticSuccess;
-                            notificationsService.success(statusWithMessage.Message);
-                            vm.dashboard.removeSelectedValues();
-                        } else {
-                            notificationsService.error(statusWithMessage.Message);
-                        }
-                        refreshStateAfterTime();
-                    }).error(function () {
-                        notificationsService.error('Sorry, we could not purge the cache for the selected static files.');
-                        refreshStateAfterTime();
-                    });
-            } else {
-                notificationsService.error('Please select a domain(s) to purge');
-            }
+            debugger;
+            vm.dashboard.state = vm.dashboard.purgeStaticBusy;
+            cogworksUmbracoflareResources.purgeStaticFiles(selectedFiles, vm.dashboard.currentDomain)
+                .success(function (statusWithMessage) {
+                    debugger;
+                    if (statusWithMessage.Success) {
+                        vm.dashboard.state = vm.dashboard.purgeStaticSuccess;
+                        notificationsService.success(statusWithMessage.Message);
+                        vm.dashboard.removeSelectedValues();
+                    } else {
+                        notificationsService.error(statusWithMessage.Message);
+                    }
+                    refreshStateAfterTime();
+                }).error(function () {
+                    debugger;
+                    notificationsService.error('Sorry, we could not purge the cache for the selected static files.');
+                    refreshStateAfterTime();
+                });
         };
 
         vm.dashboard.openFilePicker = function () {
@@ -213,26 +198,21 @@
                 return;
             }
 
-            if (vm.dashboard.selectedDomains.length > 0) {
-                vm.dashboard.state = vm.dashboard.purgeUrlsBusy;
-
-                cogworksUmbracoflareResources.purgeCacheForUrls(urls, vm.dashboard.selectedDomains)
-                    .success(function (statusWithMessage) {
-                        if (statusWithMessage.Success) {
-                            vm.dashboard.state = vm.dashboard.purgeUrlsSuccess;
-                            notificationsService.success(statusWithMessage.Message);
-                            vm.dashboard.urls = [];
-                        } else {
-                            notificationsService.error(statusWithMessage.Message);
-                        }
-                        refreshStateAfterTime();
-                    }).error(function () {
-                        notificationsService.error('Sorry, we could not purge the cache for the given urls.');
-                        refreshStateAfterTime();
-                    });
-            } else {
-                notificationsService.error('Please select domain(s) to purge');
-            }
+            vm.dashboard.state = vm.dashboard.purgeUrlsBusy;
+            cogworksUmbracoflareResources.purgeCacheForUrls(urls, vm.dashboard.currentDomain)
+                .success(function (statusWithMessage) {
+                    if (statusWithMessage.Success) {
+                        vm.dashboard.state = vm.dashboard.purgeUrlsSuccess;
+                        notificationsService.success(statusWithMessage.Message);
+                        vm.dashboard.urls = [];
+                    } else {
+                        notificationsService.error(statusWithMessage.Message);
+                    }
+                    refreshStateAfterTime();
+                }).error(function () {
+                    notificationsService.error('Sorry, we could not purge the cache for the given urls.');
+                    refreshStateAfterTime();
+                });
         };
     }
 }

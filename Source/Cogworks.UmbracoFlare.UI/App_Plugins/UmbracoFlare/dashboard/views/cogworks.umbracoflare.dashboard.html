@@ -1,7 +1,14 @@
-<!--Included in /config/Dashboard.config-->
 <div ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare umb-scrollable">
     <div class="cloudflare-config">
-        <h2>Status Cloudflare Account: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
+        <div class="row-fluid">
+            <div class="span3">
+                <h2>Status Cloudflare Account: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
+            </div>
+            <div class="span3">
+                <h2>Current Domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h2>
+                <p ng-show="!cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account</p>
+            </div>
+        </div>
         <hr />
         <div class="row-fluid">
             <div class="span3">
@@ -23,7 +30,7 @@
                     </div>
                 </div>
 
-                <div class="cloudflare-config cloudflare-auto-purge">
+                <div class="cloudflare-config cloudflare-auto-purge" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
                     <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
                     <div class="toggle-container">
                         <span>CloudFlare Auto-Purge on "Save and publish"</span>
@@ -49,22 +56,10 @@
                     </p>
                 </div>
             </div>
-            <div class="span4 offset1" ng-show="cogworksUmbracoflareDashboardController.dashboard.allowedDomains.length > 0">
-                <h3>Domain(s) to purge</h3>
-                <ul class="unstyled umbracoflare">
-                    <li ng-repeat="domain in cogworksUmbracoflareDashboardController.dashboard.allowedDomains">
-                        <label for="{{domain}}">
-                            <input type="checkbox" value="{{domain}}" ng-click="cogworksUmbracoflareDashboardController.dashboard.toggleSelectedDomain(domain)" ng-checked="cogworksUmbracoflareDashboardController.dashboard.isChecked(domain)" />
-                            {{domain}}
-                        </label>
-                    </li>
-                </ul>
-                <span ng-show="cogworksUmbracoflareDashboardController.dashboard.allowedDomains.length == 0">You do not have any hostnames registered with Umbraco.</span>
-            </div>
         </div>
     </div>
 
-    <div ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid}">
+    <div ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
 
         <div class="manual-purge-container">
             <h2>Purge Options</h2>

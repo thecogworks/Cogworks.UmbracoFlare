@@ -44,31 +44,26 @@ namespace Cogworks.UmbracoFlare.Core.Services
         {
             var results = new List<StatusWithMessage>();
 
-            urls = _umbracoFlareDomainService.FilterToAllowedDomains(urls);
-            var groupings = urls.GroupBy(url => UmbracoFlareUrlHelper.GetDomainFromUrl(url, true));
-
-            foreach (var domainUrlGroup in groupings)
+            if (!urls.HasAny())
             {
-                var domainUrl = new UriBuilder(domainUrlGroup.Key).Uri;
-                var websiteZone = GetZoneFilteredByDomain(domainUrl.DnsSafeHost);
-
-                if (websiteZone == null)
-                {
-                    results.Add(new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain(url) of {domainUrl}"));
-                    continue;
-                }
-
-                var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, domainUrlGroup, false);
-
-                if (!apiResult)
-                {
-                    results.Add(new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareApiError));
-                }
-                else
-                {
-                    results.AddRange(domainUrlGroup.Select(url => new StatusWithMessage(true, $"The url => {url} was purged successfully")));
-                }
+                results.Add(new StatusWithMessage(false, "There were not valid urls to purge, please check if the domain is a valid zone in your cloudflare account"));
+                return results;
             }
+
+            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var websiteZone = GetZoneFilteredByDomain(currentDomain);
+
+            if (websiteZone == null)
+            {
+                results.Add(new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain of {currentDomain}"));
+                return results;
+            }
+            
+            var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, urls, false);
+
+            results.Add(!apiResult
+                ? new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareApiError)
+                : new StatusWithMessage(true, $"The url => {string.Join(",", urls)} was purged successfully"));
 
             return results;
         }
@@ -87,7 +82,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var purgeCacheStatus = _cloudflareApiClient.PurgeCache(websiteZone.Id, Enumerable.Empty<string>(), true);
 
             return purgeCacheStatus
-                ? new StatusWithMessage(true, string.Empty)
+                ? new StatusWithMessage(true, $"Your current domain {domain} was purged successfully.")
                 : new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareApiError);
         }
 
@@ -160,7 +155,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
                 return filteredZonesByDomainUrl.FirstOrDefault();
             }
 
-            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain(url) of {filteredZonesByDomainUrl}");
+            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain of {domainUrl}");
             _umbracoLoggingService.LogError<ICloudflareService>(noZoneException.Message, noZoneException);
 
             return null;

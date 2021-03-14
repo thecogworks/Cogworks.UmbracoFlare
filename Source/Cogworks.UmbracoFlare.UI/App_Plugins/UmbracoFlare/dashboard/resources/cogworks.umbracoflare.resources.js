@@ -22,23 +22,23 @@
 
         return service;
 
-        function purgeCacheForUrls(urls, domains) {
+        function purgeCacheForUrls(urls, currentDomain) {
             return $http.post(
                 API_ROOT + 'PurgeCacheForUrls',
-                { Urls: urls, Domains: domains }
+                { Urls: urls, CurrentDomain: currentDomain }
             );
         }
 
-        function purgeAll() {
+        function purgeAll(currentDomain) {
             return $http.post(
-                API_ROOT + 'PurgeAll'
+                API_ROOT + 'PurgeAll/?currentDomain=' + currentDomain
             );
         }
 
-        function purgeStaticFiles(staticFiles, domains) {
+        function purgeStaticFiles(staticFiles, currentDomain) {
             return $http.post(
                 API_ROOT + 'PurgeStaticFiles',
-                { StaticFiles: staticFiles, SelectedDomains: domains }
+                { StaticFiles: staticFiles, CurrentDomain: currentDomain }
             );
         }
 
@@ -46,10 +46,10 @@
             return $http.get(API_ROOT + 'GetConfig');
         }
 
-        function purgeCacheForNodeId(nodeId, purgeChildren) {
+        function purgeCacheForNodeId(nodeId, purgeChildren, currentDomain) {
             return $http.post(
                 API_ROOT + 'PurgeCacheForContentNode',
-                { nodeId: nodeId, purgeChildren: purgeChildren }
+                { nodeId: nodeId, purgeChildren: purgeChildren, CurrentDomain: currentDomain }
             );
         }
 

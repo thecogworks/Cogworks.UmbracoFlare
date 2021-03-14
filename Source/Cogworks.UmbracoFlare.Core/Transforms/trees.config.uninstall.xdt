@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<trees xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">
+	<add xdt:Locator="Match(type)" xdt:Transform="Remove" initialize="true" sortOrder="0" alias="fileSystemTree" application="dummy" title="File System" iconClosed="icon-folder" iconOpen="icon-folder-open" type="Cogworks.UmbracoFlare.Core.FileSystemPickerControllers.FolderSystemTreeController, Cogworks.UmbracoFlare.Core" />
+</trees>

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace Cogworks.UmbracoFlare.Core.Models
 {
@@ -17,8 +16,5 @@ namespace Cogworks.UmbracoFlare.Core.Models
 
         [XmlElement(ElementName = "credentialsAreValid")]
         public bool CredentialsAreValid { get; set; }
-
-        [XmlArray("SelectedDomains"), XmlArrayItem(typeof(string), ElementName="SelectedDomain", IsNullable = true)]
-        public List<string> SelectedDomains { get; set; }
     }
 }

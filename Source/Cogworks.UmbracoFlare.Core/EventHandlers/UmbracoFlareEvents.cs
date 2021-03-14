@@ -46,12 +46,13 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var urls = new List<string>();
+            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var content in e.PublishedEntities)
             {
                 if (content.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
-                urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id));
+                urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id, currentDomain));
             }
 
             var results = _cloudflareService.PurgePages(urls);
@@ -83,9 +84,10 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
         {
             var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
+            if (!files.HasAny()) { return; }
 
+            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
             var urls = new List<string>();
-            var umbracoDomains = _umbracoFlareDomainService.GetUmbracoDomains();
 
             foreach (var file in files)
             {
@@ -93,7 +95,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.Add(file.VirtualPath);
             }
 
-            var fullUrls = UmbracoFlareUrlHelper.GetFullUrlForPurgeEvents(urls, umbracoDomains, true);
+            var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
+
             var results = _cloudflareService.PurgePages(fullUrls);
 
             if (results.HasAny() && results.Any(x => !x.Success))
@@ -114,7 +117,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             var imageCropSizes = _imageCropperService.GetAllCrops().ToList();
             var urls = new List<string>();
 
-            var umbracoDomains = _umbracoFlareDomainService.GetUmbracoDomains();
+            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var media in e.SavedEntities)
             {
@@ -132,7 +135,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.Add(publishedMedia.Url);
             }
 
-            var fullUrls = UmbracoFlareUrlHelper.GetFullUrlForPurgeEvents(urls, umbracoDomains, true);
+            var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
             var results = _cloudflareService.PurgePages(fullUrls);
 
             if (results.HasAny() && results.Any(x => !x.Success))

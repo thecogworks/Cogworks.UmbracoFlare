@@ -56,20 +56,17 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         }
 
         [HttpPost]
-        public StatusWithMessage PurgeAll()
+        public StatusWithMessage PurgeAll([FromUri] string currentDomain)
         {
-            var domains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
-            var results = domains
-                .Where(x=> x.HasValue())
-                .Select(domain => _cloudflareService.PurgeEverything(domain))
-                .ToList();
+            var currentDomainIsValid = _umbracoFlareDomainService.GetAllowedCloudflareDomains().Count(x => x.Equals(currentDomain)) > 0;
 
-            if (results.Any(x => !x.Success))
+            if (!currentDomainIsValid)
             {
-                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
             }
 
-            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} domains purged successfully.");
+            var result = _cloudflareService.PurgeEverything(currentDomain);
+            return new StatusWithMessage(result.Success, result.Message);
         }
 
         [HttpGet]
@@ -86,6 +83,13 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 return new StatusWithMessage(false, "There were not static files selected to purge");
             }
 
+            var currentDomainIsValid = _umbracoFlareDomainService.GetAllowedCloudflareDomains().Count(x => x.Equals(model.CurrentDomain)) > 0;
+
+            if (!currentDomainIsValid)
+            {
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
+            }
+            
             var results = new List<StatusWithMessage>();
             var fullUrlsToPurge = new List<string>();
             var allFilePaths = _cloudflareService.GetFilePaths(model.StaticFiles);
@@ -96,7 +100,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
                 if (ApplicationConstants.AllowedFileExtensions.Contains(extension))
                 {
-                    var urls = UmbracoFlareUrlHelper.GetFullUrlForPurgeStaticFiles(filePath, model.SelectedDomains, true);
+                    var urls = UmbracoFlareUrlHelper.GetFullUrlForPurgeStaticFiles(filePath, model.CurrentDomain, true);
                     fullUrlsToPurge.AddRange(urls);
                 }
             }
@@ -121,13 +125,16 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 return new StatusWithMessage(false, "You must provide urls to clear the cache for.");
             }
 
-            var builtUrls = new List<string>();
+            var currentDomainIsValid = _umbracoFlareDomainService.GetAllowedCloudflareDomains().Count(x => x.Equals(model.CurrentDomain)) > 0;
 
-            if (model.Domains.HasAny())
+            if (!currentDomainIsValid)
             {
-                builtUrls.AddRange(UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(model.Urls, model.Domains, true));
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
             }
-
+            
+            var builtUrls = new List<string>();
+            builtUrls.AddRange(UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(model.Urls, model.CurrentDomain, true));
+            
             var urlsWithWildCards = builtUrls.Where(x => x.Contains('*'));
             var willCardsUrls = !urlsWithWildCards.HasAny()
                 ? builtUrls
@@ -153,8 +160,15 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 return new StatusWithMessage(false, "You must provide a node id.");
             }
 
+            var currentDomainIsValid = _umbracoFlareDomainService.GetAllowedCloudflareDomains().Count(x => x.Equals(model.CurrentDomain)) > 0;
+
+            if (!currentDomainIsValid)
+            {
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
+            }
+
             var urls = new List<string>();
-            urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(model.NodeId, model.PurgeChildren));
+            urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(model.NodeId, model.CurrentDomain, model.PurgeChildren));
 
             var results = _cloudflareService.PurgePages(urls);
 

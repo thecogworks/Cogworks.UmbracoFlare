@@ -262,6 +262,7 @@
     <None Include="packages.config" />
     <None Include="Transforms\dashboard.config.install.xdt" />
     <None Include="Transforms\dashboard.config.uninstall.xdt" />
+    <None Include="Transforms\trees.config.uninstall.xdt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets" Condition="Exists('..\packages\AutoMapper.3.3.1\tools\AutoMapper.targets')" />

@@ -21,11 +21,6 @@
             public const string CloudflareApiError = "There was an error from the Cloudflare API. Please check the logfile to see the issue.";
         }
 
-        public static class CacheKeys
-        {
-            public const string UmbracoUrlWildCardServiceCacheKey = "UmbracoUrlWildCardService.ContentIdToUrlCache";
-        }
-
         public static class ConfigurationFile
         {
             public const string ConfigurationFilePath = "~/Config/cloudflare.config";

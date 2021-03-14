@@ -20,7 +20,8 @@
             vm.menu.busyElement = document.getElementById('purge-menu-loader');
             vm.menu.errorElement = document.getElementById('purge-menu-error');
             vm.menu.successElement = document.getElementById('purge-menu-success');
-            
+            vm.menu.currentDomain = window.location.hostname;
+
             var dialogOptions = $scope.dialogOptions;
             var node = dialogOptions.currentNode;
 
@@ -28,7 +29,7 @@
                 vm.menu.busy = true;
                 vm.menu.busyElement.classList.remove(vm.menu.hiddenClass);
                 
-                cogworksUmbracoflareResources.purgeCacheForNodeId(node.id, $scope.purgeChildren)
+                cogworksUmbracoflareResources.purgeCacheForNodeId(node.id, $scope.purgeChildren, vm.menu.currentDomain)
                     .success(function (statusWithMessage) {
                         vm.menu.busy = false;
                         vm.menu.busyElement.classList.add(vm.menu.hiddenClass);
