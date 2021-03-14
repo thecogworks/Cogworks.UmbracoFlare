@@ -9,9 +9,12 @@
 		<requireLicenseAcceptance>true</requireLicenseAcceptance>
 		<licenseUrl>https://creativecommons.org/licenses/by-sa/4.0/deed.en</licenseUrl>
 		<icon>content\App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-logo-light.png</icon>
-		<projectUrl>https://github.com/scyllagroup/UmbracoFlare</projectUrl>
+		<projectUrl>https://github.com/thecogworks/Cogworks.UmbracoFlare</projectUrl>
 		<description>This project aims to provide a basic level of service integration between Cloudflare and the open-source ASP.NET CMS Umbraco.</description>
-		<summary>This is a custom build for Umbraco 7.15.7 created by Cogworks(Ale) for freedom fridays. While it should work for the broader community, it wasn't designed as such and is offered as-is. Any bugs or fixes should be reported to the main project at https://github.com/scyllagroup/UmbracoFlare</summary>
+		<summary>This is a fork of the main UmbracoFlare project offered by The Scylla Group at https://github.com/scyllagroup/UmbracoFlare. Created by Cogworks(Ale) for freedom fridays.
+			It contains a massive refactor and bug fixes to work with Umbraco 7.15.7, now the functionality works around the current domain. It is being offered to the community as-is.
+			Happy to maintain package, add new features and fix the reported bugs.
+		</summary>
 		<copyright>Copyright 2021</copyright>
 		<tags>Umbraco Cloudflare UmbracoFlare</tags>
 	</metadata>
