@@ -1,52 +1,55 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Factories;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Services;
-using Cogworks.UmbracoFlare.Core.Wrappers;
 using System.Collections.Generic;
 using System.Linq;
-using Umbraco.Core;
+using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
-using Umbraco.Core.Publishing;
 using Umbraco.Core.Services;
+using Umbraco.Core.Services.Implement;
 using Umbraco.Web;
-using UmbracoFlareUrlHelper = Cogworks.UmbracoFlare.Core.Helpers.UmbracoFlareUrlHelper;
+using Umbraco.Web.Models.Trees;
+using Umbraco.Web.Trees;
 
-namespace Cogworks.UmbracoFlare.Core.EventHandlers
+namespace Cogworks.UmbracoFlare.Core.Components
 {
-    public class UmbracoFlareEvents : ApplicationEventHandler
+    public class UmbracoFlareEventsComponent : IComponent
     {
-        private ICloudflareService _cloudflareService;
-        private IUmbracoFlareDomainService _umbracoFlareDomainService;
-        private IUmbracoHelperWrapper _umbracoHelperWrapper;
-        private IImageCropperService _imageCropperService;
-        private IConfigurationService _configurationService;
+        private readonly ICloudflareService _cloudflareService;
+        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
+        private readonly UmbracoHelper _umbracoHelper;
+        private readonly IImageCropperService _imageCropperService;
+        private readonly IConfigurationService _configurationService;
 
-        protected override void ApplicationStarted(UmbracoApplicationBase umbracoApplication, ApplicationContext applicationContext)
+        public UmbracoFlareEventsComponent(UmbracoHelper umbracoHelper)
         {
+            _umbracoHelper = umbracoHelper;
             _configurationService = ServiceFactory.GetConfigurationService();
             _cloudflareService = ServiceFactory.GetCloudflareService();
             _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
-            _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
             _imageCropperService = ServiceFactory.GetImageCropperService();
 
-            ContentService.Published += PurgeCloudflareCache;
-            //What happens when the node gets unpublished or deleted???
+            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
+        }
 
+        public void Initialize()
+        {
+            ContentService.Published += PurgeCloudflareCache;
             FileService.SavedScript += PurgeCloudflareCacheForScripts;
             FileService.SavedStylesheet += PurgeCloudflareCacheForStylesheets;
-
             MediaService.Saved += PurgeCloudflareCacheForMedia;
         }
 
-        protected void PurgeCloudflareCache(IPublishingStrategy strategy, PublishEventArgs<IContent> e)
+        private void PurgeCloudflareCache(IContentService sender, ContentPublishedEventArgs e)
         {
             var umbracoFlareConfigModel = _configurationService.LoadConfigurationFile();
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var urls = new List<string>();
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var content in e.PublishedEntities)
             {
@@ -68,6 +71,10 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             }
         }
 
+        public void Terminate()
+        {
+        }
+
         private void PurgeCloudflareCacheForScripts(IFileService sender, SaveEventArgs<Script> e)
         {
             var files = e.SavedEntities.Select(script => script as File);
@@ -86,12 +93,12 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
             if (!files.HasAny()) { return; }
 
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
             var urls = new List<string>();
 
             foreach (var file in files)
             {
-                if (file.IsNewEntity()) { continue; }
+                if (file.HasIdentity) { continue; }
                 urls.Add(file.VirtualPath);
             }
 
@@ -117,22 +124,22 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             var imageCropSizes = _imageCropperService.GetAllCrops().ToList();
             var urls = new List<string>();
 
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var media in e.SavedEntities)
             {
-                if (media.IsNewEntity() || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
+                if (media.HasIdentity || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
-                var publishedMedia = _umbracoHelperWrapper.TypedMedia(media.Id);
-
+                var publishedMedia = _umbracoHelper.Media(media.Id);
+                
                 if (publishedMedia == null)
                 {
                     e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not find the IPublishedContent version of the media: " + media.Id + " you are trying to save.", EventMessageType.Error));
                     continue;
                 }
 
-                urls.AddRange(imageCropSizes.Select(crop => publishedMedia.GetCropUrl(crop.Alias)));
-                urls.Add(publishedMedia.Url);
+                urls.AddRange(imageCropSizes.Select(x=> publishedMedia.GetCropUrl(x.Alias)));
+                urls.Add(publishedMedia.Url());
             }
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
@@ -146,6 +153,20 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             {
                 e.Messages.Add(new EventMessage("Cloudflare Caching", "Successfully purged the cloudflare cache.", EventMessageType.Success));
             }
+        }
+
+        private static void AddPurgeCacheForContentMenu(TreeControllerBase sender, MenuRenderingEventArgs e)
+        {
+            if (sender.TreeAlias != "content") { return; }
+
+            var menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
+            {
+                Icon = "umbracoflare-tiny"
+            };
+
+            menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.menu.html", "Purge Cloudflare Cache");
+
+            e.Menu.Items.Insert(e.Menu.Items.Count - 1, menuItem);
         }
     }
 }

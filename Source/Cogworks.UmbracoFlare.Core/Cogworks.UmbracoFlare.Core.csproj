@@ -267,9 +267,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventHandlers\UmbracoFlareStartup.cs" />
-    <Compile Include="EventHandlers\UmbracoFlareEvents.cs" />
+    <Compile Include="Components\UmbracoFlareEventsComponent.cs" />
+    <Compile Include="Components\UmbracoFlareStartupComponent.cs" />
+    <Compile Include="Composers\UmbracoFlareEventsComposer.cs" />
     <Compile Include="Client\CloudflareApiClient.cs" />
+    <Compile Include="Composers\UmbracoFlareStartupComposer.cs" />
     <Compile Include="Constants\ApplicationConstants.cs" />
     <Compile Include="Controllers\CloudflareUmbracoApiController.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
@@ -278,7 +280,6 @@
     <Compile Include="Factories\ServiceFactory.cs" />
     <Compile Include="FileSystemPickerControllers\FolderSystemTreeController.cs" />
     <Compile Include="Helpers\UmbracoFlareFileHelper.cs" />
-    <Compile Include="Helpers\UmbracoFlareUmbracoContextHelper.cs" />
     <Compile Include="Helpers\UmbracoFlareUrlHelper.cs" />
     <Compile Include="Models\Api\PurgeFromContentTree.cs" />
     <Compile Include="Models\Cloudflare\BasicCloudflareResponse.cs" />
@@ -299,8 +300,6 @@
     <Compile Include="Services\ImageCropperService.cs" />
     <Compile Include="Services\UmbracoFlareDomainService.cs" />
     <Compile Include="Services\UmbracoLoggingService.cs" />
-    <Compile Include="Wrappers\UmbracoContextWrapper.cs" />
-    <Compile Include="Wrappers\UmbracoHelperWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
