@@ -1,4 +1,12 @@
 ﻿{
+  "dashboards": [
+    {
+      "alias": "umbracoFlare",
+      "view": "~/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.dashboard.html",
+      "sections": [ "settings" ],
+      "weight": 70
+    }
+  ],
   "javascript": [
     "~/App_Plugins/UmbracoFlare/dashboard/controllers/cogworks.umbracoflare.menu.controller.js",
     "~/App_Plugins/UmbracoFlare/dashboard/controllers/cogworks.umbracoflare.dashboard.controller.js",

@@ -7,10 +7,10 @@
         '$timeout',
         'Cogworks.Umbracoflare.Resources',
         'notificationsService',
-        'dialogService'
+        'editorService'
     ];
 
-    function CogworksUmbracoflareDashboardController($timeout, cogworksUmbracoflareResources, notificationsService, dialogService) {
+    function CogworksUmbracoflareDashboardController($timeout, cogworksUmbracoflareResources, notificationsService, editorService) {
         var vm = this;
 
         /////////////////////////////Dashboard/////////////////////////////////
@@ -167,8 +167,9 @@
         };
 
         vm.dashboard.openFilePicker = function () {
-            fileSystemPickerTreeDialog = dialogService.open({
-                template: '/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.filespicker.html',
+            fileSystemPickerTreeDialog = editorService.open({
+                view: '/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.filespicker.html',
+                size: 'small',
                 callback: function (data) {
                     vm.dashboard.selectedFiles = data;
                 }
