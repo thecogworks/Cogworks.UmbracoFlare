@@ -256,22 +256,7 @@
     <Compile Include="Wrappers\UmbracoHelperWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.dashboard.controller.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.filespicker.controller.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\controllers\cogworks.umbracoflare.menu.controller.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\css\styles.css" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-black-18x20px.png" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-logo-light.png" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\cogworks.umbracoflare.inputadder.directives.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\filespicker.directives.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\resources\cogworks.umbracoflare.resources.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.dashboard.html" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.filespicker.html" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.inputadder.html" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.menu.html" />
     <None Include="app.config" />
-    <Content Include="App_Plugins\UmbracoFlare\package.manifest" />
-    <Content Include="Cogworks.UmbracoFlare.nuspec" />
     <None Include="Config\cloudflare.config" />
     <None Include="packages.config" />
     <None Include="Transforms\dashboard.config.install.xdt" />
