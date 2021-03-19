@@ -9,7 +9,7 @@ namespace Cogworks.UmbracoFlare.Core.Composers
     {
         public void Compose(Composition composition)
         {
-            composition.Components().Append<UmbracoFlareEventsComponent>();
+            //composition.Components().Append<UmbracoFlareEventsComponent>();
         }
     }
 }

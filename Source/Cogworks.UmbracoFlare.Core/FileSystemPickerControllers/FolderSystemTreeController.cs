@@ -10,7 +10,7 @@ using Umbraco.Web.Trees;
 
 namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
 {
-    [Tree("dummy", "fileSystemTree", "File System")]
+    [Tree("dummy", "fileSystemTree")]
     [PluginController("FileSystemPicker")]
     public class FolderSystemTreeController : TreeController
     {

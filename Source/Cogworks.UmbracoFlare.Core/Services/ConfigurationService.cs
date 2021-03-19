@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Web;
 using System.Xml.Serialization;
-using Cogworks.UmbracoFlare.Core.Factories;
 
 namespace Cogworks.UmbracoFlare.Core.Services
 {
@@ -22,9 +21,9 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
-        public ConfigurationService()
+        public ConfigurationService(IUmbracoLoggingService umbracoLoggingService)
         {
-            _umbracoLoggingService = ServiceFactory.GetUmbracoLoggingService();
+            _umbracoLoggingService = umbracoLoggingService;
         }
 
         public bool ConfigurationFileHasData(UmbracoFlareConfigModel configurationFile)

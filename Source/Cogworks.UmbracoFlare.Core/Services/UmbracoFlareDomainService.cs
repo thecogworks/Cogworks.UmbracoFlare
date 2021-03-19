@@ -1,12 +1,10 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Factories;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
-using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cogworks.UmbracoFlare.Core.Helpers;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -17,29 +15,31 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false);
 
-        IEnumerable<Zone> GetAllowedCloudflareZones();
-
         IEnumerable<string> GetAllowedCloudflareDomains();
 
         IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls);
+
+        Zone GetZoneFilteredByDomain(string domainUrl);
     }
 
     public class UmbracoFlareDomainService : IUmbracoFlareDomainService
     {
+        private readonly UmbracoHelper _umbracoHelper;
         private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IDomainService _domainService;
-        private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
+        private readonly IUmbracoLoggingService _umbracoLoggingService;
 
-        public UmbracoFlareDomainService()
+        public UmbracoFlareDomainService(UmbracoHelper umbracoHelper, ICloudflareApiClient cloudflareApiClient, IDomainService domainService, IUmbracoLoggingService umbracoLoggingService)
         {
-            _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
-            _cloudflareApiClient = ServiceFactory.GetCloudflareApiClient();
-            _domainService = ServiceFactory.GetDomainService();
+            _umbracoHelper = umbracoHelper;
+            _cloudflareApiClient = cloudflareApiClient;
+            _domainService = domainService;
+            _umbracoLoggingService = umbracoLoggingService;
         }
-        
+
         public IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false)
         {
-            var content = _umbracoHelperWrapper.TypedContent(contentId);
+            var content = _umbracoHelper.Content(contentId);
             var urls = new List<string>();
 
             if (!content.HasValue()) { return urls; }
@@ -47,23 +47,15 @@ namespace Cogworks.UmbracoFlare.Core.Services
             if (includeDescendants)
             {
                 urls.AddRange(content.DescendantsOrSelf().Select(
-                    descendantContent => UmbracoFlareUrlHelper.MakeFullUrlWithDomain(descendantContent.Url, currentDomain, true))
+                    descendantContent => UmbracoFlareUrlHelper.MakeFullUrlWithDomain(descendantContent.Url(), currentDomain, true))
                 );
             }
             else
             {
-                urls.Add(UmbracoFlareUrlHelper.MakeFullUrlWithDomain(content.Url, currentDomain, true));
+                urls.Add(UmbracoFlareUrlHelper.MakeFullUrlWithDomain(content.Url(), currentDomain, true));
             }
 
             return urls;
-        }
-
-        public IEnumerable<Zone> GetAllowedCloudflareZones()
-        {
-            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
-            var allowedZones = allowedZonesAndDomains.Key;
-
-            return allowedZones;
         }
 
         public IEnumerable<string> GetAllowedCloudflareDomains()
@@ -72,6 +64,51 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var allowedDomains = allowedZonesAndDomains.Value;
 
             return allowedDomains;
+        }
+
+        public Zone GetZoneFilteredByDomain(string domainUrl)
+        {
+            var allowedZones = GetAllowedCloudflareZones();
+            var filteredZonesByDomainUrl = allowedZones.Where(x => domainUrl.Contains(x.Name)).ToList();
+
+            if (filteredZonesByDomainUrl.HasAny())
+            {
+                return filteredZonesByDomainUrl.FirstOrDefault();
+            }
+
+            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain of {domainUrl}");
+            _umbracoLoggingService.LogError<IUmbracoFlareDomainService>(noZoneException.Message, noZoneException);
+
+            return null;
+        }
+
+        public IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls)
+        {
+            var resolvedUrls = new List<string>();
+
+            if (!wildCardUrls.HasAny()) { return resolvedUrls; }
+
+            var allContentUrls = GetAllContentUrls();
+
+            foreach (var wildCardUrl in wildCardUrls)
+            {
+                if (!wildCardUrl.Contains('*')) { continue; }
+
+                var wildCardUrlTrimmed = wildCardUrl.TrimEnd('*');
+                wildCardUrlTrimmed = wildCardUrlTrimmed.TrimEnd('/');
+
+                resolvedUrls.AddRange(allContentUrls.Where(x => x.StartsWith(wildCardUrlTrimmed)));
+            }
+
+            return resolvedUrls;
+        }
+
+        private IEnumerable<Zone> GetAllowedCloudflareZones()
+        {
+            var allowedZonesAndDomains = GetAllowedZonesAndDomains();
+            var allowedZones = allowedZonesAndDomains.Key;
+
+            return allowedZones;
         }
 
         private KeyValuePair<IEnumerable<Zone>, IEnumerable<string>> GetAllowedZonesAndDomains()
@@ -100,36 +137,15 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return new KeyValuePair<IEnumerable<Zone>, IEnumerable<string>>(allowedZones, allowedDomains);
         }
 
-        public IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls)
-        {
-            var resolvedUrls = new List<string>();
-
-            if (!wildCardUrls.HasAny()) { return resolvedUrls; }
-
-            var allContentUrls = GetAllContentUrls();
-
-            foreach (var wildCardUrl in wildCardUrls)
-            {
-                if (!wildCardUrl.Contains('*')) { continue; }
-
-                var wildCardUrlTrimmed = wildCardUrl.TrimEnd('*');
-                wildCardUrlTrimmed = wildCardUrlTrimmed.TrimEnd('/');
-
-                resolvedUrls.AddRange(allContentUrls.Where(x => x.StartsWith(wildCardUrlTrimmed)));
-            }
-
-            return resolvedUrls;
-        }
-
         private IEnumerable<string> GetAllContentUrls()
         {
             var urls = new List<string>();
-            var roots = _umbracoHelperWrapper.TypedContentAtRoot();
+            var roots = _umbracoHelper.ContentAtRoot();
 
             foreach (var root in roots)
             {
                 var allContent = root.DescendantsOrSelf();
-                urls.AddRange(allContent.Select(content => content.Url));
+                urls.AddRange(allContent.Select(content => content.Url()));
             }
 
             return urls;

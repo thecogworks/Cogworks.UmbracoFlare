@@ -18,6 +18,7 @@
         vm.filesPicker.selectedValues = [];
 
         function nodeSelectHandler(ev, args) {
+            debugger;
             args.event.preventDefault();
             args.event.stopPropagation();
 
@@ -41,6 +42,7 @@
         };
 
         function buildFullPath(node, path) {
+            debugger;
             if (node.parentId === null) {
                 //we have made it to the top, return
                 return path;
@@ -52,6 +54,7 @@
         }
 
         vm.filesPicker.selectFiles = function () {
+            debugger;
             //Crazy how the dialog service works. If you submit, the value is passed back to the callback function that was defined when you opened the modal.
             $scope.submit(vm.filesPicker.selectedValues);
         }

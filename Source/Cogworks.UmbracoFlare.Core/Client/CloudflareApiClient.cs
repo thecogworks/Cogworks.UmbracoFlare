@@ -1,6 +1,5 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Cogworks.UmbracoFlare.Core.Services;
 using Newtonsoft.Json;
@@ -31,10 +30,10 @@ namespace Cogworks.UmbracoFlare.Core.Client
         public const string CloudflareApiUserEndpoint = "user";
         public const string CloudflareApiZonesEndpoint = "zones";
 
-        public CloudflareApiClient()
+        public CloudflareApiClient(IUmbracoLoggingService umbracoLoggingService, IConfigurationService configurationService)
         {
-            _configurationService = ServiceFactory.GetConfigurationService();
-            _umbracoLoggingService = ServiceFactory.GetUmbracoLoggingService();
+            _umbracoLoggingService = umbracoLoggingService;
+            _configurationService = configurationService;
         }
 
         public UserDetails GetUserDetails()
@@ -74,7 +73,6 @@ namespace Cogworks.UmbracoFlare.Core.Client
                 }
 
                 _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"The request for <<GetUserDetails>> was not successful for user email {umbracoFlareConfigModel.AccountEmail}");
-
                 return userDetails;
             }
         }

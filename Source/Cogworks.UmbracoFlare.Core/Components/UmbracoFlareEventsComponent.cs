@@ -1,6 +1,5 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Services;
 using System.Collections.Generic;
@@ -18,19 +17,19 @@ namespace Cogworks.UmbracoFlare.Core.Components
 {
     public class UmbracoFlareEventsComponent : IComponent
     {
+        private readonly UmbracoHelper _umbracoHelper;
         private readonly ICloudflareService _cloudflareService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
-        private readonly UmbracoHelper _umbracoHelper;
         private readonly IImageCropperService _imageCropperService;
         private readonly IConfigurationService _configurationService;
 
-        public UmbracoFlareEventsComponent(UmbracoHelper umbracoHelper)
+        public UmbracoFlareEventsComponent(UmbracoHelper umbracoHelper, ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IImageCropperService imageCropperService, IConfigurationService configurationService)
         {
             _umbracoHelper = umbracoHelper;
-            _configurationService = ServiceFactory.GetConfigurationService();
-            _cloudflareService = ServiceFactory.GetCloudflareService();
-            _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
-            _imageCropperService = ServiceFactory.GetImageCropperService();
+            _cloudflareService = cloudflareService;
+            _umbracoFlareDomainService = umbracoFlareDomainService;
+            _imageCropperService = imageCropperService;
+            _configurationService = configurationService;
 
             TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
         }
@@ -131,14 +130,14 @@ namespace Cogworks.UmbracoFlare.Core.Components
                 if (media.HasIdentity || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
                 var publishedMedia = _umbracoHelper.Media(media.Id);
-                
+
                 if (publishedMedia == null)
                 {
                     e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not find the IPublishedContent version of the media: " + media.Id + " you are trying to save.", EventMessageType.Error));
                     continue;
                 }
 
-                urls.AddRange(imageCropSizes.Select(x=> publishedMedia.GetCropUrl(x.Alias)));
+                urls.AddRange(imageCropSizes.Select(x => publishedMedia.GetCropUrl(x.Alias)));
                 urls.Add(publishedMedia.Url());
             }
 

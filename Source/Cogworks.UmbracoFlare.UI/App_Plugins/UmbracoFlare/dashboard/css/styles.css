@@ -12,15 +12,6 @@
     color: #e92051;
 }
 
-.umbracoflare .title h1 {
-}
-
-.umbracoflare .title h2 {
-}
-
-.umbracoflare .title a {
-}
-
 .umbracoflare .licenseContainer {
     margin-top: 1rem;
 }
@@ -31,10 +22,6 @@
     box-sizing: border-box;
     height: 420px;
 }
-
-/*
-		Borrowed from Bootstrap
-	*/
 
 .umbracoflare .bs-callout {
     padding: 0 20px 20px 20px;
@@ -111,10 +98,6 @@
 .umbracoflare .-grey-out {
     opacity: .5;
     pointer-events: none;
-}
-
-.umbracoflare .manual-purge-container {
-    margin: 40px 0;
 }
 
     .umbracoflare .manual-purge-container .purge-static-files .umb-button__progress, .umbracoflare .manual-purge-container .purge-by-url .umb-button__progress {
@@ -417,12 +400,16 @@
     cursor: pointer;
 }
 
-/*.umbracoflare .apikey-input {
-    width: 100%;
-}*/
-
 .cloudflare-account input {
     width: 100%;
+}
+
+.cloudflare-account .icon-check {
+    left: 35%;
+}
+
+.cloudflare-account .umb-button__progress {
+    left: 35%;
 }
 
 .purge-everything {
@@ -445,7 +432,7 @@
 
 .cloudflare-config {
     height: 50%;
-    margin: 0 0;
+    margin-top: 30px;
 }
 
     .cloudflare-config.cloudflare-account .umb-button__success {
@@ -525,4 +512,8 @@ i.inactive {
 .icon-umbracoflare-tiny::before {
     content: url('umbracoflare-black-18x20px.png');
     margin-left: -2px;
+}
+
+.domain-invalid-error {
+    font-style: italic;
 }

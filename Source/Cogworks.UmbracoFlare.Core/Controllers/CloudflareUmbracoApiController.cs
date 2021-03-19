@@ -1,6 +1,5 @@
 ﻿using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Factories;
 using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models;
 using Cogworks.UmbracoFlare.Core.Models.Api;
@@ -21,11 +20,11 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IConfigurationService _configurationService;
 
-        public CloudflareUmbracoApiController()
+        public CloudflareUmbracoApiController(ICloudflareService cloudflareService, IConfigurationService configurationService, IUmbracoFlareDomainService umbracoFlareDomainService)
         {
-            _cloudflareService = ServiceFactory.GetCloudflareService();
-            _umbracoFlareDomainService = ServiceFactory.GetUmbracoFlareDomainService();
-            _configurationService = ServiceFactory.GetConfigurationService();
+            _cloudflareService = cloudflareService;
+            _configurationService = configurationService;
+            _umbracoFlareDomainService = umbracoFlareDomainService;
         }
 
         [HttpGet]

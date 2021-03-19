@@ -1,12 +1,11 @@
 ﻿using System;
+using Umbraco.Core.Logging;
 
 namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IUmbracoLoggingService
     {
         void LogError<T>(string message, Exception ex);
-
-        void LogError(Type callingType, string message, Exception ex);
 
         void LogInfo<T>(string message);
 
@@ -17,29 +16,31 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
     public class UmbracoLoggingService : IUmbracoLoggingService
     {
-        public void LogError<T>(string message, Exception ex)
+        private readonly ILogger _logger;
+
+        public UmbracoLoggingService(ILogger logger)
         {
-            Umbraco.Core.Logging.LogHelper.Error<T>(message, ex);
+            _logger = logger;
         }
 
-        public void LogError(Type callingType, string message, Exception ex)
+        public void LogError<T>(string message, Exception ex)
         {
-            Umbraco.Core.Logging.LogHelper.Error(callingType, message, ex);
+            _logger.Error(typeof(T), ex, message);
         }
 
         public void LogInfo<T>(string message)
         {
-            Umbraco.Core.Logging.LogHelper.Info<T>(message);
+            _logger.Info(typeof(T), message);
         }
 
         public void LogDebug<T>(string message)
         {
-            Umbraco.Core.Logging.LogHelper.Debug<T>(message);
+            _logger.Debug(typeof(T), message);
         }
 
         public void LogWarn<T>(string message)
         {
-            Umbraco.Core.Logging.LogHelper.Warn<T>(message);
+            _logger.Warn(typeof(T), message);
         }
     }
 }

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using Cogworks.UmbracoFlare.Core.Constants;
-using Cogworks.UmbracoFlare.Core.Factories;
+using Umbraco.Core.PropertyEditors;
 using Umbraco.Core.Services;
 
 namespace Cogworks.UmbracoFlare.Core.Services
@@ -18,26 +18,44 @@ namespace Cogworks.UmbracoFlare.Core.Services
     {
         private readonly IDataTypeService _dataTypeService;
 
-        public ImageCropperService()
+        public ImageCropperService(IDataTypeService dataTypeService)
         {
-            _dataTypeService = ServiceFactory.GetDataTypeService();
+            _dataTypeService = dataTypeService;
         }
 
         public IEnumerable<Crop> GetAllCrops()
         {
             var allCrops = new List<Crop>();
-            var imageCropperDataTypes = _dataTypeService.GetDataTypeDefinitionByPropertyEditorAlias(ApplicationConstants.ImageCropperPropertyEditorAlias);
+            var imageCropperDataTypes = _dataTypeService.GetByEditorAlias(ApplicationConstants.ImageCropperPropertyEditorAlias);
 
             foreach (var dataType in imageCropperDataTypes)
             {
-                var crops = _dataTypeService.GetPreValuesByDataTypeId(dataType.Id).ToList();
-                if (!crops.HasAny()) { continue; }
+                var valueList = (ImageCropperConfiguration)dataType.Configuration;
 
-                var cropsFromDb = JsonConvert.DeserializeObject<IEnumerable<Crop>>(crops.First());
-                allCrops.AddRange(cropsFromDb);
+                //var preValues = new List<PreValue>();
+
+                //if (valueList != null && valueList.Items.HasAny())
+                //{
+                //    preValues.AddRange(valueList.Items.Select(s => new PreValue
+                //    {
+                //        Id = s.Id,
+                //        Value = s.Value
+                //    }));
+                //}
+                
+                //if (!preValues.HasAny()) { continue; }
+                
+                //var cropsFromDb = JsonConvert.DeserializeObject<IEnumerable<Crop>>(valueList);
+                //allCrops.AddRange(cropsFromDb);
             }
 
             return allCrops;
         }
+    }
+    public class PreValue
+    {
+        public int Id { get; set; }
+
+        public string Value { get; set; }
     }
 }

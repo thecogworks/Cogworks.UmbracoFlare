@@ -3,12 +3,12 @@
 
     angular
         .module('umbraco.resources')
-        .factory('Cogworks.Umbracoflare.Resources', CogworksUmbracoflareResourcess);
+        .factory('Cogworks.Umbracoflare.Resources', CogworksUmbracoflareResources);
 
-    CogworksUmbracoflareResourcess.$inject = ['$http'];
+    CogworksUmbracoflareResources.$inject = ['$http'];
 
-    function CogworksUmbracoflareResourcess($http) {
-        var API_ROOT = '/umbraco/backoffice/umbracoFlare/cloudflareUmbracoApi/';
+    function CogworksUmbracoflareResources($http) {
+        var API_ROOT = '/umbraco/backoffice/UmbracoFlare/cloudflareUmbracoApi/';
 
         var service = {
             purgeCacheForUrls: purgeCacheForUrls,

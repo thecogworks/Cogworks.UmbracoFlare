@@ -1,135 +1,162 @@
-<div ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare umb-scrollable">
-    <div class="cloudflare-config">
-        <div class="row-fluid">
-            <div class="span3">
-                <h2>Status Cloudflare Account: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
-            </div>
-            <div class="span3">
-                <h2>Current Domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h2>
-                <p ng-show="!cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account</p>
-            </div>
-        </div>
-        <hr />
-        <div class="row-fluid">
-            <div class="span3">
-                <h3>Cloudflare Account</h3>
-                <div class="cloudflare-config cloudflare-account">
-                    <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
-                    <div class="config-group">
-                        <label>Account Email </label>
-                        <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
-                    </div>
-                    <div class="config-group">
-                        <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
-                    </div>
-                    <div class="config-group position-relative">
-                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
-                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingCredentials}"></div>
-                        <button class="btn btn-success" ng-disabled="cogworksUmbracoflareDashboardController.dashboard.updatingCredentials" ng-click="cogworksUmbracoflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
-                    </div>
-                </div>
+<div id="umbracoFlare" ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare">
 
-                <div class="cloudflare-config cloudflare-auto-purge" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
-                    <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
-                    <div class="toggle-container">
-                        <span>CloudFlare Auto-Purge on "Save and publish"</span>
-                        <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}">
-                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
-                                <div class="toggle-label">ON</div>
-                            </div>
-                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
-                                <div class="toggle-label">OFF</div>
-                            </div>
-                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedAutoPurge}"></div>
-                            <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}"></div>
-                        </div>
-                    </div>
-                    <p>
-                        Notes:
-                        <br />
-                        <br />
-                        -You can still manually choose NOT to purge cache upon Save/Publish at the page content level by adding the property (bool) "cloudflareDisabledOnPublish" to the node.
-                        <br />
-                        <br />
-                        -You can also manually purge pages through the UmbracoFlare dashboard or by right clicking a node and choosing option "Purge Cloudflare Cache" from the menu.
-                    </p>
-                </div>
-            </div>
-        </div>
+    <div ng-show="cogworksUmbracoflareDashboardController.dashboard.loading">
+        <umb-load-indicator></umb-load-indicator>
     </div>
 
-    <div ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
+    <div class="umb-panel-group__details-group" ng-class="{'-grey-out' : cogworksUmbracoflareDashboardController.dashboard.loading}">
+        <div class="umb-panel-group__details-group-title">
+            <div class="umb-panel-group__details-group-name">
+                Cloudflare Account
+            </div>
+        </div>
+        <div class="umb-panel-group__details-checks">
+            <div class="umb-panel-group__details-check">
+                <div class="umb-panel-group__details-status">
+                    <div class="umb-panel-group__details-status-content">
+                        <div class="umb-panel-group__details-status-text">
+                            <h4>Status: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h4>
+                            <h4>Current domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h4>
+                            <p class="umb-panel-group__details-status-action domain-invalid-error" ng-show="!cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.</p>
+                        </div>
 
-        <div class="manual-purge-container">
-            <h2>Purge Options</h2>
-            <hr />
-            <div class="row-fluid">
-                <div class="span3 site-purge">
-                    <h3>Site Purge</h3>
-                    <p>Purge everything on your site (domain and subdomains). This will take a while depending on your site and servers.</p>
-                    <div class="config-group position-relative">
-                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy' class="btn btn-success" ng-show="!cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteConfirmation()">Purge Site</button>
-                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteDone}"></div>
-                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy}"></div>
-                    </div>
+                        <div class="cloudflare-config">
+                            <div class="row-fluid">
+                                <div class="span3">
+                                    <div class="cloudflare-account">
+                                        <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
 
-                    <div class="purge-confirmation-message" ng-show="cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage">
-                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSite()">Yes, purge it.</button>
-                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-danger offset1" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteCancel()">Cancel</button>
-                    </div>
-                </div>
-
-                <div class="span3 offset1 purge-static-files">
-                    <h3>Pick Files</h3>
-                    <p>
-                        Add individual files by selecting them from the picker below.
-                        Add individual files by selecting them from the picker below.
-                        Multiple files can added for purging together.
-                    </p>
-                    <br />
-
-                    <div class="file-system-picker-control pull-right">
-                        <div class="umb-editor">
-                            <ul class="unstyled" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length !== 0">
-                                <li ng-repeat="selectedFile in cogworksUmbracoflareDashboardController.dashboard.selectedFiles">
-                                    <a href="#" prevent-default ng-click="cogworksUmbracoflareDashboardController.dashboard.removeSelectedValues(selectedFile)">
-                                        <i class="icon icon-delete red"></i> {{selectedFile}}
-                                    </a>
-                                </li>
-                            </ul>
-                            <ul class="unstyled list-icons" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0">
-                                <li>
-                                    <i class="icon icon-add blue"></i>
-                                    <a href="#" ng-click="cogworksUmbracoflareDashboardController.dashboard.openFilePicker()" prevent-default>
-                                        <localize key="general_add">Add</localize>
-                                    </a>
-                                </li>
-                            </ul>
+                                        <div class="config-group">
+                                            <label>Account Email </label>
+                                            <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
+                                        </div>
+                                        <div class="config-group">
+                                            <label>Api Key </label>
+                                            <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
+                                        </div>
+                                        <div class="config-group position-relative">
+                                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
+                                            <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingCredentials}"></div>
+                                            <button type="button" class="btn btn-success" ng-disabled="cogworksUmbracoflareDashboardController.dashboard.updatingCredentials" ng-click="cogworksUmbracoflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span3 offset1">
+                                    <div class="cloudflare-auto-purge" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
+                                        <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
+                                        <div class="toggle-container">
+                                            <span>CloudFlare Auto-Purge on "Save and publish"</span>
+                                            <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}">
+                                                <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
+                                                    <div class="toggle-label">ON</div>
+                                                </div>
+                                                <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
+                                                    <div class="toggle-label">OFF</div>
+                                                </div>
+                                                <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedAutoPurge}"></div>
+                                                <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="span3 offset1">
+                                    <p>
+                                        Notes:
+                                        <br />
+                                        <br />
+                                        -You can still manually choose NOT to purge cache upon Save/Publish at the page content level by adding the property (bool) "cloudflareDisabledOnPublish" to the node.
+                                        <br />
+                                        <br />
+                                        -You can also manually purge pages through the UmbracoFlare dashboard or by right clicking a node and choosing option "Purge Cloudflare Cache" from the menu.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="button-container pull-left">
-                        <div class="icon-check umb-button__success status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticSuccess}"></div>
-                        <div class="umb-button__progress status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy}"></div>
-                        <button class="btn btn-success -float-right" ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.state === cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy || cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0'
-                                ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeStaticFiles(cogworksUmbracoflareDashboardController.dashboard.selectedFiles)">
-                            Purge Static Files
-                        </button>
-                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="span3 offset1 purge-by-url">
-                    <form ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
-                        <h3>Purge By Url</h3>
-                        <p>
-                            URLs must be relative and begin with a / and should not include the domain. This also support wild cards.
-                        </p>
-                        <span>Example: /products/umbracoflare/*</span>
-                        <br />
-                        <span>Example: /products/umbracoflare/dashboard</span>
-                        <input-adder class="input-adder" ng-model="cogworksUmbracoflareDashboardController.dashboard.urls" state="cogworksUmbracoflareDashboardController.dashboard.state" on-submit="cogworksUmbracoflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
-                    </form>
+        <div class="umb-panel-group__details-group-title">
+            <div class="umb-panel-group__details-group-name">
+                Purge Options
+            </div>
+        </div>
+
+        <div class="umb-panel-group__details-checks" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
+            <div class="umb-panel-group__details-check">
+                <div class="umb-panel-group__details-status">
+                    <div class="umb-panel-group__details-status-content">
+
+                        <div class="manual-purge-container">
+                            <div class="row-fluid">
+                                <div class="span3 site-purge">
+                                    <h4>Site Purge</h4>
+                                    <p>Purge everything on your site (domain and subdomains). This will take a while depending on your site and servers.</p>
+                                    <div class="config-group position-relative">
+                                        <button type="button" ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid' class="btn btn-success" ng-show="!cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteConfirmation()">Purge Site</button>
+                                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteDone}"></div>
+                                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.purgeSiteBusy}"></div>
+                                    </div>
+
+                                    <div class="purge-confirmation-message" ng-show="cogworksUmbracoflareDashboardController.dashboard.purgeConfirmationMessage">
+                                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-success" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSite()">Yes, purge it.</button>
+                                        <button ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' class="btn btn-danger offset1" ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeSiteCancel()">Cancel</button>
+                                    </div>
+                                </div>
+
+                                <div class="span3 offset1 purge-static-files">
+                                    <h4>Pick Files</h4>
+                                    <p>
+                                        Add individual files by selecting them from the picker below.
+                                        Add individual files by selecting them from the picker below.
+                                        Multiple files can added for purging together.
+                                    </p>
+                                    <br />
+
+                                    <div class="file-system-picker-control pull-right">
+                                        <ul class="unstyled" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length !== 0">
+                                            <li ng-repeat="selectedFile in cogworksUmbracoflareDashboardController.dashboard.selectedFiles">
+                                                <a href="#" prevent-default ng-click="cogworksUmbracoflareDashboardController.dashboard.removeSelectedValues(selectedFile)">
+                                                    <i class="icon icon-delete red"></i> {{selectedFile}}
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <ul class="unstyled list-icons" ng-show="cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0">
+                                            <li>
+                                                <i class="icon icon-add blue"></i>
+                                                <a href="#" ng-click="cogworksUmbracoflareDashboardController.dashboard.openFilePicker()" prevent-default>
+                                                    <localize key="general_add">Add</localize>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="button-container pull-left">
+                                        <div class="icon-check umb-button__success status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticSuccess}"></div>
+                                        <div class="umb-button__progress status-indicator" ng-class="{'-hidden': cogworksUmbracoflareDashboardController.dashboard.state !== cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy}"></div>
+                                        <button type="button" class="btn btn-success -float-right" ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || cogworksUmbracoflareDashboardController.dashboard.state === cogworksUmbracoflareDashboardController.dashboard.purgeStaticBusy || cogworksUmbracoflareDashboardController.dashboard.selectedFiles.length === 0'
+                                                ng-click="cogworksUmbracoflareDashboardController.dashboard.purgeStaticFiles(cogworksUmbracoflareDashboardController.dashboard.selectedFiles)">
+                                            Purge Static Files
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="span3 offset1 purge-by-url">
+                                    <form ng-disabled='!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid' name="listUrls">
+                                        <h4>Purge By Url</h4>
+                                        <p>
+                                            URLs must be relative and begin with a / and should not include the domain. This also support wild cards.
+                                        </p>
+                                        <span>Example: /products/umbracoflare/*</span>
+                                        <br />
+                                        <span>Example: /products/umbracoflare/dashboard</span>
+                                        <input-adder class="input-adder" ng-model="cogworksUmbracoflareDashboardController.dashboard.urls" state="cogworksUmbracoflareDashboardController.dashboard.state" on-submit="cogworksUmbracoflareDashboardController.dashboard.purgeUrls(collection)"></input-adder>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

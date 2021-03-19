@@ -17,7 +17,7 @@
                     return;
                 }
 
-                if (!item.startsWith('/')){
+                if (!item.startsWith('/')) {
                     notificationsService.error('The url field needs to start with "/".');
                     return;
                 }

@@ -1,12 +1,12 @@
 <div class="umb-panel" ng-controller="Cogworks.Umbracoflare.Filespicker.Controller as cogworksUmbracoflareFilespickerController">
     <div class="umb-panel-body no-header with-footer umb-scrollable">
-        <fs-tree section="dummy"
-                 treealias="fileSystemTree"
-                 eventhandler="dialogEventHandler"
-                 hideoptions="false"
-                 hideheader="false"
-                 isdialog="true"
-                 customtreeparams="startfolder=&amp;filter=&amp;files=true" />
+        <umb-tree section="dummy"
+                  treealias="fileSystemTree"
+                  eventhandler="dialogEventHandler"
+                  hideoptions="true"
+                  hideheader="true"
+                  isdialog="true"
+                  customtreeparams="startfolder={{dialogData.folder}}&amp;filter={{dialogData.filter}}&amp;files=true" />
     </div>
     <div class="umb-panel-footer">
         <div class="umb-el-wrap umb-panel-buttons">

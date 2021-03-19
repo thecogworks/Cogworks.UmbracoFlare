@@ -277,7 +277,6 @@
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Factories\ServiceFactory.cs" />
     <Compile Include="FileSystemPickerControllers\FolderSystemTreeController.cs" />
     <Compile Include="Helpers\UmbracoFlareFileHelper.cs" />
     <Compile Include="Helpers\UmbracoFlareUrlHelper.cs" />
