@@ -1,8 +1,6 @@
+using Cogworks.UmbracoFlare.Core.Helpers;
 using System.Linq;
 using System.Net.Http.Formatting;
-using Cogworks.UmbracoFlare.Core.Extensions;
-using Cogworks.UmbracoFlare.Core.Helpers;
-using Umbraco.Core;
 using Umbraco.Core.IO;
 using Umbraco.Web.Models.Trees;
 using Umbraco.Web.Mvc;
@@ -10,17 +8,16 @@ using Umbraco.Web.Trees;
 
 namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
 {
-    [Tree("dummy", "fileSystemTree")]
+    [Tree("settings", "fileSystemTree")]
     [PluginController("FileSystemPicker")]
     public class FolderSystemTreeController : TreeController
     {
         protected override TreeNodeCollection GetTreeNodes(string id, FormDataCollection queryStrings)
         {
-            var folder = id == "-1" ? queryStrings.Get("startfolder") : id;
-            folder = folder.EnsureStartsWith("/");
+            var rootPath = id != "-1" ? $"/{id}" : string.Empty;
 
-            var tempTree = AddFolders(folder, queryStrings);
-            tempTree.AddRange(AddFiles(folder, queryStrings));
+            var tempTree = AddFolders(rootPath, queryStrings);
+            tempTree.AddRange(AddFiles(rootPath, queryStrings));
 
             return tempTree;
         }
@@ -30,21 +27,28 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
             return new MenuItemCollection();
         }
 
-        private TreeNodeCollection AddFiles(string folder, FormDataCollection queryStrings)
+        protected override TreeNode CreateRootNode(FormDataCollection queryStrings)
         {
-            if (!folder.HasValue()) { return null; }
+            var node = CreateTreeNode("-1", null, null, "fileSystemTree");
+            node.HasChildren = false;
+            node.MenuUrl = null;
+            node.Path = null;
+            node.CssClasses.Add("hidden");
+            
+            return node;
+        }
 
-            var filter = queryStrings.Get("filter").Split(',').Select(a => a.Trim().EnsureStartsWith(".")).ToArray();
-
-            var path = IOHelper.MapPath(folder);
-            var rootPath = IOHelper.MapPath(queryStrings.Get("startfolder"));
+        private TreeNodeCollection AddFolders(string parent, FormDataCollection queryStrings)
+        {
             var treeNodeCollection = new TreeNodeCollection();
+            var rootFolderPath = IOHelper.MapPath("~");
+            var folders = UmbracoFlareFileHelper.GetFolders(parent);
 
-            foreach (var file in UmbracoFlareFileHelper.GetFiles(folder, filter))
+            foreach (var folder in folders)
             {
-                var nodeTitle = file.Name;
-                var filePath = file.FullName.Replace(rootPath, "").Replace("\\", "/");
-                var treeNode = CreateTreeNode(filePath, path, queryStrings, nodeTitle, "icon-document", false);
+                var folderFullName = folder.FullName.Replace(rootFolderPath, "").Replace("\\", "/");
+                var folderHasFiles = folder.EnumerateDirectories().Any() || UmbracoFlareFileHelper.GetFiles(folderFullName).Any();
+                var treeNode = CreateTreeNode(folderFullName, parent, queryStrings, folder.Name, "icon-folder", folderHasFiles);
 
                 treeNodeCollection.Add(treeNode);
             }
@@ -52,18 +56,18 @@ namespace Cogworks.UmbracoFlare.Core.FileSystemPickerControllers
             return treeNodeCollection;
         }
 
-        private TreeNodeCollection AddFolders(string parent, FormDataCollection queryStrings)
+        private TreeNodeCollection AddFiles(string folder, FormDataCollection queryStrings)
         {
-            var filter = queryStrings.Get("filter").Split(',').Select(a => a.Trim().EnsureStartsWith(".")).ToArray();
+            var path = IOHelper.MapPath(folder);
+            var rootPath = IOHelper.MapPath("~");
             var treeNodeCollection = new TreeNodeCollection();
-            var rootFolderPath = IOHelper.MapPath("~");
-            var folders = UmbracoFlareFileHelper.GetFolders(parent, filter);
+            var files = UmbracoFlareFileHelper.GetFiles(folder);
 
-            foreach (var folder in folders)
+            foreach (var file in files)
             {
-                var folderFullName = folder.FullName.Replace(rootFolderPath, "").Replace("\\", "/");
-                var folderHasFiles = folder.EnumerateDirectories().Any() || UmbracoFlareFileHelper.GetFiles(folderFullName, filter).Any();
-                var treeNode = CreateTreeNode(folderFullName, parent, queryStrings, folder.Name, "icon-folder", folderHasFiles);
+                var nodeTitle = file.Name;
+                var filePath = file.FullName.Replace(rootPath, "").Replace("\\", "/");
+                var treeNode = CreateTreeNode(filePath, path, queryStrings, nodeTitle, "icon-document", false);
 
                 treeNodeCollection.Add(treeNode);
             }

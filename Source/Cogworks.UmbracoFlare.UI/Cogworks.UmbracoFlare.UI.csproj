@@ -296,7 +296,6 @@
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-black-18x20px.png" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\css\umbracoflare-logo-light.png" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\cogworks.umbracoflare.inputadder.directives.js" />
-    <Content Include="App_Plugins\UmbracoFlare\dashboard\directives\filespicker.directives.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\lang\en-US.xml" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\resources\cogworks.umbracoflare.resources.js" />
     <Content Include="App_Plugins\UmbracoFlare\dashboard\views\cogworks.umbracoflare.dashboard.html" />

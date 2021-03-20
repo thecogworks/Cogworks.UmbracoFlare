@@ -47,7 +47,6 @@
         function getCloudflareStatus() {
             cogworksUmbracoflareResources.getConfigurationStatus()
                 .then(function (configFromServer) {
-                    
                     vm.dashboard.newConfig = configFromServer.data;
                     vm.dashboard.currentApiKey = vm.dashboard.newConfig.ApiKey;
                     vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
@@ -80,7 +79,6 @@
         }
 
         vm.dashboard.updateCredentials = function (isAutoPurgeCall) {
-            
             if (!isAutoPurgeCall) {
                 vm.dashboard.updatingCredentials = true;
             }
@@ -91,7 +89,6 @@
 
             cogworksUmbracoflareResources.updateConfigurationStatus(vm.dashboard.newConfig)
                 .then(function (configFromServer) {
-                    
                     if (configFromServer === null || configFromServer === undefined) {
                         notificationsService.error("We could not update the configuration.");
                     } else if (!configFromServer.data.CredentialsAreValid) {
@@ -172,14 +169,41 @@
 
         vm.dashboard.openFilePicker = function () {
             debugger;
-            editorService.open({
-                view: '/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.filespicker.html',
-                size: 'small'
-                //callback: function (data) {
-                //    debugger;
-                //    vm.dashboard.selectedFiles = data;
-                //}
-            });
+
+            var filePicker = {
+                title: 'File Picker',
+                section: 'settings',
+                treeAlias: 'fileSystemTree',
+                multiPicker: true,
+                select: function (node) {
+                    debugger;
+                    node.selected = !node.selected;
+                    var id = decodeURIComponent(node.id.replace(/\+/g, " "));
+                    var index = vm.dashboard.selectedFiles.indexOf(id);
+
+                    if (node.selected) {
+                        if (index === -1) {
+                            vm.dashboard.selectedFiles.push(id);
+                        }
+                    } else {
+                        vm.dashboard.selectedFiles.splice(index, 1);
+                    }
+
+                    console.log(vm.dashboard.selectedFiles);
+                    //editorService.close();
+                },
+                submit: function (data) {
+                    console.log(data);
+                    //processSelections(data.selection);
+                    editorService.close();
+                },
+                close: function () {
+                    editorService.close();
+                }
+            };
+
+            editorService.treePicker(filePicker);
+
         };
 
         vm.dashboard.removeSelectedValues = function (item) {
