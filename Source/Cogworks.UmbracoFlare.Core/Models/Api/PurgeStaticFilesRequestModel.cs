@@ -1,8 +1,10 @@
-﻿namespace Cogworks.UmbracoFlare.Core.Models.Api
+﻿using System.Collections.Generic;
+
+namespace Cogworks.UmbracoFlare.Core.Models.Api
 {
     public class PurgeStaticFilesRequestModel
     {
-        public string[] StaticFiles { get; set; }
+        public IEnumerable<string> StaticFiles { get; set; }
         public string CurrentDomain { get; set; }
     }
 }

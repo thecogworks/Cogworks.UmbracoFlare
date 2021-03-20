@@ -1,5 +1,4 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
-using Cogworks.UmbracoFlare.Core.Constants;
 using Cogworks.UmbracoFlare.Core.Controllers;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Helpers;
@@ -14,7 +13,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface ICloudflareService
     {
-        List<StatusWithMessage> PurgePages(IEnumerable<string> urls);
+        StatusWithMessage PurgePages(IEnumerable<string> urls);
 
         StatusWithMessage PurgeEverything(string currentDomain);
 
@@ -38,32 +37,26 @@ namespace Cogworks.UmbracoFlare.Core.Services
             _umbracoFlareDomainService = umbracoFlareDomainService;
         }
 
-        public List<StatusWithMessage> PurgePages(IEnumerable<string> urls)
+        public StatusWithMessage PurgePages(IEnumerable<string> urls)
         {
-            var results = new List<StatusWithMessage>();
-
             if (!urls.HasAny())
             {
-                results.Add(new StatusWithMessage(false, "There were not valid urls to purge, please check if the domain is a valid zone in your cloudflare account"));
-                return results;
+                return new StatusWithMessage(false, "There were not valid urls to purge, please check if the domain is a valid zone in your cloudflare account");
             }
 
             var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
             var websiteZone = _umbracoFlareDomainService.GetZoneFilteredByDomain(currentDomain);
-            
+
             if (websiteZone == null)
             {
-                results.Add(new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain of {currentDomain}"));
-                return results;
+                return new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain of {currentDomain}");
             }
 
             var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, urls, false);
 
-            results.Add(!apiResult
-                ? new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareApiError)
-                : new StatusWithMessage(true, $"The url => {string.Join(",", urls)} was purged successfully"));
-
-            return results;
+            return apiResult
+                ? new StatusWithMessage(true, "The values were purged successfully")
+                : new StatusWithMessage(false, "There was an error from the Cloudflare API. Please check the logs to see the issue.");
         }
 
         public StatusWithMessage PurgeEverything(string currentDomain)
@@ -81,7 +74,7 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
             return purgeCacheStatus
                 ? new StatusWithMessage(true, $"Your current domain {currentDomain} was purged successfully.")
-                : new StatusWithMessage(false, ApplicationConstants.CloudflareMessages.CloudflareApiError);
+                : new StatusWithMessage(false, "There was an error from the Cloudflare API. Please check the logfile to see the issue.");
         }
 
         public string PrintResultsSummary(IEnumerable<StatusWithMessage> results)

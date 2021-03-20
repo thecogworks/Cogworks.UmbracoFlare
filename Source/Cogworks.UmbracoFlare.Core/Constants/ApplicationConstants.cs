@@ -15,12 +15,7 @@
         {
             public const string CloudflareCaching = "Cloudflare Caching";
         }
-
-        public static class CloudflareMessages
-        {
-            public const string CloudflareApiError = "There was an error from the Cloudflare API. Please check the logfile to see the issue.";
-        }
-
+        
         public static class ConfigurationFile
         {
             public const string ConfigurationFilePath = "~/Config/cloudflare.config";

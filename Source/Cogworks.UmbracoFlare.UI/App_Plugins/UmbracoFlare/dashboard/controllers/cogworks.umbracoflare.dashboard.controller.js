@@ -18,7 +18,9 @@
         vm.dashboard.credentialsAreValid = false;
         vm.dashboard.state = '';
         vm.dashboard.urls = [];
+        vm.dashboard.preSelectedFiles = [];
         vm.dashboard.selectedFiles = [];
+        vm.dashboard.selectedFilesPath = [];
         vm.dashboard.newConfig = {};
         vm.dashboard.currentApiKey = '';
         vm.dashboard.currentAccountEmail = '';
@@ -119,13 +121,8 @@
             vm.dashboard.updateCredentials(true);
         };
 
-        vm.dashboard.purgeSiteConfirmation = function () {
-            vm.dashboard.purgeConfirmationMessage = true;
-        }
 
-        vm.dashboard.purgeSiteCancel = function () {
-            vm.dashboard.purgeConfirmationMessage = false;
-        }
+        /////////////////////////////Purge Site/////////////////////////////////
 
         vm.dashboard.purgeSite = function () {
             vm.dashboard.purgeConfirmationMessage = false;
@@ -147,12 +144,25 @@
             refreshStateAfterTime();
         }
 
+        vm.dashboard.purgeSiteConfirmation = function () {
+            vm.dashboard.purgeConfirmationMessage = true;
+        }
+
+        vm.dashboard.purgeSiteCancel = function () {
+            vm.dashboard.purgeConfirmationMessage = false;
+        }
+
+        /////////////////////////////Purge Static Files/////////////////////////////////
+
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
-            debugger;
+
+            angular.forEach(selectedFiles, function (value) {
+                vm.dashboard.selectedFilesPath.push('/' + value.id);
+            });
+            
             vm.dashboard.state = vm.dashboard.purgeStaticBusy;
-            cogworksUmbracoflareResources.purgeStaticFiles(selectedFiles, vm.dashboard.currentDomain)
+            cogworksUmbracoflareResources.purgeStaticFiles(vm.dashboard.selectedFilesPath, vm.dashboard.currentDomain)
                 .then(function (statusWithMessage) {
-                    debugger;
                     if (statusWithMessage.data.Success) {
                         vm.dashboard.state = vm.dashboard.purgeStaticSuccess;
                         notificationsService.success(statusWithMessage.data.Message);
@@ -168,36 +178,29 @@
         };
 
         vm.dashboard.openFilePicker = function () {
-            debugger;
-
             var filePicker = {
                 title: 'File Picker',
                 section: 'settings',
                 treeAlias: 'fileSystemTree',
                 multiPicker: true,
                 select: function (node) {
-                    debugger;
                     node.selected = !node.selected;
-                    var id = decodeURIComponent(node.id.replace(/\+/g, " "));
-                    var index = vm.dashboard.selectedFiles.indexOf(id);
-
+                    var index = vm.dashboard.preSelectedFiles.indexOf(node);
                     if (node.selected) {
                         if (index === -1) {
-                            vm.dashboard.selectedFiles.push(id);
+                            vm.dashboard.preSelectedFiles.push(node);
                         }
                     } else {
-                        vm.dashboard.selectedFiles.splice(index, 1);
+                        vm.dashboard.preSelectedFiles.splice(index, 1);
                     }
-
-                    console.log(vm.dashboard.selectedFiles);
-                    //editorService.close();
                 },
                 submit: function (data) {
-                    console.log(data);
-                    //processSelections(data.selection);
+                    vm.dashboard.selectedFiles = vm.dashboard.preSelectedFiles;
+                    vm.dashboard.preSelectedFiles = [];
                     editorService.close();
                 },
                 close: function () {
+                    vm.dashboard.removeSelectedValues();
                     editorService.close();
                 }
             };
@@ -207,14 +210,16 @@
         };
 
         vm.dashboard.removeSelectedValues = function (item) {
-            debugger;
             var index = vm.dashboard.selectedFiles.indexOf(item);
             if (index !== -1) {
                 vm.dashboard.selectedFiles.splice(index, 1);
             } else {
                 vm.dashboard.selectedFiles = [];
+                vm.dashboard.selectedFilesPath = [];
             }
         };
+
+        /////////////////////////////Purge Urls/////////////////////////////////
 
         vm.dashboard.purgeUrls = function (urls) {
             var noBeginningSlash = false;

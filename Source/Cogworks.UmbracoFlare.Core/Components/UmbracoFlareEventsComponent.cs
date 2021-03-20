@@ -57,17 +57,14 @@ namespace Cogworks.UmbracoFlare.Core.Components
                 urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id, currentDomain));
             }
 
-            var results = _cloudflareService.PurgePages(urls);
+            var result = _cloudflareService.PurgePages(urls);
 
-            if (results.HasAny())
-            {
-                e.Messages.Add(results.Any(x => !x.Success)
-                    ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
-                        "We could not purge the Cloudflare cache. \n \n" +
-                        _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning)
-                    : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "Successfully purged the cloudflare cache.",
-                        EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                "Successfully purged the cloudflare cache.", EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "We could not purge the Cloudflare cache. Please check the logs to find out more.",
+                    EventMessageType.Warning));
         }
 
         public void Terminate()
@@ -103,16 +100,13 @@ namespace Cogworks.UmbracoFlare.Core.Components
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
 
-            var results = _cloudflareService.PurgePages(fullUrls);
+            var result = _cloudflareService.PurgePages(fullUrls);
 
-            if (results.HasAny() && results.Any(x => !x.Success))
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not purge the Cloudflare cache. \n \n" + _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning));
-            }
-            else if (results.Any())
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "Successfully purged the cloudflare cache.", EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "Successfully purged the cloudflare cache.",
+                    EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "We could not purge the Cloudflare cache.",
+                    EventMessageType.Warning));
         }
 
         protected void PurgeCloudflareCacheForMedia(IMediaService sender, SaveEventArgs<IMedia> e)
@@ -142,16 +136,13 @@ namespace Cogworks.UmbracoFlare.Core.Components
             }
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
-            var results = _cloudflareService.PurgePages(fullUrls);
+            var result = _cloudflareService.PurgePages(fullUrls);
 
-            if (results.HasAny() && results.Any(x => !x.Success))
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not purge the Cloudflare cache. \n \n" + _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning));
-            }
-            else if (results.Any())
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "Successfully purged the cloudflare cache.", EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "Successfully purged the cloudflare cache.", EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "We could not purge the Cloudflare cache.", EventMessageType.Warning));
         }
 
         private static void AddPurgeCacheForContentMenu(TreeControllerBase sender, MenuRenderingEventArgs e)
