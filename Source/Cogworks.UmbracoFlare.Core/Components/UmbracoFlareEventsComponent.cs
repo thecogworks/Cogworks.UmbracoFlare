@@ -4,6 +4,7 @@ using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Services;
 using System.Collections.Generic;
 using System.Linq;
+using Umbraco.Core;
 using Umbraco.Core.Composing;
 using Umbraco.Core.Events;
 using Umbraco.Core.Models;
@@ -15,23 +16,23 @@ using Umbraco.Web.Trees;
 
 namespace Cogworks.UmbracoFlare.Core.Components
 {
+    [RuntimeLevel(MinLevel = RuntimeLevel.Run)]
     public class UmbracoFlareEventsComponent : IComponent
     {
-        private readonly UmbracoHelper _umbracoHelper;
-        private readonly ICloudflareService _cloudflareService;
-        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly IImageCropperService _imageCropperService;
+        private readonly IUmbracoContextFactory _umbracoContextFactory;
         private readonly IConfigurationService _configurationService;
-
-        public UmbracoFlareEventsComponent(UmbracoHelper umbracoHelper, ICloudflareService cloudflareService, IUmbracoFlareDomainService umbracoFlareDomainService, IImageCropperService imageCropperService, IConfigurationService configurationService)
+        private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
+        private readonly ICloudflareService _cloudflareService;
+        
+        public UmbracoFlareEventsComponent(IImageCropperService imageCropperService, IUmbracoContextFactory umbracoContextFactory,
+            IConfigurationService configurationService, IUmbracoFlareDomainService umbracoFlareDomainService, ICloudflareService cloudflareService)
         {
-            _umbracoHelper = umbracoHelper;
-            _cloudflareService = cloudflareService;
-            _umbracoFlareDomainService = umbracoFlareDomainService;
             _imageCropperService = imageCropperService;
+            _umbracoContextFactory = umbracoContextFactory;
             _configurationService = configurationService;
-
-            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
+            _umbracoFlareDomainService = umbracoFlareDomainService;
+            _cloudflareService = cloudflareService;
         }
 
         public void Initialize()
@@ -40,6 +41,8 @@ namespace Cogworks.UmbracoFlare.Core.Components
             FileService.SavedScript += PurgeCloudflareCacheForScripts;
             FileService.SavedStylesheet += PurgeCloudflareCacheForStylesheets;
             MediaService.Saved += PurgeCloudflareCacheForMedia;
+
+            TreeControllerBase.MenuRendering += AddPurgeCacheForContentMenu;
         }
 
         private void PurgeCloudflareCache(IContentService sender, ContentPublishedEventArgs e)
@@ -119,20 +122,25 @@ namespace Cogworks.UmbracoFlare.Core.Components
 
             var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
 
-            foreach (var media in e.SavedEntities)
+            using (var umbracoContextReference = _umbracoContextFactory.EnsureUmbracoContext())
             {
-                if (media.HasIdentity || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
+                var mediaCache = umbracoContextReference.UmbracoContext.Media;
 
-                var publishedMedia = _umbracoHelper.Media(media.Id);
-
-                if (publishedMedia == null)
+                foreach (var media in e.SavedEntities)
                 {
-                    e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not find the IPublishedContent version of the media: " + media.Id + " you are trying to save.", EventMessageType.Error));
-                    continue;
-                }
+                    if (media.HasIdentity || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
-                urls.AddRange(imageCropSizes.Select(x => publishedMedia.GetCropUrl(x.Alias)));
-                urls.Add(publishedMedia.Url());
+                    var publishedMedia = mediaCache.GetById(media.Id);
+
+                    if (publishedMedia == null)
+                    {
+                        e.Messages.Add(new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "We could not find the IPublishedContent version of the media: " + media.Id + " you are trying to save.", EventMessageType.Error));
+                        continue;
+                    }
+
+                    urls.AddRange(imageCropSizes.Select(x => publishedMedia.GetCropUrl(x.Alias)));
+                    urls.Add(publishedMedia.Url());
+                }
             }
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
@@ -155,7 +163,7 @@ namespace Cogworks.UmbracoFlare.Core.Components
             };
 
             menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.menu.html", "Purge Cloudflare Cache");
-
+            
             e.Menu.Items.Insert(e.Menu.Items.Count - 1, menuItem);
         }
     }

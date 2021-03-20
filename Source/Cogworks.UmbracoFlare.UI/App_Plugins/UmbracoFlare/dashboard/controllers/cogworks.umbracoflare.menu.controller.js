@@ -1,62 +1,55 @@
 ﻿(function () {
-        angular
-            .module('umbraco')
-            .controller('Cogworks.Umbracoflare.Menu.Controller', CogworksUmbracoflareMenuController);
+    angular
+        .module('umbraco')
+        .controller('Cogworks.Umbracoflare.Menu.Controller', CogworksUmbracoflareMenuController);
 
-        CogworksUmbracoflareMenuController.$inject = [
-            '$scope',
-            'Cogworks.Umbracoflare.Resources'
-        ];
+    CogworksUmbracoflareMenuController.$inject = [
+        '$scope',
+        'navigationService',
+        'Cogworks.Umbracoflare.Resources'
+    ];
 
-        function CogworksUmbracoflareMenuController($scope, cogworksUmbracoflareResources) {
-            var vm = this;
+    function CogworksUmbracoflareMenuController($scope, navigationService, cogworksUmbracoflareResources) {
+        var vm = this;
 
-            /////////////////////////////Menu/////////////////////////////////
-            vm.menu = {};
-            vm.menu.hiddenClass = '-hidden';
-            vm.menu.busy = false;
-            vm.menu.success = false;
-            vm.menu.error = false;
-            vm.menu.busyElement = document.getElementById('purge-menu-loader');
-            vm.menu.errorElement = document.getElementById('purge-menu-error');
-            vm.menu.successElement = document.getElementById('purge-menu-success');
-            vm.menu.currentDomain = window.location.hostname;
+        /////////////////////////////Menu/////////////////////////////////
+        vm.menu = {};
+        vm.menu.busy = false;
+        vm.menu.success = false;
+        vm.menu.error = false;
+        vm.menu.currentDomain = window.location.hostname;
+        vm.menu.includeDescendants = false;
 
-            var dialogOptions = $scope.dialogOptions;
-            var node = dialogOptions.currentNode;
-
-            vm.menu.purge = function () {
-                vm.menu.busy = true;
-                vm.menu.busyElement.classList.remove(vm.menu.hiddenClass);
-                
-                cogworksUmbracoflareResources.purgeCacheForNodeId(node.id, $scope.purgeChildren, vm.menu.currentDomain)
-                    .success(function (statusWithMessage) {
-                        vm.menu.busy = false;
-                        vm.menu.busyElement.classList.add(vm.menu.hiddenClass);
-
-                        if (statusWithMessage.Success) {
-                            vm.menu.error = false;
-                            vm.menu.errorElement.classList.add(vm.menu.hiddenClass);
-                            vm.menu.success = true;
-                            vm.menu.successElement.classList.remove(vm.menu.hiddenClass);
-                        
-                        } else {
-                            vm.menu.error = true;
-                            vm.menu.errorElement.classList.remove(vm.menu.hiddenClass);
-                            vm.menu.success = false;
-                            vm.menu.successElement.classList.add(vm.menu.hiddenClass);
-                            vm.menu.errorMsg = statusWithMessage.Message === undefined ? "We are sorry, we could not clear the cache at this time." : statusWithMessage.Message;
-                        }
-                    }).error(function (e) {
-                        vm.menu.busy = false;
-                        vm.menu.busyElement.classList.add(vm.menu.hiddenClass);
-                        vm.menu.success = false;
-                        vm.menu.successElement.classList.add(vm.menu.hiddenClass);
-                        vm.menu.error = true;
-                        vm.menu.errorElement.classList.remove(vm.menu.hiddenClass);
-                        vm.menu.errorMessage = "We are sorry, we could not clear the cache at this time.";
-                    });
-            };
+        vm.menu.includeDescendantsToggle = function () {
+            vm.menu.includeDescendants = !vm.menu.includeDescendants;
         }
+
+        vm.menu.purge = function () {
+            vm.menu.busy = true;
+            
+            cogworksUmbracoflareResources.purgeCacheForNodeId($scope.currentNode.id, vm.menu.includeDescendants, vm.menu.currentDomain)
+                .then(function (statusWithMessage) {
+                    vm.menu.busy = false;
+                    
+                    if (statusWithMessage.data.Success) {
+                        vm.menu.error = false;
+                        vm.menu.success = true;
+                    } else {
+                        vm.menu.error = true;
+                        vm.menu.success = false;
+                        vm.menu.errorMsg = statusWithMessage.data.Message === undefined ? "We are sorry, we could not clear the cache at this time." : statusWithMessage.data.Message;
+                    }
+                }, function (error) {
+                    vm.menu.busy = false;
+                    vm.menu.success = false;
+                    vm.menu.error = true;
+                    vm.menu.errorMessage = "We are sorry, we could not clear the cache at this time.";
+                });
+        };
+
+        vm.menu.closeDialog = function () {
+            navigationService.hideDialog();
+        };
     }
+}
 )();

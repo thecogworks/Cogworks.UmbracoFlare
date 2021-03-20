@@ -1,36 +1,35 @@
-﻿<div ng-controller="Cogworks.Umbracoflare.Menu.Controller as cogworksUmbracoflareMenuController"class="purge-menu">
+﻿<div ng-controller="Cogworks.Umbracoflare.Menu.Controller as cogworksUmbracoflareMenuController" class="purge-menu">
     <div class="umb-pane">
         <div ng-hide="cogworksUmbracoflareMenuController.menu.success">
-            <p class="abstract">
+            <p>
                 Are you sure you want to purge the Cloudflare cache for this node?
             </p>
-            <umb-pane ng-hide="cogworksUmbracoflareMenuController.menu.busy">
-                <umb-control-group label="Include Descendants?">
-                    <input type="checkbox" ng-model="$parent.$parent.purgeChildren" />
-                </umb-control-group>
-            </umb-pane>
+            <br />
+            <umb-control-group label="Include Descendants?">
+                <umb-toggle checked="cogworksUmbracoflareMenuController.menu.includeDescendants" on-click="cogworksUmbracoflareMenuController.menu.includeDescendantsToggle()"></umb-toggle>
+
+                <div id="purge-menu-loader" class="umb-loader-wrapper" ng-if="cogworksUmbracoflareMenuController.menu.busy">
+                    <div class="umb-loader"></div>
+                </div>
+            </umb-control-group>
         </div>
 
-        <div id="purge-menu-error" class="alert alert-error -hidden">
+        <div id="purge-menu-error" class="alert alert-error" ng-if="cogworksUmbracoflareMenuController.menu.error">
             <h4>{{cogworksUmbracoflareMenuController.menu.errorMsg}}</h4>
         </div>
 
-        <div id="purge-menu-loader" class="umb-loader-wrapper -hidden">
-            <div class="umb-loader"></div>
+        <div id="purge-menu-success" class="alert alert-success" ng-if="cogworksUmbracoflareMenuController.menu.success">
+            <p>You have successfully cleared the cache for this node!</p>
+            <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.closeDialog()">Ok</button>
         </div>
 
-        <div id="purge-menu-success" class="alert alert-success -hidden">
-            You have successfully cleared the cache for this node!
-            <button class="btn btn-primary" ng-click="nav.hideDialog()">Ok</button>
+        <div ng-hide="cogworksUmbracoflareMenuController.menu.success" ng-class="{'-grey-out' : cogworksUmbracoflareMenuController.menu.busy}">
+            <a class="btn btn-link" ng-click="cogworksUmbracoflareMenuController.menu.closeDialog()">
+                <localize key="general_cancel">Cancel</localize>
+            </a>
+            <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.purge()" ng-disabled="cogworksUmbracoflareMenuController.menu.busy">
+                Purge Cache
+            </button>
         </div>
-    </div>
-
-    <div class="umb-dialog-footer btn-toolbar umb-btn-toolbar" ng-hide="cogworksUmbracoflareMenuController.menu.success">
-        <a class="btn btn-link" ng-click="nav.hideDialog()" ng-if="!cogworksUmbracoflareMenuController.menu.busy">
-            <localize key="general_cancel">Cancel</localize>
-        </a>
-        <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.purge()" ng-disabled="cogworksUmbracoflareMenuController.menu.busy">
-            Purge Cache
-        </button>
     </div>
 </div>

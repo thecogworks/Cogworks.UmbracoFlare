@@ -5,6 +5,7 @@ using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Umbraco.Core.Models.PublishedContent;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
@@ -24,14 +25,14 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
     public class UmbracoFlareDomainService : IUmbracoFlareDomainService
     {
-        private readonly UmbracoHelper _umbracoHelper;
+        private readonly IUmbracoContextFactory _umbracoContextFactory;
         private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IDomainService _domainService;
         private readonly IUmbracoLoggingService _umbracoLoggingService;
 
-        public UmbracoFlareDomainService(UmbracoHelper umbracoHelper, ICloudflareApiClient cloudflareApiClient, IDomainService domainService, IUmbracoLoggingService umbracoLoggingService)
+        public UmbracoFlareDomainService(IUmbracoContextFactory umbracoContextFactory, ICloudflareApiClient cloudflareApiClient, IDomainService domainService, IUmbracoLoggingService umbracoLoggingService)
         {
-            _umbracoHelper = umbracoHelper;
+            _umbracoContextFactory = umbracoContextFactory;
             _cloudflareApiClient = cloudflareApiClient;
             _domainService = domainService;
             _umbracoLoggingService = umbracoLoggingService;
@@ -39,9 +40,14 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         public IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false)
         {
-            var content = _umbracoHelper.Content(contentId);
-            var urls = new List<string>();
+            IPublishedContent content;
+            using (var umbracoContextReference = _umbracoContextFactory.EnsureUmbracoContext())
+            {
+                var contentCache = umbracoContextReference.UmbracoContext.Content;
+                content = contentCache.GetById(contentId);
+            }
 
+            var urls = new List<string>();
             if (!content.HasValue()) { return urls; }
 
             if (includeDescendants)
@@ -139,8 +145,17 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         private IEnumerable<string> GetAllContentUrls()
         {
+            IEnumerable<IPublishedContent> roots;
+
+            using (var umbracoContextReference = _umbracoContextFactory.EnsureUmbracoContext())
+            {
+                var contentCache = umbracoContextReference.UmbracoContext.Content;
+                roots = contentCache.GetAtRoot();
+            }
+
             var urls = new List<string>();
-            var roots = _umbracoHelper.ContentAtRoot();
+
+            if (!roots.HasAny()) { return urls; }
 
             foreach (var root in roots)
             {

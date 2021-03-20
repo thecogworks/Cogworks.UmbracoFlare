@@ -21,7 +21,6 @@
 	<files>
 		<file src="..\Cogworks.UmbracoFlare.Core\obj\Release\Cogworks.UmbracoFlare.Core.dll" target="lib\net452" />
 		<file src="..\Cogworks.UmbracoFlare.Core\Config\**" target="content\Config" />
-		<file src="..\Cogworks.UmbracoFlare.Core\Transforms\**" target="content\Config" />
 		<file src="App_Plugins\UmbracoFlare\**" target="content\App_Plugins\UmbracoFlare" />
 	</files>
 </package>

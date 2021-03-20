@@ -16,12 +16,13 @@ namespace Cogworks.UmbracoFlare.Core.Composers
     {
         public void Compose(Composition composition)
         {
-            composition.Components().Append<UmbracoFlareStartupComponent>();
-
             var container = composition.Concrete as ServiceContainer;
-
             RegisterServices(container);
             RegisterAssembliesControllers(container);
+
+            composition.Components()
+                .Append<UmbracoFlareStartupComponent>()
+                .Append<UmbracoFlareEventsComponent>();
         }
 
         private static void RegisterServices(IServiceRegistry container)
