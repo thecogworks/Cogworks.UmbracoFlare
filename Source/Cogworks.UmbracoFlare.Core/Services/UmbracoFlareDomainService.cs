@@ -9,7 +9,6 @@ using Umbraco.Core.Models.PublishedContent;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
-// ReSharper disable PossibleMultipleEnumeration
 namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IUmbracoFlareDomainService

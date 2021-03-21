@@ -26,9 +26,6 @@ namespace Cogworks.UmbracoFlare.Core.Client
         private readonly IUmbracoLoggingService _umbracoLoggingService;
         private readonly IConfigurationService _configurationService;
 
-        public const string CloudflareApiBaseUrl = "https://api.cloudflare.com/client/v4/";
-        public const string CloudflareApiUserEndpoint = "user";
-        public const string CloudflareApiZonesEndpoint = "zones";
 
         public CloudflareApiClient(IUmbracoLoggingService umbracoLoggingService, IConfigurationService configurationService)
         {
@@ -49,8 +46,8 @@ namespace Cogworks.UmbracoFlare.Core.Client
             using (var client = new HttpClient())
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
-                const string url = CloudflareApiBaseUrl + CloudflareApiUserEndpoint;
-
+                var url = $"{ApplicationConstants.CloudflareApi.BaseUrl}{ApplicationConstants.CloudflareApi.UserEndpoint}";
+                
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri(url),
@@ -81,7 +78,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
         {
             using (var client = new HttpClient())
             {
-                var url = $"{CloudflareApiBaseUrl}{CloudflareApiZonesEndpoint}";
+                var url = $"{ApplicationConstants.CloudflareApi.BaseUrl}{ApplicationConstants.CloudflareApi.ZonesEndpoint}";
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
 
                 var request = new HttpRequestMessage
@@ -129,7 +126,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
                 var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri(CloudflareApiBaseUrl + "zones/" + zoneId + "/purge_cache"),
+                    RequestUri = new Uri($"{ApplicationConstants.CloudflareApi.BaseUrl}zones/{zoneId}/purge_cache"),
                     Method = HttpMethod.Delete,
                     Content = new StringContent(json, Encoding.UTF8, ApplicationConstants.ContentTypeApplicationJson)
                 };

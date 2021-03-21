@@ -30,22 +30,22 @@
         vm.dashboard.updatedCredentials = false;
         vm.dashboard.updatedAutoPurge = false;
         vm.dashboard.updatingAutoPurge = false;
-
         vm.dashboard.purgeConfirmationMessage = false;
         vm.dashboard.purgeSiteDone = false;
         vm.dashboard.purgeSiteBusy = false;
-
         vm.dashboard.purgeStaticBusy = 'purge-static-busy';
         vm.dashboard.purgeStaticSuccess = 'purge-static-success';
         vm.dashboard.purgeUrlsBusy = 'purge-urls-busy';
         vm.dashboard.purgeUrlsSuccess = 'purge-urls-success';
-
         vm.dashboard.currentDomain = window.location.hostname;
         vm.dashboard.currentDomainIsValid = false;
+        vm.dashboard.showCurrentDomainInvalidErrorMessage = false;
         vm.dashboard.loading = true;
 
-        getCloudflareStatus();
-
+        if (vm.dashboard.currentAccountEmail === '' && vm.dashboard.currentApiKey === '') {
+            getCloudflareStatus();    
+        }
+        
         function getCloudflareStatus() {
             cogworksUmbracoflareResources.getConfigurationStatus()
                 .then(function (configFromServer) {
@@ -54,22 +54,15 @@
                     vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
                     vm.dashboard.currentPurgeCacheOn = vm.dashboard.newConfig.PurgeCacheOn;
                     vm.dashboard.credentialsAreValid = vm.dashboard.newConfig.CredentialsAreValid;
-                    if (vm.dashboard.credentialsAreValid) {
-                        getAllowedDomains();
-                    }
+                    vm.dashboard.currentDomainIsValid = vm.dashboard.newConfig.AllowedDomains.indexOf(vm.dashboard.currentDomain) > -1;
+                    vm.dashboard.showCurrentDomainInvalidErrorMessage = !vm.dashboard.newConfig.CredentialsAreValid;
                     vm.dashboard.loading = false;
+
                 }, function (error) {
                     vm.dashboard.loading = false;
                 });
         }
-
-        function getAllowedDomains() {
-            cogworksUmbracoflareResources.getAllowedDomains()
-                .then(function (domains) {
-                    vm.dashboard.currentDomainIsValid = domains.data.indexOf(vm.dashboard.currentDomain) > -1;
-                });
-        }
-
+        
         var refreshStateAfterTime = function () {
             $timeout(function () {
                 vm.dashboard.state = '';
@@ -121,7 +114,6 @@
             vm.dashboard.updateCredentials(true);
         };
 
-
         /////////////////////////////Purge Site/////////////////////////////////
 
         vm.dashboard.purgeSite = function () {
@@ -155,11 +147,10 @@
         /////////////////////////////Purge Static Files/////////////////////////////////
 
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
-
             angular.forEach(selectedFiles, function (value) {
                 vm.dashboard.selectedFilesPath.push('/' + value.id);
             });
-            
+
             vm.dashboard.state = vm.dashboard.purgeStaticBusy;
             cogworksUmbracoflareResources.purgeStaticFiles(vm.dashboard.selectedFilesPath, vm.dashboard.currentDomain)
                 .then(function (statusWithMessage) {
@@ -206,7 +197,6 @@
             };
 
             editorService.treePicker(filePicker);
-
         };
 
         vm.dashboard.removeSelectedValues = function (item) {

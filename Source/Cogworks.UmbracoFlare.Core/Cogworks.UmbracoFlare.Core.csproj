@@ -273,6 +273,7 @@
     <Compile Include="Composers\UmbracoFlareStartupComposer.cs" />
     <Compile Include="Constants\ApplicationConstants.cs" />
     <Compile Include="Controllers\CloudflareUmbracoApiController.cs" />
+    <Compile Include="Extensions\EntityExtensions.cs" />
     <Compile Include="Extensions\EnumerableExtensions.cs" />
     <Compile Include="Extensions\GenericExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -282,10 +283,6 @@
     <Compile Include="Models\Api\PurgeFromContentTree.cs" />
     <Compile Include="Models\Cloudflare\BasicCloudflareResponse.cs" />
     <Compile Include="Models\UmbracoFlareConfigModel.cs" />
-    <Compile Include="Models\CropModels\Coordinates.cs" />
-    <Compile Include="Models\CropModels\Crop.cs" />
-    <Compile Include="Models\CropModels\FocalPoint.cs" />
-    <Compile Include="Models\CropModels\UmbracoFile.cs" />
     <Compile Include="Models\Cloudflare\ZonesResponse.cs" />
     <Compile Include="Models\Api\PurgeUrlsRequestModel.cs" />
     <Compile Include="Models\Api\PurgeStaticFilesRequestModel.cs" />

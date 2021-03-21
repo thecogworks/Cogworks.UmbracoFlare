@@ -97,7 +97,7 @@ namespace Cogworks.UmbracoFlare.Core.Components
 
             foreach (var file in files)
             {
-                if (file.HasIdentity) { continue; }
+                if (file.IsNew()) { continue; }
                 urls.Add(file.VirtualPath);
             }
 
@@ -128,7 +128,7 @@ namespace Cogworks.UmbracoFlare.Core.Components
 
                 foreach (var media in e.SavedEntities)
                 {
-                    if (media.HasIdentity || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
+                    if (media.IsNew() || media.GetValue<bool>(ApplicationConstants.UmbracoFlareBackendProperties.CloudflareDisabledOnPublishPropertyAlias)) { continue; }
 
                     var publishedMedia = mediaCache.GetById(media.Id);
 

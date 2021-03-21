@@ -17,7 +17,7 @@
                         <div class="umb-panel-group__details-status-text">
                             <h4>Status: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h4>
                             <h4>Current domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h4>
-                            <p class="umb-panel-group__details-status-action domain-invalid-error" ng-show="!cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.</p>
+                            <p class="umb-panel-group__details-status-action domain-invalid-error" ng-show="cogworksUmbracoflareDashboardController.dashboard.showCurrentDomainInvalidErrorMessage">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.</p>
                         </div>
 
                         <div class="cloudflare-config">
@@ -76,6 +76,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    <br />
+    <div class="umb-panel-group__details-group" ng-class="{'-grey-out' : cogworksUmbracoflareDashboardController.dashboard.loading}">
+
         <div class="umb-panel-group__details-group-title">
             <div class="umb-panel-group__details-group-name">
                 Purge Options
@@ -110,7 +114,7 @@
                                         Add individual files by selecting them from the picker below.
                                         Multiple files can added for purging together.
                                     </p>
-                                    
+
                                     <ng-form name="filePickerForm">
                                         <div>
                                             <umb-node-preview ng-repeat="selectedFile in cogworksUmbracoflareDashboardController.dashboard.selectedFiles"

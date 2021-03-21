@@ -38,6 +38,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             var userDetails = _cloudflareService.GetCloudflareUserDetails();
             configurationFile.CredentialsAreValid = userDetails != null && userDetails.Success;
+            configurationFile.AllowedDomains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
 
             return configurationFile;
         }
@@ -66,12 +67,6 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             var result = _cloudflareService.PurgeEverything(currentDomain);
             return result;
-        }
-
-        [HttpGet]
-        public IEnumerable<string> GetAllowedDomains()
-        {
-            return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
         }
 
         [HttpPost]

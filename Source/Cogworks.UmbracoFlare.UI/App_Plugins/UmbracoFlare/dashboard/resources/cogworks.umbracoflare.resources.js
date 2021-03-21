@@ -16,8 +16,7 @@
             purgeStaticFiles: purgeStaticFiles,
             getConfigurationStatus: getConfigurationStatus,
             purgeCacheForNodeId: purgeCacheForNodeId,
-            updateConfigurationStatus: updateConfigurationStatus,
-            getAllowedDomains: getAllowedDomains
+            updateConfigurationStatus: updateConfigurationStatus
         };
 
         return service;
@@ -57,10 +56,6 @@
             return $http.post(API_ROOT + 'UpdateConfigStatus',
                 { PurgeCacheOn : configObject.PurgeCacheOn, ApiKey: configObject.ApiKey,
                     AccountEmail: configObject.AccountEmail, SelectedDomains: configObject.SelectedDomains });
-        }
-        
-        function getAllowedDomains() {
-            return $http.get(API_ROOT + 'GetAllowedDomains');
         }
     }
 })();

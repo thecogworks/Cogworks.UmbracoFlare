@@ -15,10 +15,17 @@
         {
             public const string CloudflareCaching = "Cloudflare Caching";
         }
-        
+
         public static class ConfigurationFile
         {
             public const string ConfigurationFilePath = "~/Config/cloudflare.config";
+        }
+
+        public static class CloudflareApi
+        {
+            public const string BaseUrl = "https://api.cloudflare.com/client/v4/";
+            public const string UserEndpoint = "user";
+            public const string ZonesEndpoint = "zones";
         }
     }
 }

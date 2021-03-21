@@ -17,8 +17,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
 
         StatusWithMessage PurgeEverything(string currentDomain);
 
-        string PrintResultsSummary(IEnumerable<StatusWithMessage> results);
-
         UserDetails GetCloudflareUserDetails();
 
         IEnumerable<string> GetFilePaths(IEnumerable<string> filesOrFolders);
@@ -75,19 +73,6 @@ namespace Cogworks.UmbracoFlare.Core.Services
             return purgeCacheStatus
                 ? new StatusWithMessage(true, $"Your current domain {currentDomain} was purged successfully.")
                 : new StatusWithMessage(false, "There was an error from the Cloudflare API. Please check the logfile to see the issue.");
-        }
-
-        public string PrintResultsSummary(IEnumerable<StatusWithMessage> results)
-        {
-            var statusMessages = new List<string>
-            {
-                $"There were {results.Count(x => x.Success)} successes."
-            };
-
-            statusMessages.AddRange(results.Where(x => !x.Success).Select(failedStatus => "Failed for reason: " + failedStatus.Message + ".  "));
-            var resultsSummary = string.Join(" ", statusMessages);
-
-            return resultsSummary;
         }
 
         public UserDetails GetCloudflareUserDetails()
