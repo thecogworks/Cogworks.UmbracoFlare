@@ -145,7 +145,8 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             if (!currentDomainIsValid)
             {
-                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account " +
+                                                    "and make sure you this account is associated in the umbracoflare dashboard");
             }
 
             var urls = new List<string>();
