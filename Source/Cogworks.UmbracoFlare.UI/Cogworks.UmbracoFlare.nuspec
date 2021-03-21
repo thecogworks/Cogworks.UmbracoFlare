@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
 	<metadata>
 		<id>Cogworks.UmbracoFlare</id>
-		<version>1.2.0</version>
+		<version>8.0.0</version>
 		<title>Cogworks.UmbracoFlare</title>
 		<authors>Cogworks</authors>
 		<owners>The Scylla Group,Inc.</owners>
@@ -12,7 +12,7 @@
 		<projectUrl>https://github.com/thecogworks/Cogworks.UmbracoFlare</projectUrl>
 		<description>This project aims to provide a basic level of service integration between Cloudflare and the open-source ASP.NET CMS Umbraco.</description>
 		<summary>This is a fork of the main UmbracoFlare project offered by The Scylla Group at https://github.com/scyllagroup/UmbracoFlare. Created by Cogworks(Ale) for freedom fridays.
-			It contains a massive refactor and bug fixes to work with Umbraco 7.15.7, now the functionality works around the current domain. It is being offered to the community as-is.
+			It contains a massive refactor and bug fixes to work with Umbraco 8.12.0, now the functionality works around the current domain. It is being offered to the community as-is.
 			Happy to maintain package, add new features and fix the reported bugs.
 		</summary>
 		<copyright>Copyright 2021</copyright>
