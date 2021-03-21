@@ -25,4 +25,11 @@ To [install from NuGet](https://www.nuget.org/packages/Cogworks.UmbracoFlare/), 
 
 After installing the package, you'll be able to access a new tab on the Settings section called "Umbraco Flare" via the Umbraco backoffice.
 
+## Backoffice User:
+
+```sh
+Email: admin@admin.com
+Password: 0123456789
+```
+
 **_Happy to maintain the package, add new features and fix the reported bugs._**
