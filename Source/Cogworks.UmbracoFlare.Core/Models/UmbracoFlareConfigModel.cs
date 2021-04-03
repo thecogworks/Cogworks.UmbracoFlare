@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace Cogworks.UmbracoFlare.Core.Models
@@ -6,6 +7,11 @@ namespace Cogworks.UmbracoFlare.Core.Models
     [XmlRoot(Namespace = "cloudflare", ElementName = "cloudflare")]
     public class UmbracoFlareConfigModel
     {
+        public UmbracoFlareConfigModel()
+        {
+            AllowedDomains = Enumerable.Empty<string>();
+        }
+
         [XmlElement(ElementName = "purgeCacheOn")]
         public bool PurgeCacheOn { get; set; }
 
