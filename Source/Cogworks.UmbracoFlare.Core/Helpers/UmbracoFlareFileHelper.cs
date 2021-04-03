@@ -1,5 +1,4 @@
 ﻿using Cogworks.UmbracoFlare.Core.Extensions;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,32 +8,38 @@ namespace Cogworks.UmbracoFlare.Core.Helpers
 {
     public static class UmbracoFlareFileHelper
     {
-        public static IEnumerable<DirectoryInfo> GetFolders(string folder, string[] filter)
-        {
-            var path = IOHelper.MapPath("~/" + folder.TrimStart('~', '/'));
+        private static readonly IEnumerable<string> ExcludedPaths = new List<string> { "app_data", "app_browsers", "app_data", "app_code", "app_plugins", "properties", "bin", "config", "media", "obj", "umbraco", "views" };
+        private static readonly IEnumerable<string> ExcludedExtensions = new List<string> { ".config", ".asax", ".user", ".nuspec", ".dll", ".pdb", ".lic", ".csproj", ".aspx" };
 
-            if (!filter.HasValue() || filter[0] == ".")
-            {
-                return new DirectoryInfo(path).GetDirectories("*");
-            }
-
-            var directories = new DirectoryInfo(path).EnumerateDirectories();
-
-            return directories.Where(x => x.EnumerateFiles().Any(f => filter.Contains(f.Extension, StringComparer.OrdinalIgnoreCase)));
-        }
-
-        public static IEnumerable<FileInfo> GetFiles(string folder, string[] filter)
+        public static IEnumerable<DirectoryInfo> GetFolders(string folder)
         {
             var path = IOHelper.MapPath("~/" + folder.TrimStart('~', '/'));
             var directory = new DirectoryInfo(path);
-            var files = directory.EnumerateFiles();
 
-            if (filter.HasValue() && filter[0] != ".")
+            if (!directory.Exists)
             {
-                return files.Where(f => filter.Contains(f.Extension, StringComparer.OrdinalIgnoreCase));
+                return Enumerable.Empty<DirectoryInfo>();
             }
 
-            return new DirectoryInfo(path).GetFiles();
+            var directories = directory.EnumerateDirectories().Where(x => !ExcludedPaths.Contains(x.Name.ToLowerInvariant())).ToList();
+            var allowedDirectories = directories.Where(x => x.EnumerateFiles().Any(f => !ExcludedExtensions.Contains(f.Extension)));
+
+            return allowedDirectories;
+        }
+
+        public static IEnumerable<FileInfo> GetFiles(string folder)
+        {
+            var path = IOHelper.MapPath("~/" + folder.TrimStart('~', '/'));
+            var directory = new DirectoryInfo(path);
+
+            if (!directory.Exists)
+            {
+                return Enumerable.Empty<FileInfo>();
+            }
+
+            var files = directory.EnumerateFiles().Where(f => !ExcludedExtensions.Contains(f.Extension));
+
+            return files;
         }
 
         public static IEnumerable<FileInfo> GetFilesIncludingSubDirs(string path)

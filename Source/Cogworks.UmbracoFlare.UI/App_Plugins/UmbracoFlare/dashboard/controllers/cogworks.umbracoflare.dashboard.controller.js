@@ -28,21 +28,21 @@
         vm.dashboard.updatedCredentials = false;
         vm.dashboard.updatedAutoPurge = false;
         vm.dashboard.updatingAutoPurge = false;
-
         vm.dashboard.purgeConfirmationMessage = false;
         vm.dashboard.purgeSiteDone = false;
         vm.dashboard.purgeSiteBusy = false;
-
         vm.dashboard.purgeStaticBusy = 'purge-static-busy';
         vm.dashboard.purgeStaticSuccess = 'purge-static-success';
         vm.dashboard.purgeUrlsBusy = 'purge-urls-busy';
         vm.dashboard.purgeUrlsSuccess = 'purge-urls-success';
-
         vm.dashboard.currentDomain = window.location.hostname;
         vm.dashboard.currentDomainIsValid = false;
+        vm.dashboard.showCurrentDomainInvalidErrorMessage = false;
+        vm.dashboard.loading = true;
 
-
-        getCloudflareStatus();
+        if (vm.dashboard.currentAccountEmail === '' && vm.dashboard.currentApiKey === '') {
+            getCloudflareStatus();    
+        }
 
         function getCloudflareStatus() {
             cogworksUmbracoflareResources.getConfigurationStatus()
@@ -52,17 +52,12 @@
                     vm.dashboard.currentAccountEmail = vm.dashboard.newConfig.AccountEmail;
                     vm.dashboard.currentPurgeCacheOn = vm.dashboard.newConfig.PurgeCacheOn;
                     vm.dashboard.credentialsAreValid = vm.dashboard.newConfig.CredentialsAreValid;
-                    
-                    if (vm.dashboard.credentialsAreValid) {
-                        getAllowedDomains();
-                    }
-                });
-        }
+                    vm.dashboard.currentDomainIsValid = vm.dashboard.newConfig.AllowedDomains.indexOf(vm.dashboard.currentDomain) > -1;
+                    vm.dashboard.showCurrentDomainInvalidErrorMessage = !vm.dashboard.newConfig.CredentialsAreValid;
+                    vm.dashboard.loading = false;
 
-        function getAllowedDomains() {
-            cogworksUmbracoflareResources.getAllowedDomains()
-                .success(function (domains) {
-                    vm.dashboard.currentDomainIsValid = domains.includes(vm.dashboard.currentDomain);
+                }).error(function () {
+                    vm.dashboard.loading = false;
                 });
         }
 
@@ -117,13 +112,7 @@
             vm.dashboard.updateCredentials(true);
         };
 
-        vm.dashboard.purgeSiteConfirmation = function () {
-            vm.dashboard.purgeConfirmationMessage = true;
-        }
-
-        vm.dashboard.purgeSiteCancel = function () {
-            vm.dashboard.purgeConfirmationMessage = false;
-        }
+        /////////////////////////////Purge Site/////////////////////////////////
 
         vm.dashboard.purgeSite = function () {
             vm.dashboard.purgeConfirmationMessage = false;
@@ -145,8 +134,17 @@
             refreshStateAfterTime();
         }
 
+        vm.dashboard.purgeSiteConfirmation = function () {
+            vm.dashboard.purgeConfirmationMessage = true;
+        }
+
+        vm.dashboard.purgeSiteCancel = function () {
+            vm.dashboard.purgeConfirmationMessage = false;
+        }
+
+        /////////////////////////////Purge Static Files/////////////////////////////////
+
         vm.dashboard.purgeStaticFiles = function (selectedFiles) {
-            debugger;
             vm.dashboard.state = vm.dashboard.purgeStaticBusy;
             cogworksUmbracoflareResources.purgeStaticFiles(selectedFiles, vm.dashboard.currentDomain)
                 .success(function (statusWithMessage) {
@@ -160,7 +158,6 @@
                     }
                     refreshStateAfterTime();
                 }).error(function () {
-                    debugger;
                     notificationsService.error('Sorry, we could not purge the cache for the selected static files.');
                     refreshStateAfterTime();
                 });
@@ -184,6 +181,8 @@
             }
         };
 
+        /////////////////////////////Purge Urls/////////////////////////////////
+        
         vm.dashboard.purgeUrls = function (urls) {
             var noBeginningSlash = false;
 

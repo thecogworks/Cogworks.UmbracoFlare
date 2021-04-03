@@ -446,14 +446,15 @@
 .cloudflare-config {
     height: 50%;
     margin: 0 0;
+    margin-top: 30px;
 }
 
-    .cloudflare-config.cloudflare-account .umb-button__success {
+    .cloudflare-account .umb-button__success {
         top: 33px;
         left: 179px;
     }
 
-    .cloudflare-config.cloudflare-account .umb-button__progress {
+    .cloudflare-account .umb-button__progress {
         position: relative;
         left: 178px;
         top: 25px;
@@ -467,13 +468,13 @@
     margin-top: 40px;
 }
 
-    .cloudflare-config.cloudflare-auto-purge .umb-button__success {
+    .cloudflare-auto-purge .umb-button__success {
         position: relative;
         top: -3px;
         margin-left: 110px;
     }
 
-    .cloudflare-config.cloudflare-auto-purge .umb-button__progress {
+    .cloudflare-auto-purge .umb-button__progress {
         position: relative;
         left: 173px;
         top: -32px;
@@ -525,4 +526,12 @@ i.inactive {
 .icon-umbracoflare-tiny::before {
     content: url('umbracoflare-black-18x20px.png');
     margin-left: -2px;
+}
+
+.section-name {
+    margin-top: 0;
+}
+
+.domain-invalid-error {
+    font-style: italic;
 }

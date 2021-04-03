@@ -1,50 +1,63 @@
-<div ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare umb-scrollable">
-    <div class="cloudflare-config">
+<div id="umbracoFlare" ng-controller="Cogworks.Umbracoflare.Dashboard.Controller as cogworksUmbracoflareDashboardController" class="umbracoflare">
+
+    <div ng-if="cogworksUmbracoflareDashboardController.dashboard.loading">
+        <umb-load-indicator></umb-load-indicator>
+    </div>
+
+    <div>
         <div class="row-fluid">
             <div class="span3">
-                <h2>Status Cloudflare Account: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h2>
+                <h3 class="section-name">Cloudflare Account</h3>
+                <h4>Status: <span ng-show="cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-green">Associated <i class="fa fa-icon-remove-sign fa-lg active"></i></span><span ng-show="!cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid" class="-red">Not Associated <i class="fa fa-icon-ok-circle fa-lg inactive"></i></span></h4>
+                <h4>Current Domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h4>
+                <p class="domain-invalid-error -red" ng-show="cogworksUmbracoflareDashboardController.dashboard.showCurrentDomainInvalidErrorMessage">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.</p>
             </div>
             <div class="span3">
-                <h2>Current Domain: <span ng-class="{'-green': cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid, '-red' : !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">{{cogworksUmbracoflareDashboardController.dashboard.currentDomain}}</span></h2>
-                <p ng-show="!cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid">The current domain is not valid, please check if the domain is a valid zone in your cloudflare account</p>
+                
             </div>
         </div>
         <hr />
-        <div class="row-fluid">
-            <div class="span3">
-                <h3>Cloudflare Account</h3>
-                <div class="cloudflare-config cloudflare-account">
-                    <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
-                    <div class="config-group">
-                        <label>Account Email </label>
-                        <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
-                    </div>
-                    <div class="config-group">
-                        <label>Api Key </label>
-                        <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
-                    </div>
-                    <div class="config-group position-relative">
-                        <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
-                        <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingCredentials}"></div>
-                        <button class="btn btn-success" ng-disabled="cogworksUmbracoflareDashboardController.dashboard.updatingCredentials" ng-click="cogworksUmbracoflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
+        <div class="cloudflare-config">
+            <div class="row-fluid">
+                <div class="span3">
+                    <div class="cloudflare-account">
+                        <p>This is the master control to turn off the cloudflare controls in Umbraco. This includes purging on publish, from the context menu and from the dashboard.</p>
+                        <div class="config-group">
+                            <label>Account Email </label>
+                            <input type="text" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentAccountEmail" />
+                        </div>
+                        <div class="config-group">
+                            <label>Api Key </label>
+                            <input type="text" class="apikey-input" ng-model="cogworksUmbracoflareDashboardController.dashboard.currentApiKey" />
+                        </div>
+                        <div class="config-group position-relative">
+                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedCredentials}"></div>
+                            <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingCredentials}"></div>
+                            <button class="btn btn-success" ng-disabled="cogworksUmbracoflareDashboardController.dashboard.updatingCredentials" ng-click="cogworksUmbracoflareDashboardController.dashboard.updateCredentials(false)">Update Credentials</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="cloudflare-config cloudflare-auto-purge" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
-                    <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
-                    <div class="toggle-container">
-                        <span>CloudFlare Auto-Purge on "Save and publish"</span>
-                        <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}">
-                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
-                                <div class="toggle-label">ON</div>
+                <div class="span3 offset1">
+                    <div class="cloudflare-auto-purge" ng-class="{'-grey-out' : !cogworksUmbracoflareDashboardController.dashboard.credentialsAreValid || !cogworksUmbracoflareDashboardController.dashboard.currentDomainIsValid}">
+                        <p>By turning Auto-Purge ON, CloudFlare will automatically purge the server's cache every time you save/publish a page or media type.</p>
+                        <div class="toggle-container">
+                            <span>CloudFlare Auto-Purge on "Save and publish"</span>
+                            <div class="toggle-switch" ng-class="{'disable-toggle-switch' : cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}">
+                                <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-bright-green' : cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-left toggle-button">
+                                    <div class="toggle-label">ON</div>
+                                </div>
+                                <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
+                                    <div class="toggle-label">OFF</div>
+                                </div>
+                                <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedAutoPurge}"></div>
+                                <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}"></div>
                             </div>
-                            <div ng-click="cogworksUmbracoflareDashboardController.dashboard.togglePurgeCacheOn()" ng-class="{'-background-red' : !cogworksUmbracoflareDashboardController.dashboard.currentPurgeCacheOn, 'pointer-events': cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}" class="-float-right toggle-button">
-                                <div class="toggle-label">OFF</div>
-                            </div>
-                            <div class="icon-check umb-button__success" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatedAutoPurge}"></div>
-                            <div class="umb-button__progress" ng-class="{'-hidden': !cogworksUmbracoflareDashboardController.dashboard.updatingAutoPurge}"></div>
                         </div>
                     </div>
+                </div>
+
+                <div class="span3 offset1">
                     <p>
                         Notes:
                         <br />

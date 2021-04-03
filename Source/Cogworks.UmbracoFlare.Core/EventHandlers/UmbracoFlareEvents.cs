@@ -32,11 +32,8 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             _imageCropperService = ServiceFactory.GetImageCropperService();
 
             ContentService.Published += PurgeCloudflareCache;
-            //What happens when the node gets unpublished or deleted???
-
             FileService.SavedScript += PurgeCloudflareCacheForScripts;
             FileService.SavedStylesheet += PurgeCloudflareCacheForStylesheets;
-
             MediaService.Saved += PurgeCloudflareCacheForMedia;
         }
 
@@ -46,7 +43,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
 
             var urls = new List<string>();
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var content in e.PublishedEntities)
             {
@@ -55,17 +52,14 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
                 urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(content.Id, currentDomain));
             }
 
-            var results = _cloudflareService.PurgePages(urls);
+            var result = _cloudflareService.PurgePages(urls);
 
-            if (results.HasAny())
-            {
-                e.Messages.Add(results.Any(x => !x.Success)
-                    ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
-                        "We could not purge the Cloudflare cache. \n \n" +
-                        _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning)
-                    : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "Successfully purged the cloudflare cache.",
-                        EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "Successfully purged the cloudflare cache.", EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "We could not purge the Cloudflare cache. Please check the logs to find out more.",
+                    EventMessageType.Warning));
         }
 
         private void PurgeCloudflareCacheForScripts(IFileService sender, SaveEventArgs<Script> e)
@@ -86,7 +80,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             if (!umbracoFlareConfigModel.PurgeCacheOn) { return; }
             if (!files.HasAny()) { return; }
 
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
             var urls = new List<string>();
 
             foreach (var file in files)
@@ -97,16 +91,13 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
 
-            var results = _cloudflareService.PurgePages(fullUrls);
+            var result = _cloudflareService.PurgePages(fullUrls);
 
-            if (results.HasAny() && results.Any(x => !x.Success))
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not purge the Cloudflare cache. \n \n" + _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning));
-            }
-            else if (results.Any())
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "Successfully purged the cloudflare cache.", EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "Successfully purged the cloudflare cache.",
+                    EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching, "We could not purge the Cloudflare cache.",
+                    EventMessageType.Warning));
         }
 
         protected void PurgeCloudflareCacheForMedia(IMediaService sender, SaveEventArgs<IMedia> e)
@@ -117,7 +108,7 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             var imageCropSizes = _imageCropperService.GetAllCrops().ToList();
             var urls = new List<string>();
 
-            var currentDomain =  UmbracoFlareUrlHelper.GetCurrentDomain();
+            var currentDomain = UmbracoFlareUrlHelper.GetCurrentDomain();
 
             foreach (var media in e.SavedEntities)
             {
@@ -136,16 +127,13 @@ namespace Cogworks.UmbracoFlare.Core.EventHandlers
             }
 
             var fullUrls = UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(urls, currentDomain, true);
-            var results = _cloudflareService.PurgePages(fullUrls);
+            var result = _cloudflareService.PurgePages(fullUrls);
 
-            if (results.HasAny() && results.Any(x => !x.Success))
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "We could not purge the Cloudflare cache. \n \n" + _cloudflareService.PrintResultsSummary(results), EventMessageType.Warning));
-            }
-            else if (results.Any())
-            {
-                e.Messages.Add(new EventMessage("Cloudflare Caching", "Successfully purged the cloudflare cache.", EventMessageType.Success));
-            }
+            e.Messages.Add(result.Success
+                ? new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "Successfully purged the cloudflare cache.", EventMessageType.Success)
+                : new EventMessage(ApplicationConstants.EventMessageCategory.CloudflareCaching,
+                    "We could not purge the Cloudflare cache.", EventMessageType.Warning));
         }
     }
 }

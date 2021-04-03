@@ -39,6 +39,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             var userDetails = _cloudflareService.GetCloudflareUserDetails();
             configurationFile.CredentialsAreValid = userDetails != null && userDetails.Success;
+            configurationFile.AllowedDomains = _umbracoFlareDomainService.GetAllowedCloudflareDomains();
 
             return configurationFile;
         }
@@ -66,13 +67,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             }
 
             var result = _cloudflareService.PurgeEverything(currentDomain);
-            return new StatusWithMessage(result.Success, result.Message);
-        }
-
-        [HttpGet]
-        public IEnumerable<string> GetAllowedDomains()
-        {
-            return _umbracoFlareDomainService.GetAllowedCloudflareDomains();
+            return result;
         }
 
         [HttpPost]
@@ -89,8 +84,7 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             {
                 return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
             }
-            
-            var results = new List<StatusWithMessage>();
+
             var fullUrlsToPurge = new List<string>();
             var allFilePaths = _cloudflareService.GetFilePaths(model.StaticFiles);
 
@@ -105,16 +99,9 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
                 }
             }
 
-            var pageStatusMessages = _cloudflareService.PurgePages(fullUrlsToPurge);
-            results.AddRange(pageStatusMessages);
+            var result = _cloudflareService.PurgePages(fullUrlsToPurge);
 
-            if (results.Any(x => !x.Success))
-            {
-                var resultsSummary = _cloudflareService.PrintResultsSummary(results);
-                return new StatusWithMessage(false, resultsSummary);
-            }
-
-            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} static files purged successfully.");
+            return !result.Success ? result : new StatusWithMessage(true, $"{fullUrlsToPurge.Count()} static files were purged successfully.");
         }
 
         [HttpPost]
@@ -131,10 +118,10 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
             {
                 return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
             }
-            
+
             var builtUrls = new List<string>();
             builtUrls.AddRange(UmbracoFlareUrlHelper.MakeFullUrlsWithDomain(model.Urls, model.CurrentDomain, true));
-            
+
             var urlsWithWildCards = builtUrls.Where(x => x.Contains('*'));
             var willCardsUrls = !urlsWithWildCards.HasAny()
                 ? builtUrls
@@ -142,14 +129,9 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             builtUrls.AddRangeUnique(willCardsUrls);
 
-            var results = _cloudflareService.PurgePages(builtUrls);
+            var result = _cloudflareService.PurgePages(builtUrls);
 
-            if (results.Any(x => !x.Success))
-            {
-                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
-            }
-
-            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} urls purged successfully.");
+            return !result.Success ? result : new StatusWithMessage(true, $"{builtUrls.Count()} urls purged successfully.");
         }
 
         [HttpPost]
@@ -164,20 +146,16 @@ namespace Cogworks.UmbracoFlare.Core.Controllers
 
             if (!currentDomainIsValid)
             {
-                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account.");
+                return new StatusWithMessage(false, "The current domain is not valid, please check if the domain is a valid zone in your cloudflare account " +
+                                                    "and make sure you this account is associated in the umbracoflare dashboard");
             }
 
             var urls = new List<string>();
             urls.AddRange(_umbracoFlareDomainService.GetUrlsForNode(model.NodeId, model.CurrentDomain, model.PurgeChildren));
 
-            var results = _cloudflareService.PurgePages(urls);
+            var result = _cloudflareService.PurgePages(urls);
 
-            if (results.Any(x => !x.Success))
-            {
-                return new StatusWithMessage(false, _cloudflareService.PrintResultsSummary(results));
-            }
-
-            return new StatusWithMessage(true, $"{results.Count(x => x.Success)} urls purged successfully.");
+            return !result.Success ? result : new StatusWithMessage(true, $"{urls.Count()} urls purged successfully.");
         }
     }
 }

@@ -1,27 +1,26 @@
 ﻿using Cogworks.UmbracoFlare.Core.Client;
 using Cogworks.UmbracoFlare.Core.Extensions;
 using Cogworks.UmbracoFlare.Core.Factories;
+using Cogworks.UmbracoFlare.Core.Helpers;
 using Cogworks.UmbracoFlare.Core.Models.Cloudflare;
 using Cogworks.UmbracoFlare.Core.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cogworks.UmbracoFlare.Core.Helpers;
 using Umbraco.Core.Services;
 using Umbraco.Web;
 
-// ReSharper disable PossibleMultipleEnumeration
 namespace Cogworks.UmbracoFlare.Core.Services
 {
     public interface IUmbracoFlareDomainService
     {
         IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false);
 
-        IEnumerable<Zone> GetAllowedCloudflareZones();
-
         IEnumerable<string> GetAllowedCloudflareDomains();
 
         IEnumerable<string> GetAllUrlsForWildCardUrls(IEnumerable<string> wildCardUrls);
+
+        Zone GetZoneFilteredByDomain(string domainUrl);
     }
 
     public class UmbracoFlareDomainService : IUmbracoFlareDomainService
@@ -29,14 +28,16 @@ namespace Cogworks.UmbracoFlare.Core.Services
         private readonly ICloudflareApiClient _cloudflareApiClient;
         private readonly IDomainService _domainService;
         private readonly IUmbracoHelperWrapper _umbracoHelperWrapper;
+        private readonly IUmbracoLoggingService _umbracoLoggingService;
 
         public UmbracoFlareDomainService()
         {
+            _umbracoLoggingService = ServiceFactory.GetUmbracoLoggingService();
             _umbracoHelperWrapper = ServiceFactory.GetUmbracoHelperWrapper();
             _cloudflareApiClient = ServiceFactory.GetCloudflareApiClient();
             _domainService = ServiceFactory.GetDomainService();
         }
-        
+
         public IEnumerable<string> GetUrlsForNode(int contentId, string currentDomain, bool includeDescendants = false)
         {
             var content = _umbracoHelperWrapper.TypedContent(contentId);
@@ -72,6 +73,22 @@ namespace Cogworks.UmbracoFlare.Core.Services
             var allowedDomains = allowedZonesAndDomains.Value;
 
             return allowedDomains;
+        }
+
+        public Zone GetZoneFilteredByDomain(string domainUrl)
+        {
+            var allowedZones = GetAllowedCloudflareZones();
+            var filteredZonesByDomainUrl = allowedZones.Where(x => domainUrl.Contains(x.Name)).ToList();
+
+            if (filteredZonesByDomainUrl.HasAny())
+            {
+                return filteredZonesByDomainUrl.FirstOrDefault();
+            }
+
+            var noZoneException = new Exception($"Could not retrieve the zone from cloudflare with the domain of {domainUrl}");
+            _umbracoLoggingService.LogError<IUmbracoFlareDomainService>(noZoneException.Message, noZoneException);
+
+            return null;
         }
 
         private KeyValuePair<IEnumerable<Zone>, IEnumerable<string>> GetAllowedZonesAndDomains()
