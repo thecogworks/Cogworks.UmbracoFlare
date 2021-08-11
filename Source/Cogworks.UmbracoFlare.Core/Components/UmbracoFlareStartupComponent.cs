@@ -10,13 +10,6 @@ namespace Cogworks.UmbracoFlare.Core.Components
         public void Initialize()
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            JsonConvert.DefaultSettings = () => new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore
-            };
         }
 
         public void Terminate()
