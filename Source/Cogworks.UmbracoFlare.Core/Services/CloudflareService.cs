@@ -50,8 +50,17 @@ namespace Cogworks.UmbracoFlare.Core.Services
                 return new StatusWithMessage(false, $"Could not retrieve the zone from cloudflare with the domain of {currentDomain}");
             }
 
-            var apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, urls, false);
+            var apiResult = false;
 
+            foreach (var chunk in urls.Chunk(30)) // Cloudflare has a limit of 30 urls in the API call
+            {
+
+                apiResult = _cloudflareApiClient.PurgeCache(websiteZone.Id, chunk, false);
+                if (!apiResult)
+                {
+                    break;
+                }
+            }
             return apiResult
                 ? new StatusWithMessage(true, "The values were purged successfully")
                 : new StatusWithMessage(false, "There was an error from the Cloudflare API. Please check the logs to see the issue.");
