@@ -47,7 +47,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
             {
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(ApplicationConstants.ContentTypeApplicationJson));
                 var url = $"{ApplicationConstants.CloudflareApi.BaseUrl}{ApplicationConstants.CloudflareApi.UserEndpoint}";
-                
+
                 var request = new HttpRequestMessage
                 {
                     RequestUri = new Uri(url),
@@ -99,7 +99,8 @@ namespace Cogworks.UmbracoFlare.Core.Client
                         return response.Zones;
                     }
 
-                    _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"Could not get the list of zones because of {response.Messages}");
+                    _umbracoLoggingService.LogWarn<ICloudflareApiClient>(GetLogMessage(response, "Could not get the list of zones. Message(s): "));
+
                     return Enumerable.Empty<Zone>();
                 }
                 catch (Exception e)
@@ -142,7 +143,7 @@ namespace Cogworks.UmbracoFlare.Core.Client
 
                     if (!response.Success)
                     {
-                        _umbracoLoggingService.LogWarn<ICloudflareApiClient>($"Something went wrong because of {response.Messages}");
+                        _umbracoLoggingService.LogWarn<ICloudflareApiClient>(GetLogMessage(response, "Something went wrong purging the cache. Message(s): "));
                         return false;
                     }
                 }
@@ -153,6 +154,22 @@ namespace Cogworks.UmbracoFlare.Core.Client
                 }
 
                 return true;
+            }
+        }
+
+        private string GetLogMessage(BasicCloudflareResponse response, string message)
+        {
+            if (response.Errors.Any())
+            {
+                return message + string.Join(", ", response.Errors.Select(e => $"{e.Message} - Code: {e.Code}"));
+            }
+            else if (response.Messages.Any())
+            {
+                return message + string.Join(", ", response.Messages);
+            }
+            else
+            {
+                return message + " No errormessage provided.";
             }
         }
 
