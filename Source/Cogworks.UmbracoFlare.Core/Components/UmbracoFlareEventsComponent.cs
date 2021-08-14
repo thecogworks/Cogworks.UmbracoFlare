@@ -24,7 +24,7 @@ namespace Cogworks.UmbracoFlare.Core.Components
         private readonly IConfigurationService _configurationService;
         private readonly IUmbracoFlareDomainService _umbracoFlareDomainService;
         private readonly ICloudflareService _cloudflareService;
-        
+
         public UmbracoFlareEventsComponent(IImageCropperService imageCropperService, IUmbracoContextFactory umbracoContextFactory,
             IConfigurationService configurationService, IUmbracoFlareDomainService umbracoFlareDomainService, ICloudflareService cloudflareService)
         {
@@ -157,13 +157,27 @@ namespace Cogworks.UmbracoFlare.Core.Components
         {
             if (sender.TreeAlias != "content") { return; }
 
-            var menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
-            {
-                Icon = "umbracoflare-tiny"
-            };
+            MenuItem menuItem;
 
-            menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.menu.html", "Purge Cloudflare Cache");
-            
+            if (e.NodeId == "-1") // if content root
+            {
+                menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
+                {
+                    Icon = "umbracoflare-tiny"
+                };
+
+                menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.rootmenu.html", "Purge Cloudflare Cache");
+            }
+            else
+            {
+                menuItem = new MenuItem("purgeCache", "Purge Cloudflare Cache")
+                {
+                    Icon = "umbracoflare-tiny"
+                };
+
+                menuItem.LaunchDialogView("/App_Plugins/UmbracoFlare/dashboard/views/cogworks.umbracoflare.menu.html", "Purge Cloudflare Cache");
+            }
+
             e.Menu.Items.Insert(e.Menu.Items.Count - 1, menuItem);
         }
     }

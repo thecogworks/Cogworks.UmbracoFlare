@@ -1,0 +1,28 @@
+﻿<div ng-controller="Cogworks.Umbracoflare.Menu.Controller as cogworksUmbracoflareMenuController" class="purge-menu">
+    <div class="umb-pane">
+        <div ng-hide="cogworksUmbracoflareMenuController.menu.success">
+            <p>
+                Are you sure you want to purge everything from the Cloudflare cache?
+            </p>
+            <br />
+        </div>
+
+        <div id="purge-menu-error" class="alert alert-error" ng-if="cogworksUmbracoflareRootMenuController.menu.error">
+            <h4>{{cogworksUmbracoflareRootMenuController.menu.errorMsg}}</h4>
+        </div>
+
+        <div id="purge-menu-success" class="alert alert-success" ng-if="cogworksUmbracoflareMenuController.menu.success">
+            <p>You have successfully cleared the cache for this node!</p>
+            <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.closeDialog()">Ok</button>
+        </div>
+
+        <div ng-hide="cogworksUmbracoflareMenuController.menu.success" ng-class="{'-grey-out' : cogworksUmbracoflareMenuController.menu.busy}">
+            <a class="btn btn-link" ng-click="cogworksUmbracoflareMenuController.menu.closeDialog()">
+                <localize key="general_cancel">Cancel</localize>
+            </a>
+            <button class="btn btn-primary" ng-click="cogworksUmbracoflareMenuController.menu.purgeEverything()" ng-disabled="cogworksUmbracoflareMenuController.menu.busy">
+                Purge Cache
+            </button>
+        </div>
+    </div>
+</div>
